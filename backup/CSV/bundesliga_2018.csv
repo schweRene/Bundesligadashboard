@@ -1,0 +1,307 @@
+spieltag,home,away,result
+1,Bayern,Leverkusen,3:1
+1,Hoffenheim,Bremen,1:0
+1,Wolfsburg,Dortmund,0:3
+1,Hertha BSC,Stuttgart,2:0
+1,Hamburg,Augsburg,1:0
+1,Mainz,Hannover,0:1
+1,Schalke,RB Leipzig,2:0
+1,Freiburg,Frankfurt,0:0
+1,M'gladbach,Köln,1:0
+2,(12.) Köln,Hamburg (5.),1:3
+2,(16.) Stuttgart,Mainz (14.),1:0
+2,(15.) Leverkusen,Hoffenheim (8.),2:2
+2,(9.) Frankfurt,Wolfsburg (18.),0:1
+2,(11.) Bremen,Bayern (2.),0:2
+2,(13.) Augsburg,M'gladbach (7.),2:2
+2,(1.) Dortmund,Hertha BSC (3.),2:0
+2,(17.) RB Leipzig,Freiburg (10.),4:1
+2,(6.) Hannover,Schalke (4.),1:0
+3,(3.) Hamburg,RB Leipzig (7.),0:2
+3,(16.) Mainz,Leverkusen (14.),3:1
+3,(6.) M'gladbach,Frankfurt (13.),0:1
+3,(15.) Freiburg,Dortmund (1.),0:0
+3,(12.) Augsburg,Köln (17.),3:0
+3,(11.) Wolfsburg,Hannover (4.),1:1
+3,(5.) Hoffenheim,Bayern (2.),2:0
+3,(9.) Hertha BSC,Bremen (18.),1:1
+3,(8.) Schalke,Stuttgart (10.),3:1
+4,(3.) Hannover,Hamburg (7.),2:0
+4,(14.) Stuttgart,Wolfsburg (12.),1:0
+4,(16.) Bremen,Schalke (5.),1:2
+4,(11.) Frankfurt,Augsburg (8.),1:2
+4,(6.) Bayern,Mainz (13.),4:0
+4,(4.) RB Leipzig,M'gladbach (10.),2:2
+4,(2.) Hoffenheim,Hertha BSC (9.),1:1
+4,(17.) Leverkusen,Freiburg (15.),4:0
+4,(1.) Dortmund,Köln (18.),5:0
+5,(10.) M'gladbach,Stuttgart (9.),2:0
+5,(4.) Schalke,Bayern (3.),0:3
+5,(7.) Augsburg,RB Leipzig (6.),1:0
+5,(14.) Wolfsburg,Bremen (17.),1:1
+5,(18.) Köln,Frankfurt (13.),0:1
+5,(16.) Freiburg,Hannover (2.),1:1
+5,(15.) Mainz,Hoffenheim (5.),2:3
+5,(8.) Hamburg,Dortmund (1.),0:3
+5,(11.) Hertha BSC,Leverkusen (12.),2:1
+6,(2.) Bayern,Wolfsburg (13.),2:2
+6,(3.) Hoffenheim,Schalke (6.),2:0
+6,(15.) Mainz,Hertha BSC (8.),1:0
+6,(12.) Stuttgart,Augsburg (5.),0:0
+6,(17.) Bremen,Freiburg (16.),0:0
+6,(9.) RB Leipzig,Frankfurt (10.),2:1
+6,(1.) Dortmund,M'gladbach (7.),6:1
+6,(4.) Hannover,Köln (18.),0:0
+6,(14.) Leverkusen,Hamburg (11.),3:0
+7,(7.) Schalke,Leverkusen (10.),1:1
+7,(9.) M'gladbach,Hannover (4.),2:1
+7,(11.) Frankfurt,Stuttgart (12.),2:1
+7,(13.) Wolfsburg,Mainz (14.),1:1
+7,(5.) Augsburg,Dortmund (1.),1:2
+7,(15.) Hamburg,Bremen (17.),0:0
+7,(16.) Freiburg,Hoffenheim (2.),3:2
+7,(8.) Hertha BSC,Bayern (3.),2:2
+7,(18.) Köln,RB Leipzig (6.),1:2
+8,(14.) Stuttgart,Köln (18.),2:1
+8,(3.) Hoffenheim,Augsburg (6.),2:2
+8,(5.) Hannover,Frankfurt (8.),1:2
+8,(13.) Mainz,Hamburg (16.),3:2
+8,(10.) Hertha BSC,Schalke (9.),0:2
+8,(2.) Bayern,Freiburg (15.),5:0
+8,(1.) Dortmund,RB Leipzig (4.),2:3
+8,(11.) Leverkusen,Wolfsburg (12.),2:2
+8,(17.) Bremen,M'gladbach (7.),0:2
+9,(6.) Schalke,Mainz (10.),2:0
+9,(5.) M'gladbach,Leverkusen (12.),1:5
+9,(7.) Frankfurt,Dortmund (1.),2:2
+9,(8.) Augsburg,Hannover (9.),1:2
+9,(3.) RB Leipzig,Stuttgart (11.),1:0
+9,(15.) Hamburg,Bayern (2.),0:1
+9,(18.) Köln,Bremen (17.),0:0
+9,(16.) Freiburg,Hertha BSC (13.),1:1
+9,(14.) Wolfsburg,Hoffenheim (4.),1:1
+10,(12.) Mainz,Frankfurt (7.),1:1
+10,(6.) Hannover,Dortmund (1.),4:2
+10,(4.) Hoffenheim,M'gladbach (8.),1:3
+10,(9.) Leverkusen,Köln (18.),2:1
+10,(11.) Hertha BSC,Hamburg (16.),2:1
+10,(5.) Schalke,Wolfsburg (14.),1:1
+10,(2.) Bayern,RB Leipzig (3.),2:0
+10,(17.) Bremen,Augsburg (10.),0:3
+10,(13.) Stuttgart,Freiburg (15.),3:0
+11,(10.) Frankfurt,Bremen (17.),2:1
+11,(6.) M'gladbach,Mainz (13.),1:1
+11,(15.) Freiburg,Schalke (5.),0:1
+11,(16.) Hamburg,Stuttgart (12.),3:1
+11,(9.) Augsburg,Leverkusen (8.),1:1
+11,(3.) RB Leipzig,Hannover (4.),2:1
+11,(2.) Dortmund,Bayern (1.),1:3
+11,(18.) Köln,Hoffenheim (7.),0:3
+11,(14.) Wolfsburg,Hertha BSC (11.),3:3
+12,(12.) Stuttgart,Dortmund (3.),2:1
+12,(5.) Hoffenheim,Frankfurt (7.),1:1
+12,(13.) Mainz,Köln (18.),1:0
+12,(9.) Leverkusen,RB Leipzig (2.),2:2
+12,(14.) Wolfsburg,Freiburg (16.),3:1
+12,(1.) Bayern,Augsburg (10.),3:0
+12,(11.) Hertha BSC,M'gladbach (8.),2:4
+12,(4.) Schalke,Hamburg (15.),2:0
+12,(17.) Bremen,Hannover (6.),4:0
+13,(8.) Hannover,Stuttgart (11.),1:1
+13,(7.) Frankfurt,Leverkusen (9.),0:1
+13,(17.) Freiburg,Mainz (12.),2:1
+13,(5.) Dortmund,Schalke (2.),4:4
+13,(10.) Augsburg,Wolfsburg (13.),2:1
+13,(3.) RB Leipzig,Bremen (16.),2:0
+13,(4.) M'gladbach,Bayern (1.),2:1
+13,(15.) Hamburg,Hoffenheim (6.),3:0
+13,(18.) Köln,Hertha BSC (14.),0:2
+14,(16.) Freiburg,Hamburg (15.),0:0
+14,(7.) Hoffenheim,RB Leipzig (2.),4:0
+14,(13.) Mainz,Augsburg (8.),1:3
+14,(6.) Leverkusen,Dortmund (5.),1:1
+14,(17.) Bremen,Stuttgart (12.),1:0
+14,(1.) Bayern,Hannover (10.),3:1
+14,(3.) Schalke,Köln (18.),2:2
+14,(11.) Hertha BSC,Frankfurt (9.),1:2
+14,(14.) Wolfsburg,M'gladbach (4.),3:0
+15,(13.) Stuttgart,Leverkusen (9.),0:2
+15,(8.) Frankfurt,Bayern (1.),0:1
+15,(6.) Dortmund,Bremen (17.),1:2
+15,(15.) Hamburg,Wolfsburg (11.),0:0
+15,(2.) RB Leipzig,Mainz (14.),2:2
+15,(4.) M'gladbach,Schalke (3.),1:1
+15,(18.) Köln,Freiburg (16.),3:4
+15,(10.) Hannover,Hoffenheim (5.),2:0
+15,(7.) Augsburg,Hertha BSC (12.),1:1
+16,(11.) Wolfsburg,RB Leipzig (2.),1:1
+16,(14.) Mainz,Dortmund (8.),0:2
+16,(16.) Freiburg,M'gladbach (4.),1:0
+16,(15.) Hamburg,Frankfurt (9.),1:2
+16,(6.) Hoffenheim,Stuttgart (13.),1:0
+16,(1.) Bayern,Köln (18.),1:0
+16,(5.) Leverkusen,Bremen (17.),1:0
+16,(3.) Schalke,Augsburg (7.),3:2
+16,(12.) Hertha BSC,Hannover (10.),3:1
+17,(8.) M'gladbach,Hamburg (16.),3:1
+17,(18.) Köln,Wolfsburg (12.),1:0
+17,(7.) Frankfurt,Schalke (2.),2:2
+17,(14.) Stuttgart,Bayern (1.),0:1
+17,(17.) Bremen,Mainz (15.),2:2
+17,(9.) Augsburg,Freiburg (13.),3:3
+17,(6.) Dortmund,Hoffenheim (5.),2:1
+17,(10.) Hannover,Leverkusen (4.),4:4
+17,(3.) RB Leipzig,Hertha BSC (11.),2:3
+18,(4.) Leverkusen,Bayern (1.),1:3
+18,(11.) Hannover,Mainz (15.),3:2
+18,(16.) Bremen,Hoffenheim (7.),1:1
+18,(14.) Stuttgart,Hertha BSC (10.),1:0
+18,(9.) Augsburg,Hamburg (17.),1:0
+18,(8.) Frankfurt,Freiburg (13.),1:1
+18,(5.) RB Leipzig,Schalke (2.),3:1
+18,(18.) Köln,M'gladbach (6.),2:1
+18,(3.) Dortmund,Wolfsburg (12.),0:0
+19,(11.) Hertha BSC,Dortmund (4.),1:1
+19,(6.) M'gladbach,Augsburg (7.),2:0
+19,(14.) Freiburg,RB Leipzig (2.),2:1
+19,(15.) Mainz,Stuttgart (13.),3:2
+19,(12.) Wolfsburg,Frankfurt (9.),1:3
+19,(8.) Hoffenheim,Leverkusen (5.),1:4
+19,(17.) Hamburg,Köln (18.),0:2
+19,(1.) Bayern,Bremen (16.),4:2
+19,(3.) Schalke,Hannover (10.),1:1
+20,(7.) Frankfurt,M'gladbach (5.),2:0
+20,(1.) Bayern,Hoffenheim (9.),5:2
+20,(6.) Dortmund,Freiburg (12.),2:2
+20,(4.) RB Leipzig,Hamburg (17.),1:1
+20,(18.) Köln,Augsburg (8.),1:1
+20,(14.) Stuttgart,Schalke (3.),0:2
+20,(16.) Bremen,Hertha BSC (11.),0:0
+20,(2.) Leverkusen,Mainz (15.),2:0
+20,(10.) Hannover,Wolfsburg (13.),0:1
+21,(18.) Köln,Dortmund (6.),2:3
+21,(15.) Mainz,Bayern (1.),0:2
+21,(11.) Hertha BSC,Hoffenheim (9.),1:1
+21,(3.) Schalke,Bremen (16.),1:2
+21,(13.) Wolfsburg,Stuttgart (14.),1:1
+21,(12.) Freiburg,Leverkusen (2.),0:0
+21,(7.) M'gladbach,RB Leipzig (5.),0:1
+21,(8.) Augsburg,Frankfurt (4.),3:0
+21,(17.) Hamburg,Hannover (10.),1:1
+22,(3.) RB Leipzig,Augsburg (7.),2:0
+22,(4.) Dortmund,Hamburg (17.),2:0
+22,(2.) Leverkusen,Hertha BSC (11.),0:2
+22,(6.) Frankfurt,Köln (18.),4:2
+22,(10.) Hannover,Freiburg (12.),2:1
+22,(9.) Hoffenheim,Mainz (16.),4:2
+22,(1.) Bayern,Schalke (5.),2:1
+22,(14.) Stuttgart,M'gladbach (8.),1:0
+22,(15.) Bremen,Wolfsburg (13.),3:1
+23,(11.) Hertha BSC,Mainz (16.),0:2
+23,(13.) Wolfsburg,Bayern (1.),1:2
+23,(17.) Hamburg,Leverkusen (5.),1:2
+23,(12.) Freiburg,Bremen (15.),1:0
+23,(18.) Köln,Hannover (9.),1:1
+23,(6.) Schalke,Hoffenheim (8.),2:1
+23,(7.) Augsburg,Stuttgart (14.),0:1
+23,(10.) M'gladbach,Dortmund (3.),0:1
+23,(4.) Frankfurt,RB Leipzig (2.),2:1
+24,(16.) Mainz,Wolfsburg (14.),1:1
+24,(7.) Hannover,M'gladbach (10.),0:1
+24,(9.) Hoffenheim,Freiburg (12.),1:1
+24,(1.) Bayern,Hertha BSC (11.),0:0
+24,(13.) Stuttgart,Frankfurt (3.),1:0
+24,(15.) Bremen,Hamburg (17.),1:0
+24,(4.) Leverkusen,Schalke (6.),0:2
+24,(5.) RB Leipzig,Köln (18.),1:2
+24,(2.) Dortmund,Augsburg (8.),1:1
+25,(7.) M'gladbach,Bremen (14.),2:2
+25,(15.) Wolfsburg,Leverkusen (5.),1:2
+25,(4.) Frankfurt,Hannover (10.),1:0
+25,(3.) Schalke,Hertha BSC (11.),1:0
+25,(8.) Augsburg,Hoffenheim (9.),0:2
+25,(17.) Hamburg,Mainz (16.),0:0
+25,(6.) RB Leipzig,Dortmund (2.),1:1
+25,(18.) Köln,Stuttgart (12.),2:3
+25,(13.) Freiburg,Bayern (1.),0:4
+26,(16.) Mainz,Schalke (2.),0:1
+26,(7.) Hoffenheim,Wolfsburg (15.),3:0
+26,(11.) Hannover,Augsburg (10.),1:3
+26,(12.) Hertha BSC,Freiburg (13.),0:0
+26,(1.) Bayern,Hamburg (17.),6:0
+26,(5.) Leverkusen,M'gladbach (8.),2:0
+26,(9.) Stuttgart,RB Leipzig (6.),0:0
+26,(3.) Dortmund,Frankfurt (4.),3:2
+26,(14.) Bremen,Köln (18.),3:1
+27,(14.) Freiburg,Stuttgart (10.),1:2
+27,(8.) Augsburg,Bremen (13.),1:3
+27,(9.) M'gladbach,Hoffenheim (7.),3:3
+27,(17.) Hamburg,Hertha BSC (11.),1:2
+27,(5.) Frankfurt,Mainz (16.),3:0
+27,(15.) Wolfsburg,Schalke (2.),0:1
+27,(3.) Dortmund,Hannover (12.),1:0
+27,(18.) Köln,Leverkusen (4.),2:0
+27,(6.) RB Leipzig,Bayern (1.),2:1
+28,(13.) Hannover,RB Leipzig (6.),2:3
+28,(7.) Hoffenheim,Köln (17.),6:0
+28,(8.) Stuttgart,Hamburg (18.),1:1
+28,(5.) Leverkusen,Augsburg (10.),0:0
+28,(2.) Schalke,Freiburg (14.),2:0
+28,(1.) Bayern,Dortmund (3.),6:0
+28,(11.) Hertha BSC,Wolfsburg (15.),0:0
+28,(12.) Bremen,Frankfurt (4.),2:1
+28,(16.) Mainz,M'gladbach (9.),0:0
+29,(13.) Hannover,Bremen (12.),2:1
+29,(9.) M'gladbach,Hertha BSC (11.),2:1
+29,(10.) Augsburg,Bayern (1.),1:4
+29,(17.) Köln,Mainz (16.),1:1
+29,(14.) Freiburg,Wolfsburg (15.),0:2
+29,(18.) Hamburg,Schalke (2.),3:2
+29,(3.) Dortmund,Stuttgart (8.),3:0
+29,(6.) Frankfurt,Hoffenheim (7.),1:1
+29,(4.) RB Leipzig,Leverkusen (5.),1:4
+30,(15.) Wolfsburg,Augsburg (11.),0:0
+30,(7.) Hoffenheim,Hamburg (17.),2:0
+30,(9.) Stuttgart,Hannover (13.),1:1
+30,(10.) Hertha BSC,Köln (18.),2:1
+30,(4.) Leverkusen,Frankfurt (5.),4:1
+30,(1.) Bayern,M'gladbach (8.),5:1
+30,(2.) Schalke,Dortmund (3.),2:0
+30,(12.) Bremen,RB Leipzig (6.),1:1
+30,(16.) Mainz,Freiburg (14.),2:0
+31,(8.) M'gladbach,Wolfsburg (14.),3:0
+31,(13.) Hannover,Bayern (1.),0:3
+31,(17.) Hamburg,Freiburg (16.),1:0
+31,(5.) RB Leipzig,Hoffenheim (6.),2:5
+31,(7.) Frankfurt,Hertha BSC (9.),0:3
+31,(10.) Stuttgart,Bremen (12.),2:0
+31,(4.) Dortmund,Leverkusen (3.),4:0
+31,(11.) Augsburg,Mainz (15.),2:0
+31,(18.) Köln,Schalke (2.),2:2
+32,(5.) Hoffenheim,Hannover (13.),3:1
+32,(2.) Schalke,M'gladbach (8.),1:1
+32,(1.) Bayern,Frankfurt (7.),4:1
+32,(9.) Hertha BSC,Augsburg (11.),2:2
+32,(16.) Freiburg,Köln (18.),3:2
+32,(14.) Wolfsburg,Hamburg (17.),1:3
+32,(4.) Leverkusen,Stuttgart (10.),0:1
+32,(15.) Mainz,RB Leipzig (6.),3:0
+32,(12.) Bremen,Dortmund (3.),1:1
+33,(13.) Hannover,Hertha BSC (10.),3:1
+33,(9.) M'gladbach,Freiburg (15.),3:1
+33,(7.) Frankfurt,Hamburg (17.),3:0
+33,(18.) Köln,Bayern (1.),1:3
+33,(8.) Stuttgart,Hoffenheim (4.),2:0
+33,(3.) Dortmund,Mainz (14.),1:2
+33,(12.) Bremen,Leverkusen (5.),0:0
+33,(11.) Augsburg,Schalke (2.),1:2
+33,(6.) RB Leipzig,Wolfsburg (16.),4:1
+34,(17.) Hamburg,M'gladbach (9.),2:1
+34,(4.) Hoffenheim,Dortmund (3.),3:1
+34,(5.) Leverkusen,Hannover (13.),3:2
+34,(2.) Schalke,Frankfurt (7.),1:0
+34,(16.) Wolfsburg,Köln (18.),4:1
+34,(1.) Bayern,Stuttgart (8.),1:4
+34,(10.) Hertha BSC,RB Leipzig (6.),2:6
+34,(15.) Freiburg,Augsburg (11.),2:0
+34,(14.) Mainz,Bremen (12.),1:2

@@ -1,0 +1,22 @@
+
+--- 📄 TABELLE BUNDESLIGA 2025/26 ---
+
+ Platz                   Verein  Spiele  S  U  N  Tore  Gegentore  Punkte  Diff
+     1        FC Bayern München      15 13  2  0    55         11      41    44
+     2        Borussia Dortmund      15  9  5  1    26         12      32    14
+     3      Bayer 04 Leverkusen      15  9  2  4    33         20      29    13
+     4               RB Leipzig      15  9  2  4    30         19      29    11
+     5           TSG Hoffenheim      15  8  3  4    29         20      27     9
+     6            VfB Stuttgart      15  8  2  5    25         22      26     3
+     7      Eintracht Frankfurt      15  7  4  4    30         30      25     0
+     8       1. FC Union Berlin      15  6  3  6    20         23      21    -3
+     9              SC Freiburg      15  5  5  5    25         26      20    -1
+    10         SV Werder Bremen      15  4  5  6    18         28      17   -10
+    11               1. FC Köln      15  4  4  7    22         24      16    -2
+    12 Borussia Mönchengladbach      15  4  4  7    18         24      16    -6
+    13             Hamburger SV      15  4  4  7    16         25      16    -9
+    14            VfL Wolfsburg      15  4  3  8    23         28      15    -5
+    15            1.FC Augsburg      15  4  2  9    17         28      14   -11
+    16              FC St Pauli      15  3  3  9    13         26      12   -13
+    17         1. FC Heidenheim      15  3  2 10    13         34      11   -21
+    18             FSV Mainz 05      15  1  5  9    13         26       8   -13
