@@ -3,5 +3,7 @@ pandas
 beautifulsoup4
 plotly
 Requests
+sqlalchemy
+psycopg2-binary
 
 
