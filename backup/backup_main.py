@@ -16,15 +16,20 @@ DB_FILE = "bundesliga.db"
 # ==========================================
 
 def init_db():
-    """Erstellt die Tipps-Tabelle, falls sie noch nicht existiert."""
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS tipps 
                  (saison TEXT, spieltag INTEGER, heim TEXT, gast TEXT, 
                   tipp_heim INTEGER, tipp_gast INTEGER, punkte INTEGER)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS hall_of_fame 
+                 (name TEXT, saison TEXT, punkte INTEGER)''')
+    
+    c.execute("SELECT COUNT(*) FROM hall_of_fame")
+    if c.fetchone()[0] == 0:
+        dummies = [('Computer 1', 'Historisch', 20), ('Computer 2', 'Historisch', 17), ('Computer 3', 'Historisch', 14)]
+        c.executemany("INSERT INTO hall_of_fame VALUES (?,?,?)", dummies)
     conn.commit()
     conn.close()
-
 
 def load_data_from_db():
     if not os.path.exists(DB_FILE):
@@ -50,12 +55,16 @@ def load_data_from_db():
 # 2. TIPPSPIEL LOGIK
 # ==========================================
 
-def save_tipp(saison, spieltag, heim, gast, t_h, t_g):
+def save_tipp(saison, spieltag, heim, gast, th, tg):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("DELETE FROM tipps WHERE saison=? AND heim=? AND gast=?", (saison, heim, gast))
-    c.execute("INSERT INTO tipps (saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte) VALUES (?,?,?,?,?,?,?)",
-              (saison, spieltag, heim, gast, t_h, t_g, 0))
+    # 1. Alten Tipp löschen (verhindert Duplikate)
+    c.execute("DELETE FROM tipps WHERE saison=? AND spieltag=? AND heim=? AND gast=?", 
+              (saison, spieltag, heim, gast))
+    # 2. Neuen Tipp einfügen - Achte auf die Reihenfolge der Spalten!
+    c.execute("""INSERT INTO tipps (saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?)""", 
+              (saison, spieltag, heim, gast, th, tg, 0))
     conn.commit()
     conn.close()
 
@@ -137,6 +146,15 @@ def compute_ewige_tabelle(df):
     ewige.insert(0, "Platz", range(1, len(ewige) + 1))
     return ewige
 
+def get_latest_played_matchday(df, saison="2025/26"):
+    """Findet den aktuellsten Spieltag mit Ergebnissen in der Datenbank."""
+    df_saison = df[df["saison"] == saison]
+    # Filtert Spiele, die bereits Tore eingetragen haben
+    played = df_saison.dropna(subset=["tore_heim", "tore_gast"])
+    if not played.empty:
+        return int(played["spieltag"].max())
+    return 1
+
 # ==========================================
 # 4. HELPER FÜR STYLING
 # ==========================================
@@ -168,18 +186,23 @@ def display_styled_table(df, type="standard"):
         css += """
             .mystyle td:nth-child(1) { width: 150px; text-align: left !important; } 
             .mystyle td:nth-child(2) { width: 60px; } 
-            .mystyle td:nth-child(3) { 
-                width: auto; 
-                white-space: normal !important; 
-                text-align: left !important; 
-            }
+            .mystyle td:nth-child(3) { width: auto; white-space: normal !important; text-align: left !important; }
         """
     elif type == "analyse":
         css += """
-            /* EXTREM SCHMALE SPALTEN FÜR ANALYSE */
             .mystyle td:nth-child(1) { width: 80px !important; text-align: left !important; } 
             .mystyle td:nth-child(2), .mystyle td:nth-child(3), 
             .mystyle td:nth-child(4), .mystyle td:nth-child(5) { width: 30px !important; }
+        """
+    # --- OPTIMIERTER SPIELTAG-MODUS ---
+    elif type == "spieltag":
+        css += """
+            /* Heimteam: schmaler (35%), rechtsbündig */
+            .mystyle td:nth-child(1) { width: 35%; text-align: right !important; padding-right: 15px; font-weight: bold; } 
+            /* Ergebnis: breiter (30%), zentriert, hervorgehoben */
+            .mystyle td:nth-child(2) { width: 30%; font-weight: bold; text-align: center !important; background-color: #eeeeee !important; } 
+            /* Gastteam: schmaler (35%), linksbündig */
+            .mystyle td:nth-child(3) { width: 35%; text-align: left !important; padding-left: 15px; font-weight: bold; }
         """
     else: 
         css += """
@@ -199,6 +222,47 @@ def show_startseite():
     if os.path.exists("bundesliga.jpg"):
         st.image("bundesliga.jpg", use_container_width=True)
         st.markdown("<p style='text-align:center; font-size:12px;'>Quelle: Pixabay</p>", unsafe_allow_html=True)
+
+def show_spieltag_ansicht(df):
+    # Sidebar-Steuerung
+    seasons = sorted(df["saison"].unique(), reverse=True)
+    st.sidebar.markdown("---")
+    saison_sel = st.sidebar.selectbox("Saison für Spieltage", seasons, key="view_saison")
+    
+    # Automatisch aktuellsten Spieltag finden
+    df_saison = df[df["saison"] == saison_sel]
+    played = df_saison.dropna(subset=["tore_heim", "tore_gast"])
+    latest_md = int(played["spieltag"].max()) if not played.empty else 1
+    
+    selected_spieltag = st.sidebar.selectbox(
+        "Spieltag wählen", 
+        list(range(1, 35)), 
+        index=int(latest_md) - 1
+    )
+
+    # Einheitliche Überschrift
+    st.markdown(f"<h1 style='text-align: center; color: darkred;'>⚽ Spieltagsergebnisse {selected_spieltag}. Spieltag ({saison_sel})</h1>", unsafe_allow_html=True)
+
+    # Daten filtern und für die Tabelle vorbereiten
+    day_matches = df[(df["saison"] == saison_sel) & (df["spieltag"] == selected_spieltag)].copy()
+
+    if not day_matches.empty:
+        # Wir bauen einen sauberen DataFrame nur für die Anzeige
+        display_df = pd.DataFrame()
+        display_df['Heim'] = day_matches['heim']
+        
+        # Formatierung: "4 : 0" oder "vs"
+        display_df['Ergebnis'] = day_matches.apply(
+            lambda r: f"{int(r['tore_heim'])} : {int(r['tore_gast'])}" 
+            if pd.notna(r['tore_heim']) else "vs", axis=1
+        )
+        
+        display_df['Gast'] = day_matches['gast']
+
+        # Aufruf der Styling-Funktion mit dem neuen Typ
+        display_styled_table(display_df, type="spieltag")
+    else:
+        st.info("Keine Daten für diesen Spieltag verfügbar.")
 
 def show_meisterstatistik(df, seasons):
     st.title("🏆 Deutsche Meisterschaften")
@@ -266,34 +330,179 @@ def show_vereinsanalyse(df, seasons):
 
 def show_tippspiel(df):
     st.title("🎯 Tippspiel")
-    seasons = sorted(df["saison"].unique(), reverse=True)
-    saison = st.selectbox("Saison wählen", seasons, key="tipp_saison")
-    # Nur Spiele ohne Tore (Zukunft)
-    future_matches = df[(df['saison'] == saison) & (df['tore_heim'].isna())]
+    
+    all_seasons = sorted(df["saison"].unique(), reverse=True)
+    aktuelle_saison = all_seasons[0]
+    st.info(f"Aktuelle Saison: {aktuelle_saison}")
+
+    # --- BEREICH 1: TIPPABGABE ---
+    st.subheader("Deine Tipps")
+    
+    # Spiele ohne echtes Ergebnis (die beiden ausstehenden Partien)
+    future_matches = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())].copy()
+
     if future_matches.empty:
         st.info("Keine zukünftigen Spiele zum Tippen verfügbar.")
     else:
+        spieltage = sorted(future_matches['spieltag'].unique())
+        ausgewaehlter_tag = st.selectbox("Wähle einen Spieltag zum Tippen aus:", spieltage)
+        tag_matches = future_matches[future_matches['spieltag'] == ausgewaehlter_tag]
+
+        # VORHANDENE TIPPS LADEN
+        conn = sqlite3.connect(DB_FILE)
+        # Wir laden ALLE Tipps für diesen Spieltag ohne komplizierte Filter
+        existing_tipps = pd.read_sql_query(
+            "SELECT heim, gast, tipp_heim, tipp_gast FROM tipps WHERE spieltag=?", 
+            conn, params=(int(ausgewaehlter_tag),)
+        )
+        conn.close()
+
         with st.form("tipp_form"):
-            for idx, row in future_matches.iterrows():
+            tipp_input_data = {}
+            
+            for idx, row in tag_matches.iterrows():
+                h_name = str(row['heim']).strip()
+                g_name = str(row['gast']).strip()
+                
+                # Wir suchen den Tipp im geladenen DataFrame
+                # .str.lower() macht den Vergleich unempfindlich gegen Groß/Kleinschreibung
+                match = existing_tipps[
+                    (existing_tipps['heim'].str.strip() == h_name) & 
+                    (existing_tipps['gast'].str.strip() == g_name)
+                ]
+                
+                if not match.empty:
+                    val_h = int(match.iloc[0]['tipp_heim'])
+                    val_g = int(match_tipp_gast := match.iloc[0]['tipp_gast']) # Walrus für Lesbarkeit
+                    val_g = int(match.iloc[0]['tipp_gast'])
+                    has_tipp = True
+                else:
+                    val_h = 0
+                    val_g = 0
+                    has_tipp = False
+
                 col1, col2, col3 = st.columns([4, 1, 1])
-                col1.write(f"**{row['heim']}** vs. **{row['gast']}**")
-                t_h = col2.number_input("H", min_value=0, step=1, key=f"h_{idx}")
-                t_g = col3.number_input("G", min_value=0, step=1, key=f"g_{idx}")
+                label = f"**{h_name}** - **{g_name}**"
+                if has_tipp:
+                    label += " ✅"
+                
+                col1.write(label)
+                t_h = col2.number_input("H", min_value=0, step=1, value=val_h, key=f"h_{idx}")
+                t_g = col3.number_input("G", min_value=0, step=1, value=val_g, key=f"g_{idx}")
+                
+                tipp_input_data[idx] = (t_h, t_g)
+            
             if st.form_submit_button("Tipps speichern"):
-                for idx, row in future_matches.iterrows():
-                    save_tipp(saison, row['spieltag'], row['heim'], row['gast'], st.session_state[f"h_{idx}"], st.session_state[f"g_{idx}"])
-                st.success("Tipps gespeichert!")
+                for idx, row in tag_matches.iterrows():
+                    th, tg = tipp_input_data[idx]
+                    save_tipp(aktuelle_saison, row['spieltag'], row['heim'], row['gast'], th, tg)
+                st.success("Gespeichert!")
+                st.rerun()
+
+    st.divider()
+
+    # --- BEREICH 2: DEINE ERGEBNISSE ---
+    st.subheader("Deine Ergebnisse & Punkte")
+    evaluate_tipps(df) # Führt den Abgleich mit den realen Toren aus
+    
+    conn = sqlite3.connect(DB_FILE)
+    # Korrigierte SQL-Abfrage: 'Sp' statt 'Sp.' und korrekte Anführungszeichen
+    query_auswertung = f"""
+        SELECT t.spieltag as Sp, t.heim as Heim, t.gast as Gast, 
+               t.tipp_heim || ':' || t.tipp_gast as 'Dein Tipp',
+               s.tore_heim || ':' || s.tore_gast as 'Ergebnis',
+               t.punkte as 'Pkt'
+        FROM tipps t
+        JOIN spiele s ON t.saison = s.saison AND t.heim = s.heim AND t.gast = s.gast
+        WHERE t.saison = '{aktuelle_saison}' AND s.tore_heim IS NOT NULL
+        ORDER BY t.spieltag DESC, t.heim ASC
+    """
+    try:
+        results_df = pd.read_sql_query(query_auswertung, conn)
+        conn.close()
+
+        if not results_df.empty:
+            # Zeilenweise Färbung basierend auf der Spalte 'Pkt'
+            def style_results(row):
+                color = ''
+                if row['Pkt'] == 3:
+                    color = 'background-color: #d4edda; color: #155724; font-weight: bold' # Grün
+                elif row['Pkt'] == 1:
+                    color = 'background-color: #fff3cd; color: #856404' # Gelb
+                return [color] * len(row)
+
+            st.dataframe(results_df.style.apply(style_results, axis=1), use_container_width=True, hide_index=True)
+        else:
+            st.write("Noch keine gewerteten Tipps für diese Saison vorhanden.")
+    except Exception as e:
+        st.error(f"Fehler bei der Abfrage der Ergebnisse: {e}")
+        if conn: conn.close()
 
 def show_highscore(df):
-    st.title("🏆 Highscore")
+    st.title("🏆 Hall of Fame")
     evaluate_tipps(df)
+    
+    all_seasons = sorted(df["saison"].unique(), reverse=True)
+    aktuelle_saison = all_seasons[0]
+    
     conn = sqlite3.connect(DB_FILE)
-    query = "SELECT saison as Saison, SUM(punkte) as Gesamtpunkte FROM tipps GROUP BY saison ORDER BY Gesamtpunkte DESC"
-    highscore_df = pd.read_sql_query(query, conn)
-    if not highscore_df.empty:
-        st.table(highscore_df)
-    else:
-        st.info("Noch keine Punkte gesammelt.")
+    res = conn.execute("SELECT SUM(punkte) FROM tipps WHERE saison=?", (aktuelle_saison,)).fetchone()
+    deine_punkte = res[0] if res[0] is not None else 0
+    
+    # 1. Bestenliste anzeigen (Immer sichtbar)
+    query = "SELECT name as Name, saison as Saison, punkte as Punkte FROM hall_of_fame ORDER BY Punkte DESC"
+    hof_df = pd.read_sql_query(query, conn)
+    hof_df.insert(0, 'Platz', range(1, len(hof_df) + 1))
+
+    # Optimierte Spaltenkonfiguration mit festen Breiten
+    st.dataframe(
+        hof_df,
+        hide_index=True,
+        use_container_width=False, # Verhindert das Strecken über die ganze Seite
+        column_config={
+            "Platz": st.column_config.NumberColumn("Platz", width=60), # Feste Breite in Pixeln
+            "Name": st.column_config.TextColumn("Name", width=200),
+            "Saison": st.column_config.TextColumn("Saison", width=120),
+            "Punkte": st.column_config.NumberColumn("Punkte", width=80, format="%d ⭐") # Schön schmal
+        }
+    )
+    
+    # 2. Saison-Abschlussprüfung
+    check_for_record(df, aktuelle_saison, deine_punkte)
+    
+    conn.close()
+
+def check_for_record(df, saison, punkte):
+    if punkte == 0: return
+    
+    # PRÜFUNG: Gibt es in dieser Saison noch Spiele ohne Ergebnis?
+    offene_spiele = df[(df['saison'] == saison) & (df['tore_heim'].isna())]
+    
+    if not offene_spiele.empty:
+        # Saison läuft noch -> Kein Eintrag möglich
+        st.info(f"ℹ️ Die Saison {saison} läuft noch. Dein aktueller Stand: {punkte} Punkte. Die Hall of Fame wird nach dem letzten Spieltag freigeschaltet.")
+        return
+
+    # Wenn Saison beendet: Prüfen, ob schon eingetragen
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT * FROM hall_of_fame WHERE saison=? AND name != 'Computer 1' AND name != 'Computer 2' AND name != 'Computer 3'", (saison,))
+    schon_eingetragen = c.fetchone()
+
+    if not schon_eingetragen:
+        # Prüfen, ob die Punkte reichen, um unter die Top 3 zu kommen oder Computer zu schlagen
+        c.execute("SELECT MIN(punkte) FROM (SELECT punkte FROM hall_of_fame ORDER BY punkte DESC LIMIT 3)")
+        min_top_punkte = c.fetchone()[0]
+
+        if punkte >= min_top_punkte:
+            st.balloons()
+            st.success(f"🏆 Saison beendet! Du hast {punkte} Punkte erreicht und einen Platz in der Bestenliste verdient!")
+            with st.form("hof_form"):
+                name = st.text_input("Dein Name für die Ewigkeit:", placeholder="Echte Legende")
+                if st.form_submit_button("In Hall of Fame eintragen"):
+                    c.execute("INSERT INTO hall_of_fame (name, saison, punkte) VALUES (?,?,?)", (name, saison, punkte))
+                    conn.commit()
+                    st.rerun()
     conn.close()
 
 # ==========================================
@@ -307,9 +516,16 @@ def main():
     df = load_data_from_db()
     if df.empty: return
     seasons = sorted(df["saison"].unique(), reverse=True)
-    page = st.sidebar.radio("Navigation", ["Startseite", "Saisontabelle", "Ewige Tabelle", "Meister", "Vereinsanalyse", "Tippspiel", "Highscore"])
+    
+    # HIER "Spieltage" hinzugefügt:
+    page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Meister", "Vereinsanalyse", "Tippspiel", "Highscore"])
 
     if page == "Startseite": show_startseite()
+    
+    # HIER die neue Seite verknüpft:
+    elif page == "Spieltage":
+        show_spieltag_ansicht(df)
+        
     elif page == "Saisontabelle":
         saison_sel = st.sidebar.selectbox("Saison wählen", seasons)
         st.title(f"📅 Tabelle Saison {saison_sel}")

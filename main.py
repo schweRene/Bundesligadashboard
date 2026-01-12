@@ -55,12 +55,16 @@ def load_data_from_db():
 # 2. TIPPSPIEL LOGIK
 # ==========================================
 
-def save_tipp(saison, spieltag, heim, gast, t_h, t_g):
+def save_tipp(saison, spieltag, heim, gast, th, tg):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("DELETE FROM tipps WHERE saison=? AND heim=? AND gast=?", (saison, heim, gast))
-    c.execute("INSERT INTO tipps (saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte) VALUES (?,?,?,?,?,?,?)",
-              (saison, spieltag, heim, gast, t_h, t_g, 0))
+    # 1. Alten Tipp löschen (verhindert Duplikate)
+    c.execute("DELETE FROM tipps WHERE saison=? AND spieltag=? AND heim=? AND gast=?", 
+              (saison, spieltag, heim, gast))
+    # 2. Neuen Tipp einfügen - Achte auf die Reihenfolge der Spalten!
+    c.execute("""INSERT INTO tipps (saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?)""", 
+              (saison, spieltag, heim, gast, th, tg, 0))
     conn.commit()
     conn.close()
 
@@ -142,6 +146,15 @@ def compute_ewige_tabelle(df):
     ewige.insert(0, "Platz", range(1, len(ewige) + 1))
     return ewige
 
+def get_latest_played_matchday(df, saison="2025/26"):
+    """Findet den aktuellsten Spieltag mit Ergebnissen in der Datenbank."""
+    df_saison = df[df["saison"] == saison]
+    # Filtert Spiele, die bereits Tore eingetragen haben
+    played = df_saison.dropna(subset=["tore_heim", "tore_gast"])
+    if not played.empty:
+        return int(played["spieltag"].max())
+    return 1
+
 # ==========================================
 # 4. HELPER FÜR STYLING
 # ==========================================
@@ -173,18 +186,23 @@ def display_styled_table(df, type="standard"):
         css += """
             .mystyle td:nth-child(1) { width: 150px; text-align: left !important; } 
             .mystyle td:nth-child(2) { width: 60px; } 
-            .mystyle td:nth-child(3) { 
-                width: auto; 
-                white-space: normal !important; 
-                text-align: left !important; 
-            }
+            .mystyle td:nth-child(3) { width: auto; white-space: normal !important; text-align: left !important; }
         """
     elif type == "analyse":
         css += """
-            /* EXTREM SCHMALE SPALTEN FÜR ANALYSE */
             .mystyle td:nth-child(1) { width: 80px !important; text-align: left !important; } 
             .mystyle td:nth-child(2), .mystyle td:nth-child(3), 
             .mystyle td:nth-child(4), .mystyle td:nth-child(5) { width: 30px !important; }
+        """
+    # --- OPTIMIERTER SPIELTAG-MODUS ---
+    elif type == "spieltag":
+        css += """
+            /* Heimteam: schmaler (35%), rechtsbündig */
+            .mystyle td:nth-child(1) { width: 35%; text-align: right !important; padding-right: 15px; font-weight: bold; } 
+            /* Ergebnis: breiter (30%), zentriert, hervorgehoben */
+            .mystyle td:nth-child(2) { width: 30%; font-weight: bold; text-align: center !important; background-color: #eeeeee !important; } 
+            /* Gastteam: schmaler (35%), linksbündig */
+            .mystyle td:nth-child(3) { width: 35%; text-align: left !important; padding-left: 15px; font-weight: bold; }
         """
     else: 
         css += """
@@ -204,6 +222,47 @@ def show_startseite():
     if os.path.exists("bundesliga.jpg"):
         st.image("bundesliga.jpg", use_container_width=True)
         st.markdown("<p style='text-align:center; font-size:12px;'>Quelle: Pixabay</p>", unsafe_allow_html=True)
+
+def show_spieltag_ansicht(df):
+    # Sidebar-Steuerung
+    seasons = sorted(df["saison"].unique(), reverse=True)
+    st.sidebar.markdown("---")
+    saison_sel = st.sidebar.selectbox("Saison für Spieltage", seasons, key="view_saison")
+    
+    # Automatisch aktuellsten Spieltag finden
+    df_saison = df[df["saison"] == saison_sel]
+    played = df_saison.dropna(subset=["tore_heim", "tore_gast"])
+    latest_md = int(played["spieltag"].max()) if not played.empty else 1
+    
+    selected_spieltag = st.sidebar.selectbox(
+        "Spieltag wählen", 
+        list(range(1, 35)), 
+        index=int(latest_md) - 1
+    )
+
+    # Einheitliche Überschrift
+    st.markdown(f"<h1 style='text-align: center; color: darkred;'>⚽ Spieltagsergebnisse {selected_spieltag}. Spieltag ({saison_sel})</h1>", unsafe_allow_html=True)
+
+    # Daten filtern und für die Tabelle vorbereiten
+    day_matches = df[(df["saison"] == saison_sel) & (df["spieltag"] == selected_spieltag)].copy()
+
+    if not day_matches.empty:
+        # Wir bauen einen sauberen DataFrame nur für die Anzeige
+        display_df = pd.DataFrame()
+        display_df['Heim'] = day_matches['heim']
+        
+        # Formatierung: "4 : 0" oder "vs"
+        display_df['Ergebnis'] = day_matches.apply(
+            lambda r: f"{int(r['tore_heim'])} : {int(r['tore_gast'])}" 
+            if pd.notna(r['tore_heim']) else "vs", axis=1
+        )
+        
+        display_df['Gast'] = day_matches['gast']
+
+        # Aufruf der Styling-Funktion mit dem neuen Typ
+        display_styled_table(display_df, type="spieltag")
+    else:
+        st.info("Keine Daten für diesen Spieltag verfügbar.")
 
 def show_meisterstatistik(df, seasons):
     st.title("🏆 Deutsche Meisterschaften")
@@ -272,35 +331,73 @@ def show_vereinsanalyse(df, seasons):
 def show_tippspiel(df):
     st.title("🎯 Tippspiel")
     
-    # 1. Aktuelle Saison ermitteln
     all_seasons = sorted(df["saison"].unique(), reverse=True)
     aktuelle_saison = all_seasons[0]
     st.info(f"Aktuelle Saison: {aktuelle_saison}")
 
     # --- BEREICH 1: TIPPABGABE ---
-    st.subheader("Neue Tipps abgeben")
-    future_matches = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())]
+    st.subheader("Deine Tipps")
+    
+    # Spiele ohne echtes Ergebnis (die beiden ausstehenden Partien)
+    future_matches = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())].copy()
 
     if future_matches.empty:
         st.info("Keine zukünftigen Spiele zum Tippen verfügbar.")
     else:
-        # Spieltag-Auswahl für besseren Komfort
         spieltage = sorted(future_matches['spieltag'].unique())
         ausgewaehlter_tag = st.selectbox("Wähle einen Spieltag zum Tippen aus:", spieltage)
         tag_matches = future_matches[future_matches['spieltag'] == ausgewaehlter_tag]
 
+        # VORHANDENE TIPPS LADEN
+        conn = sqlite3.connect(DB_FILE)
+        # Wir laden ALLE Tipps für diesen Spieltag ohne komplizierte Filter
+        existing_tipps = pd.read_sql_query(
+            "SELECT heim, gast, tipp_heim, tipp_gast FROM tipps WHERE spieltag=?", 
+            conn, params=(int(ausgewaehlter_tag),)
+        )
+        conn.close()
+
         with st.form("tipp_form"):
-            for idx, row in tag_matches.iterrows():
-                col1, col2, col3 = st.columns([4, 1, 1])
-                col1.write(f"**{row['heim']}** - **{row['gast']}**")
-                t_h = col2.number_input("H", min_value=0, step=1, key=f"h_{idx}")
-                t_g = col3.number_input("G", min_value=0, step=1, key=f"g_{idx}")
+            tipp_input_data = {}
             
-            if st.form_submit_button("Tipps für diesen Spieltag speichern"):
+            for idx, row in tag_matches.iterrows():
+                h_name = str(row['heim']).strip()
+                g_name = str(row['gast']).strip()
+                
+                # Wir suchen den Tipp im geladenen DataFrame
+                # .str.lower() macht den Vergleich unempfindlich gegen Groß/Kleinschreibung
+                match = existing_tipps[
+                    (existing_tipps['heim'].str.strip() == h_name) & 
+                    (existing_tipps['gast'].str.strip() == g_name)
+                ]
+                
+                if not match.empty:
+                    val_h = int(match.iloc[0]['tipp_heim'])
+                    val_g = int(match_tipp_gast := match.iloc[0]['tipp_gast']) # Walrus für Lesbarkeit
+                    val_g = int(match.iloc[0]['tipp_gast'])
+                    has_tipp = True
+                else:
+                    val_h = 0
+                    val_g = 0
+                    has_tipp = False
+
+                col1, col2, col3 = st.columns([4, 1, 1])
+                label = f"**{h_name}** - **{g_name}**"
+                if has_tipp:
+                    label += " ✅"
+                
+                col1.write(label)
+                t_h = col2.number_input("H", min_value=0, step=1, value=val_h, key=f"h_{idx}")
+                t_g = col3.number_input("G", min_value=0, step=1, value=val_g, key=f"g_{idx}")
+                
+                tipp_input_data[idx] = (t_h, t_g)
+            
+            if st.form_submit_button("Tipps speichern"):
                 for idx, row in tag_matches.iterrows():
-                    save_tipp(aktuelle_saison, row['spieltag'], row['heim'], row['gast'], 
-                              st.session_state[f"h_{idx}"], st.session_state[f"g_{idx}"])
-                st.success(f"Tipps für den {ausgewaehlter_tag}. Spieltag gespeichert!")
+                    th, tg = tipp_input_data[idx]
+                    save_tipp(aktuelle_saison, row['spieltag'], row['heim'], row['gast'], th, tg)
+                st.success("Gespeichert!")
+                st.rerun()
 
     st.divider()
 
@@ -419,9 +516,16 @@ def main():
     df = load_data_from_db()
     if df.empty: return
     seasons = sorted(df["saison"].unique(), reverse=True)
-    page = st.sidebar.radio("Navigation", ["Startseite", "Saisontabelle", "Ewige Tabelle", "Meister", "Vereinsanalyse", "Tippspiel", "Highscore"])
+    
+    # HIER "Spieltage" hinzugefügt:
+    page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Meister", "Vereinsanalyse", "Tippspiel", "Highscore"])
 
     if page == "Startseite": show_startseite()
+    
+    # HIER die neue Seite verknüpft:
+    elif page == "Spieltage":
+        show_spieltag_ansicht(df)
+        
     elif page == "Saisontabelle":
         saison_sel = st.sidebar.selectbox("Saison wählen", seasons)
         st.title(f"📅 Tabelle Saison {saison_sel}")
