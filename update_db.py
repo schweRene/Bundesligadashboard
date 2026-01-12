@@ -1,78 +1,48 @@
-from update_scrapper import run_scrapper
+import os
+import time
+import sqlite3
+import datetime
+from update_scrapper import run_scrapper, update_csv_from_db
 from check_table import show_table, save_table_to_txt
 from validate_bundesliga_csv import validate_csv
-import sqlite3
-import csv 
-import os
-import datetime
 
 DB_NAME = "bundesliga.db"
-CSV_NAME = "bundesliga_2026.csv"
 SAISON = "2025/26"
-
-def run_update():
-    print(f"{'=' *50}\nPIPELINE START: SAISON {SAISON}\n{'='*50}")
-    if not validate_csv():
-        return False
-        
-    if not os.path.exists(CSV_NAME):
-        print(f"❌ FEHLER: {CSV_NAME} fehlt!")
-        return False
-    
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    try:
-        with open(CSV_NAME, mode='r', encoding="utf-8-sig") as f:
-            reader = csv.DictReader(f)
-            reader.fieldnames = [n.lower() for n in reader.fieldnames]
-            added = 0
-            for row in reader:
-                res = str(row.get('result', '-:-')).strip()
-                t_h, t_g = (None, None) if ":" not in res or res == "-:-" else map(int, res.split(":"))
-                cursor.execute("""
-                    INSERT OR IGNORE INTO spiele (spieltag, saison, heim, gast, tore_heim, tore_gast)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                """, (int(row['spieltag']), SAISON, row['home'].strip(), row['away'].strip(), t_h, t_g))
-                if cursor.rowcount > 0: added += 1
-        conn.commit()
-        print(f"✨ {added} neue Spiele importiert.")
-        return True
-    except Exception as e:
-        print(f"💥 Fehler: {e}")
-        return False
-    finally:
-        conn.close()
+LOG_FILE = "pipeline_log.txt"
 
 def log_pipeline_run(status, message):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    log_enty = f"[{timestamp}] STATUS: {status} | {message}\n"
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(f"[{timestamp}] {status}: {message}\n")
 
-    with open("pipeline_log.txt", "a", encoding="utf-8") as f:
-        f.write(log_enty)
+def reset_db_season():
+    print(f"🧹 Bereinige Datenbank für Saison {SAISON}...")
+    conn = sqlite3.connect(DB_NAME)
+    conn.execute("DELETE FROM spiele WHERE saison = ?", (SAISON,))
+    conn.commit()
+    conn.close()
 
 def run_pipeline():
-    # Wir starten den Log
-    log_pipeline_run("START", "Pipeline gestartet.")
-    
-    update_success = run_update()
-    if not update_success:
-        log_pipeline_run("ERROR", "CSV-Import oder Validierung fehlgeschlagen.")
-        return
+    log_pipeline_run("START", "Pipeline mit Timeout-Schutz gestartet.")
+    print(f"{'='*50}\nBUNDESLIGA UPDATE (RETRY-MODUS)\n{'='*50}")
 
-    print(f"\n--- STARTE AUTOMATISCHES WEB-UPDATE ----")
-    scrapper_success = run_scrapper(dry_run=False)
-    
-    if scrapper_success:
-        log_pipeline_run("SUCCESS", "Web-Update erfolgreich durchgeführt.")
+    reset_db_season()
+
+    for st in range(1, 35):
+        print(f"Spieltag {st}/34...", end=" ", flush=True)
+        count = run_scrapper(st)
+        print(f"Gefunden: {count}/9")
+        time.sleep(1.0) # Höhere Pause zwischen den Spieltagen gegen Blocking
+
+    update_csv_from_db()
+
+    print(f"\n--- AUDIT & VALIDIERUNG ---")
+    if validate_csv():
+        log_pipeline_run("SUCCESS", "Alle Daten geladen.")
+        show_table()
+        save_table_to_txt()
     else:
-        log_pipeline_run("WARNING", "Web-Update lieferte keine neuen Daten oder schlug fehl.")
-
-    # Tabelle wird erzeugt
-    print("\n--- AKTUALISIERE TABELLEN-DATEI ----")
-    show_table()
-    save_table_to_txt()
-    
-    log_pipeline_run("END", "Pipeline-Lauf beendet und Tabelle aktualisiert.")
+        log_pipeline_run("ERROR", "Audit fehlerhaft.")
 
 if __name__ == "__main__":
     run_pipeline()

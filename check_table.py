@@ -11,6 +11,13 @@ def get_table_data():
     df = pd.read_sql_query(query, conn)
     conn.close()
 
+    # FALLS NOCH KEINE ERGEBNISSE VORHANDEN SIND:
+    if df.empty:
+        # Erstelle ein leeres DataFrame mit den benötigten Spalten, 
+        # damit nachfolgende Skripte nicht abstürzen.
+        columns = ['Platz', 'Verein', 'Spiele', 'S', 'U', 'N', 'Tore', 'Gegentore', 'Diff', 'Punkte']
+        return pd.DataFrame(columns=columns)
+
     stats = {}
     for _, row in df.iterrows():
         h, g = row['heim'], row['gast']
@@ -35,6 +42,8 @@ def get_table_data():
             stats[g]['U'] += 1; stats[g]['Punkte'] += 1
 
     table = pd.DataFrame.from_dict(stats, orient='index')
+    
+    # Sicherstellen, dass die Spalten existieren, bevor gerechnet wird
     table['Diff'] = table['Tore'] - table['Gegentore']
     table = table.sort_values(by=['Punkte', 'Diff', 'Tore'], ascending=False)    
     table.index.name = 'Verein'
@@ -45,13 +54,22 @@ def get_table_data():
 def save_table_to_txt():
     table = get_table_data()
     output = f"\n--- 📄 TABELLE BUNDESLIGA 2025/26 ---\n\n"
-    output += table.to_string(index=False)
+    if table.empty:
+        output += "Noch keine Ergebnisse für die Saison 2025/26 verfügbar."
+    else:
+        output += table.to_string(index=False)
+        
     with open("aktuelle_tabelle.txt", "w", encoding="utf-8") as f:
         f.write(output)
     print("✅ Tabelle in 'aktuelle_tabelle.txt' gespeichert.")
     
 def show_table():
-    print(get_table_data().to_string())
+    table = get_table_data()
+    if table.empty:
+        print("\n--- 📄 TABELLE BUNDESLIGA 2025/26 ---")
+        print("Noch keine Ergebnisse vorhanden.")
+    else:
+        print(table.to_string(index=False))
 
 if __name__ == "__main__":
     show_table()

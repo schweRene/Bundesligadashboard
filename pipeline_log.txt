@@ -7,3 +7,40 @@
 [2026-01-12 08:31:52] STATUS: START | Pipeline gestartet.
 [2026-01-12 08:31:54] STATUS: SUCCESS | Web-Update erfolgreich durchgeführt.
 [2026-01-12 08:31:54] STATUS: END | Pipeline-Lauf beendet und Tabelle aktualisiert.
+[2026-01-12 16:20:36] STATUS: START | Pipeline gestartet.
+[2026-01-12 16:20:36] STATUS: WARNING | Web-Update lieferte keine neuen Daten oder schlug fehl.
+[2026-01-12 16:39:37] STATUS: START | Pipeline gestartet.
+[2026-01-12 16:39:37] STATUS: WARNING | Web-Update lieferte keine neuen Daten oder schlug fehl.
+[2026-01-12 16:42:26] STATUS: START | Pipeline gestartet.
+[2026-01-12 16:42:26] STATUS: WARNING | Web-Update lieferte keine neuen Daten oder schlug fehl.
+[2026-01-12 16:42:26] STATUS: END | Pipeline-Lauf beendet und Tabelle aktualisiert.
+[2026-01-12 16:49:16] STATUS: START | Pipeline gestartet.
+[2026-01-12 16:49:16] STATUS: ERROR | CSV-Import oder Validierung fehlgeschlagen.
+[2026-01-12 17:08:15] STATUS: START | Pipeline gestartet.
+[2026-01-12 17:08:35] STATUS: INFO | Keine neuen Web-Daten gefunden.
+[2026-01-12 17:12:52] STATUS: START | Pipeline gestartet.
+[2026-01-12 17:12:54] STATUS: INFO | Keine neuen Web-Daten gefunden.
+[2026-01-12 17:14:35] STATUS: START | Pipeline gestartet.
+[2026-01-12 17:14:38] STATUS: INFO | Keine neuen Web-Daten gefunden.
+[2026-01-12 17:30:46] STATUS: START | Pipeline gestartet.
+[2026-01-12 17:30:49] STATUS: INFO | Keine neuen Web-Daten gefunden.
+[2026-01-12 17:37:18] STATUS: START | Pipeline gestartet.
+[2026-01-12 17:37:25] STATUS: INFO | Keine neuen Web-Daten gefunden.
+[2026-01-12 17:44:17] STATUS: START | Pipeline für 2025/26 gestartet.
+[2026-01-12 17:49:18] STATUS: START | Pipeline für 2025/26 gestartet.
+[2026-01-12 17:52:20] STATUS: START | Pipeline für 2025/26 gestartet.
+[2026-01-12 18:03:05] STATUS: START | Pipeline für 2025/26 gestartet.
+[2026-01-12 18:42:17] STATUS: START | Große Reparatur-Pipeline gestartet.
+[2026-01-12 18:44:00] STATUS: ERROR | CSV Validierung fehlgeschlagen.
+[2026-01-12 18:55:09] STATUS: START | Reparatur-Lauf mit Team-Replacements gestartet.
+[2026-01-12 18:59:54] STATUS: ERROR | Validierung fehlgeschlagen.
+[2026-01-12 19:21:07] STATUS: START | Reparatur-Lauf mit Team-Replacements gestartet.
+[2026-01-12 19:22:53] STATUS: SUCCESS | Alle 34 Spieltage korrekt verarbeitet.
+[2026-01-12 19:38:26] STATUS: START | Reparatur-Lauf mit Team-Replacements gestartet.
+[2026-01-12 19:57:14] START: Pipeline mit Reparatur-Modus gestartet.
+[2026-01-12 19:59:32] ERROR: Validierung fehlgeschlagen.
+[2026-01-12 20:00:07] START: Pipeline mit Reparatur-Modus gestartet.
+[2026-01-12 20:02:28] SUCCESS: Validierung erfolgreich.
+[2026-01-12 20:12:02] START: Notfall-Reparatur gestartet.
+[2026-01-12 20:46:50] START: Pipeline mit Timeout-Schutz gestartet.
+[2026-01-12 20:48:03] SUCCESS: Alle Daten geladen.

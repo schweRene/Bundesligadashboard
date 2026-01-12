@@ -18,16 +18,26 @@ DB_FILE = "bundesliga.db"
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
+    
+    # Erstellt die Tabelle für Tipps mit der neuen Spalte 'user'
     c.execute('''CREATE TABLE IF NOT EXISTS tipps 
-                 (saison TEXT, spieltag INTEGER, heim TEXT, gast TEXT, 
+                 (user TEXT, saison TEXT, spieltag INTEGER, heim TEXT, gast TEXT, 
                   tipp_heim INTEGER, tipp_gast INTEGER, punkte INTEGER)''')
+    
     c.execute('''CREATE TABLE IF NOT EXISTS hall_of_fame 
                  (name TEXT, saison TEXT, punkte INTEGER)''')
     
+    # Erstellt die Tabelle für Spiele, falls sie noch nicht existiert
+    c.execute('''CREATE TABLE IF NOT EXISTS spiele 
+                 (saison TEXT, spieltag INTEGER, heim TEXT, gast TEXT, 
+                  tore_heim INTEGER, tore_gast INTEGER)''')
+    
+    # Hall of Fame Dummies nur einfugen, wenn leer
     c.execute("SELECT COUNT(*) FROM hall_of_fame")
     if c.fetchone()[0] == 0:
         dummies = [('Computer 1', 'Historisch', 20), ('Computer 2', 'Historisch', 17), ('Computer 3', 'Historisch', 14)]
         c.executemany("INSERT INTO hall_of_fame VALUES (?,?,?)", dummies)
+    
     conn.commit()
     conn.close()
 
@@ -55,36 +65,39 @@ def load_data_from_db():
 # 2. TIPPSPIEL LOGIK
 # ==========================================
 
-def save_tipp(saison, spieltag, heim, gast, th, tg):
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    # 1. Alten Tipp löschen (verhindert Duplikate)
-    c.execute("DELETE FROM tipps WHERE saison=? AND spieltag=? AND heim=? AND gast=?", 
-              (saison, spieltag, heim, gast))
-    # 2. Neuen Tipp einfügen - Achte auf die Reihenfolge der Spalten!
-    c.execute("""INSERT INTO tipps (saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?)""", 
-              (saison, spieltag, heim, gast, th, tg, 0))
-    conn.commit()
-    conn.close()
+def save_tipp(user, saison, spieltag, heim, gast, th, tg):
+    """Speichert den Tipp und gibt Erfolg/Fehler zurück."""
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        c = conn.cursor()
+        # Wichtig: user=? in der WHERE-Klausel und beim INSERT
+        c.execute("DELETE FROM tipps WHERE user=? AND saison=? AND spieltag=? AND heim=? AND gast=?", 
+                  (user, saison, spieltag, heim, gast))
+        c.execute("INSERT INTO tipps (user, saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte) VALUES (?,?,?,?,?,?,?,?)", 
+                  (user, saison, spieltag, heim, gast, th, tg, 0))
+        conn.commit()
+        conn.close()
+        return True, f"Tipp gespeichert: {heim} vs. {gast} ({th}:{tg})"
+    except Exception as e:
+        return False, f"Fehler: {str(e)}"
 
-def evaluate_tipps(df):
+def evaluate_tipps(df, user=None):
     conn = sqlite3.connect(DB_FILE)
-    tipps_df = pd.read_sql_query("SELECT * FROM tipps", conn)
+    if user:
+        tipps_df = pd.read_sql_query("SELECT * FROM tipps WHERE user=?", conn, params=(user,))
+    else:
+        tipps_df = pd.read_sql_query("SELECT * FROM tipps", conn)
+        
     for idx, row in tipps_df.iterrows():
         match = df[(df['saison'] == row['saison']) & (df['heim'] == row['heim']) & (df['gast'] == row['gast'])]
         if not match.empty and pd.notna(match.iloc[0]['tore_heim']):
-            e_h = int(match.iloc[0]['tore_heim'])
-            e_g = int(match.iloc[0]['tore_gast'])
+            e_h, e_g = int(match.iloc[0]['tore_heim']), int(match.iloc[0]['tore_gast'])
             t_h, t_g = int(row['tipp_heim']), int(row['tipp_gast'])
-            punkte = 0
-            if e_h == t_h and e_g == t_g:
-                punkte = 3
-            elif (e_h > e_g and t_h > t_g) or (e_h < e_g and t_h < t_g) or (e_h == e_g and t_h == t_g):
-                punkte = 1
+            punkte = 3 if (e_h == t_h and e_g == t_g) else (1 if (e_h > e_g and t_h > t_g) or (e_h < e_g and t_h < t_g) or (e_h == e_g and t_h == t_g) else 0)
+            
             c = conn.cursor()
-            c.execute("UPDATE tipps SET punkte = ? WHERE saison=? AND heim=? AND gast=?", 
-                      (punkte, row['saison'], row['heim'], row['gast']))
+            c.execute("UPDATE tipps SET punkte = ? WHERE user=? AND saison=? AND heim=? AND gast=?", 
+                      (punkte, row['user'], row['saison'], row['heim'], row['gast']))
     conn.commit()
     conn.close()
 
@@ -330,15 +343,12 @@ def show_vereinsanalyse(df, seasons):
 
 def show_tippspiel(df):
     st.title("🎯 Tippspiel")
-    
     all_seasons = sorted(df["saison"].unique(), reverse=True)
     aktuelle_saison = all_seasons[0]
     st.info(f"Aktuelle Saison: {aktuelle_saison}")
 
-    # --- BEREICH 1: TIPPABGABE ---
-    st.subheader("Deine Tipps")
-    
-    # Spiele ohne echtes Ergebnis (die beiden ausstehenden Partien)
+    # --- TEIL 1: TIPPS ABGEBEN ---
+    #st.subheader("Deine Tipps")
     future_matches = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())].copy()
 
     if future_matches.empty:
@@ -348,95 +358,62 @@ def show_tippspiel(df):
         ausgewaehlter_tag = st.selectbox("Wähle einen Spieltag zum Tippen aus:", spieltage)
         tag_matches = future_matches[future_matches['spieltag'] == ausgewaehlter_tag]
 
-        # VORHANDENE TIPPS LADEN
-        conn = sqlite3.connect(DB_FILE)
-        # Wir laden ALLE Tipps für diesen Spieltag ohne komplizierte Filter
-        existing_tipps = pd.read_sql_query(
-            "SELECT heim, gast, tipp_heim, tipp_gast FROM tipps WHERE spieltag=?", 
-            conn, params=(int(ausgewaehlter_tag),)
-        )
-        conn.close()
-
         with st.form("tipp_form"):
             tipp_input_data = {}
-            
             for idx, row in tag_matches.iterrows():
                 h_name = str(row['heim']).strip()
                 g_name = str(row['gast']).strip()
-                
-                # Wir suchen den Tipp im geladenen DataFrame
-                # .str.lower() macht den Vergleich unempfindlich gegen Groß/Kleinschreibung
-                match = existing_tipps[
-                    (existing_tipps['heim'].str.strip() == h_name) & 
-                    (existing_tipps['gast'].str.strip() == g_name)
-                ]
-                
-                if not match.empty:
-                    val_h = int(match.iloc[0]['tipp_heim'])
-                    val_g = int(match_tipp_gast := match.iloc[0]['tipp_gast']) # Walrus für Lesbarkeit
-                    val_g = int(match.iloc[0]['tipp_gast'])
-                    has_tipp = True
-                else:
-                    val_h = 0
-                    val_g = 0
-                    has_tipp = False
-
                 col1, col2, col3 = st.columns([4, 1, 1])
-                label = f"**{h_name}** - **{g_name}**"
-                if has_tipp:
-                    label += " ✅"
-                
-                col1.write(label)
-                t_h = col2.number_input("H", min_value=0, step=1, value=val_h, key=f"h_{idx}")
-                t_g = col3.number_input("G", min_value=0, step=1, value=val_g, key=f"g_{idx}")
-                
+                col1.write(f"**{h_name}** - **{g_name}**")
+                t_h = col2.number_input("H", min_value=0, step=1, value=0, key=f"h_{idx}")
+                t_g = col3.number_input("G", min_value=0, step=1, value=0, key=f"g_{idx}")
                 tipp_input_data[idx] = (t_h, t_g)
             
+            st.divider()
+            user_name_input = st.text_input("Dein Name (erforderlich zum Speichern):", value="", placeholder="z.B. Max_Mustermann")
+            
             if st.form_submit_button("Tipps speichern"):
-                for idx, row in tag_matches.iterrows():
-                    th, tg = tipp_input_data[idx]
-                    save_tipp(aktuelle_saison, row['spieltag'], row['heim'], row['gast'], th, tg)
-                st.success("Gespeichert!")
-                st.rerun()
+                if not user_name_input.strip():
+                    st.error("❌ Bitte gib deinen Namen ein!")
+                else:
+                    success_count = 0
+                    for idx, row in tag_matches.iterrows():
+                        th, tg = tipp_input_data[idx]
+                        success, _ = save_tipp(user_name_input.strip(), aktuelle_saison, row['spieltag'], row['heim'], row['gast'], th, tg)
+                        if success:
+                            success_count += 1
+                    
+                    if success_count > 0:
+                        st.success(f"✅ {success_count} Tipps für '{user_name_input}' erfolgreich gespeichert!")
+                        st.rerun()
 
     st.divider()
-
-    # --- BEREICH 2: DEINE ERGEBNISSE ---
+    # --- TEIL 2: ERGEBNISSE ANZEIGEN ---
     st.subheader("Deine Ergebnisse & Punkte")
-    evaluate_tipps(df) # Führt den Abgleich mit den realen Toren aus
-    
-    conn = sqlite3.connect(DB_FILE)
-    # Korrigierte SQL-Abfrage: 'Sp' statt 'Sp.' und korrekte Anführungszeichen
-    query_auswertung = f"""
-        SELECT t.spieltag as Sp, t.heim as Heim, t.gast as Gast, 
-               t.tipp_heim || ':' || t.tipp_gast as 'Dein Tipp',
-               s.tore_heim || ':' || s.tore_gast as 'Ergebnis',
-               t.punkte as 'Pkt'
-        FROM tipps t
-        JOIN spiele s ON t.saison = s.saison AND t.heim = s.heim AND t.gast = s.gast
-        WHERE t.saison = '{aktuelle_saison}' AND s.tore_heim IS NOT NULL
-        ORDER BY t.spieltag DESC, t.heim ASC
-    """
-    try:
-        results_df = pd.read_sql_query(query_auswertung, conn)
-        conn.close()
-
-        if not results_df.empty:
-            # Zeilenweise Färbung basierend auf der Spalte 'Pkt'
-            def style_results(row):
-                color = ''
-                if row['Pkt'] == 3:
-                    color = 'background-color: #d4edda; color: #155724; font-weight: bold' # Grün
-                elif row['Pkt'] == 1:
-                    color = 'background-color: #fff3cd; color: #856404' # Gelb
-                return [color] * len(row)
-
-            st.dataframe(results_df.style.apply(style_results, axis=1), use_container_width=True, hide_index=True)
-        else:
-            st.write("Noch keine gewerteten Tipps für diese Saison vorhanden.")
-    except Exception as e:
-        st.error(f"Fehler bei der Abfrage der Ergebnisse: {e}")
-        if conn: conn.close()
+    view_user = st.text_input("Gib deinen Namen ein, um deine Punkte zu sehen:", key="view_res")
+    if view_user.strip():
+        evaluate_tipps(df, view_user.strip()) 
+        conn = sqlite3.connect(DB_FILE)
+        query_auswertung = """
+            SELECT t.spieltag as Sp, t.heim as Heim, t.gast as Gast, 
+                   t.tipp_heim || ':' || t.tipp_gast as 'Dein Tipp',
+                   s.tore_heim || ':' || s.tore_gast as 'Ergebnis',
+                   t.punkte as 'Pkt'
+            FROM tipps t
+            JOIN spiele s ON t.saison = s.saison AND t.heim = s.heim AND t.gast = s.gast
+            WHERE t.user = ? AND t.saison = ? AND s.tore_heim IS NOT NULL
+            ORDER BY t.spieltag DESC, t.heim ASC
+        """
+        try:
+            results_df = pd.read_sql_query(query_auswertung, conn, params=(view_user.strip(), aktuelle_saison))
+            conn.close()
+            if not results_df.empty:
+                st.dataframe(results_df, use_container_width=True, hide_index=True)
+            else:
+                st.write(f"Keine gewerteten Tipps für '{view_user}' gefunden.")
+        except Exception as e:
+            st.error(f"Fehler bei der Abfrage: {e}")
+            if conn: conn.close()
 
 def show_highscore(df):
     st.title("🏆 Hall of Fame")
