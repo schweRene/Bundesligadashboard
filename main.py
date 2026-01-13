@@ -191,7 +191,7 @@ def show_spieltag_ansicht(df):
     played = df_saison.dropna(subset=["tore_heim", "tore_gast"])
     latest_md = int(played["spieltag"].max()) if not played.empty else 1
     selected_spieltag = st.sidebar.selectbox("Spieltag wählen", list(range(1, 35)), index=int(latest_md) - 1)
-    st.markdown(f"<h1 style='text-align: center; color: darkred;'>⚽ Spieltagsergebnisse {selected_spieltag}. Spieltag ({saison_sel})</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='text-align: center; color: darkred;'>⚽ {selected_spieltag}. Spieltag ({saison_sel})</h1>", unsafe_allow_html=True)
     day_matches = df[(df["saison"] == saison_sel) & (df["spieltag"] == selected_spieltag)].copy()
     if not day_matches.empty:
         display_df = pd.DataFrame()
@@ -303,7 +303,7 @@ def main():
     if df.empty: return
     seasons = sorted(df["saison"].unique(), reverse=True)
     
-    page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Meister", "Vereinsanalyse", "Tippspiel", "Highscore"])
+    page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
 
     if page == "Startseite": show_startseite()
     elif page == "Spieltage": show_spieltag_ansicht(df)
