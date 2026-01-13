@@ -90,24 +90,23 @@ def evaluate_tipps(df_spiele, user):
 
 @st.cache_data
 def calculate_table(df, saison):
-    df_saison = df[df["saison"] == saison].copy()
-    if df_saison.empty: return pd.DataFrame()
-    df_saison = df_saison.dropna(subset=["tore_heim", "tore_gast"])
-    teams = pd.unique(df_saison[["heim", "gast"]].values.ravel("K"))
-    stats = {t: {'Spiele': 0, 'S': 0, 'U': 0, 'N': 0, 'T': 0, 'G': 0, 'Punkte': 0} for t in teams}
-    for _, row in df_saison.iterrows():
-        h, g = row['heim'], row['gast']
-        th, tg = int(row['tore_heim']), int(row['tore_gast'])
-        stats[h]['Spiele'] += 1; stats[g]['Spiele'] += 1
-        stats[h]['T'] += th; stats[h]['G'] += tg; stats[g]['T'] += tg; stats[g]['G'] += th
-        if th > tg: stats[h]['S'] += 1; stats[h]['Punkte'] += 3; stats[g]['N'] += 1
-        elif th < tg: stats[g]['S'] += 1; stats[g]['Punkte'] += 3; stats[h]['N'] += 1
-        else: stats[h]['U'] += 1; stats[h]['Punkte'] += 1; stats[g]['U'] += 1; stats[g]['Punkte'] += 1
-    table = pd.DataFrame.from_dict(stats, orient='index').reset_index().rename(columns={'index': 'Team'})
-    table['Diff'] = table['T'] - table['G']
-    table = table.sort_values(by=['Punkte', 'Diff', 'T'], ascending=False).reset_index(drop=True)
-    table.insert(0, 'Platz', range(1, len(table) + 1))
-    return table
+    df_s = df[df["saison"] == saison].copy()
+    if df_s.empty: return pd.DataFrame()
+    df_s = df_s.dropna(subset=["tore_heim", "tore_gast"])
+    teams = pd.unique(df_s[["heim", "gast"]].values.ravel("K"))
+    res = {t: {'Spiele':0, 'S':0, 'U':0, 'N':0, 'T':0, 'G':0, 'Pkt':0} for t in teams}
+    for _, r in df_s.iterrows():
+        h, g, th, tg = r['heim'], r['gast'], int(r['tore_heim']), int(r['tore_gast'])
+        for t in [h, g]: res[t]['Spiele'] += 1
+        res[h]['T'] += th; res[h]['G'] += tg; res[g]['T'] += tg; res[g]['G'] += th
+        if th > tg: res[h]['S'] += 1; res[h]['Pkt'] += 3; res[g]['N'] += 1
+        elif th < tg: res[g]['S'] += 1; res[g]['Pkt'] += 3; res[h]['N'] += 1
+        else: res[h]['U'] += 1; res[h]['Pkt'] += 1; res[g]['U'] += 1; res[g]['Pkt'] += 1
+    t_df = pd.DataFrame.from_dict(res, orient='index').reset_index().rename(columns={'index': 'Team'})
+    t_df['Diff'] = t_df['T'] - t_df['G']
+    t_df = t_df.sort_values(['Pkt', 'Diff', 'T'], ascending=False).reset_index(drop=True)
+    t_df.insert(0, 'Platz', range(1, len(t_df) + 1))
+    return t_df
 
 @st.cache_data
 def compute_ewige_tabelle(df):
@@ -134,23 +133,60 @@ def get_latest_played_matchday(df_saison):
 # ==========================================
 
 def display_styled_table(df, type="standard"):
-    html = df.to_html(index=False, classes='mystyle')
+    # Wir nutzen CSS-Variablen für automatische Farbanpassung
     css = """
     <style>
-    .mystyle { font-size: 11pt; font-family: Arial; border-collapse: collapse; width: 100%; }
-    .mystyle th { background-color: #8B0000; color: white; text-align: center; padding: 8px; }
-    .mystyle td { padding: 6px; text-align: center; border-bottom: 1px solid #ddd; }
-    .mystyle tr:nth-child(even) { background-color: #f2f2f2; }
-    .mystyle tr:hover { background-color: #ffe4e1; }
+    .mystyle {
+        font-size: 11pt; 
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        border-collapse: collapse; 
+        width: 100%;
+        margin: 10px 0;
+        color: var(--text-color);
+        background-color: var(--background-color);
+    }
+    .mystyle th {
+        background-color: #8B0000;
+        color: white !important;
+        text-align: center;
+        padding: 15px;
+        text-transform: uppercase;
+        border: none;
+    }
+    .mystyle td {
+        padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+    }
+    /* Zebra-Streifen die im Dark- und Lightmode funktionieren */
+    .mystyle tr:nth-child(even) { 
+        background-color: rgba(139, 0, 0, 0.03); 
+    }
+    .mystyle tr:hover { 
+        background-color: rgba(139, 0, 0, 0.1); 
+        transition: 0.3s;
+    }
+    
+    /* Ergebnis-Highlighting */
+    .result-font {
+        font-weight: bold;
+        color: #ff4b4b;
+        font-size: 1.1em;
+    }
     </style>
     """
+    
+    html = df.to_html(index=False, classes='mystyle', escape=False)
+    
     if type == "spieltag":
-        css += "<style>.mystyle td:nth-child(2) { font-weight: bold; color: #8B0000; font-size: 13pt; }</style>"
+        # Stylt die mittlere Spalte (Ergebnis)
+        html = html.replace('<td>', '<td class="result-font">', df.shape[0]) 
+
     st.markdown(css, unsafe_allow_html=True)
-    st.write(html, unsafe_allow_html=True)
+    st.markdown(html, unsafe_allow_html=True)
 
 # ==========================================
-# 5. SEITEN (ALLE ORIGINAL FUNKTIONEN)
+# 5. SEITEN-LOGIK
 # ==========================================
 
 def show_startseite():
@@ -180,17 +216,26 @@ def show_spieltag_ansicht(df):
         })
         display_styled_table(res_df, type="spieltag")
 
-def show_meisterstatistik(df, seasons):
-    st.title("🏆 Deutsche Meisterschaften")
-    m_list = []
+def show_meisterstatistik(df):
+    st.markdown("<h1 style='text-align: center;'>🏆 Ehrentafel der Meister</h1>", unsafe_allow_html=True)
+    seasons = sorted(df["saison"].unique())
+    meister_data = []
     for s in seasons:
         t = calculate_table(df, s)
-        if not t.empty: m_list.append({"Saison": s, "Meister": t.iloc[0]["Team"]})
-    if m_list:
-        m_df = pd.DataFrame(m_list)
+        if not t.empty:
+            meister_data.append({"Saison": s, "Meister": t.iloc[0]["Team"]})
+    
+    if meister_data:
+        m_df = pd.DataFrame(meister_data)
+        # Zähle Titel pro Verein
         stats = m_df["Meister"].value_counts().reset_index()
         stats.columns = ["Verein", "Titel"]
-        display_styled_table(stats, type="meister")
+        # Jahre hinzufügen
+        jahre = m_df.groupby("Meister")["Saison"].apply(lambda x: ", ".join(x)).reset_index()
+        jahre.columns = ["Verein", "Jahre"]
+        
+        final_df = pd.merge(stats, jahre, on="Verein").sort_values("Titel", ascending=False)
+        display_styled_table(final_df)
 
 def show_vereinsanalyse(df, seasons):
     st.title("📈 Vereinsanalyse")
