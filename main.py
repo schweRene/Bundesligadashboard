@@ -154,9 +154,10 @@ def display_styled_table(df, type="standard"):
 # ==========================================
 
 def show_startseite():
-    st.markdown("<h1 style='text-align: center; color: darkred;'>⚽Bundesliga-Dashboard</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #ff4b4b;'>⚽ Bundesliga-Dashboard</h1>", unsafe_allow_html=True)
     if os.path.exists("bundesliga.jpg"):
         st.image("bundesliga.jpg", use_container_width=True)
+        st.caption("Bildquelle: [Pixabay](https://pixabay.com)")
 
 def show_spieltag_ansicht(df):
     seasons = sorted(df["saison"].unique(), reverse=True)
