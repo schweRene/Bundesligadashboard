@@ -287,44 +287,56 @@ def show_vereinsanalyse(df, seasons):
             display_styled_table(res_df)
 
 def show_tippspiel(df):
-    aktuelle_saison = sorted(df["saison"].unique(), reverse=True)[0]
     st.title("🎯 Tippspiel")
+    # Ermittlung der aktuellsten Saison aus den Daten
+    aktuelle_saison = sorted(df["saison"].unique(), reverse=True)[0]
     st.subheader(f"Tipps abgeben für Saison: {aktuelle_saison}")
+    
+    # Filter für Spiele, die noch kein Ergebnis haben
     future = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())]
+    
     if not future.empty:
-        st.info("Hinweis: Zum Speichern muss ein Name eingetragen werden.")
+        st.info("Hinweis: Zum Speichern der Tipps muss unten zwingend ein Name eingetragen werden.")
         spieltag = st.selectbox("Spieltag wählen", sorted(future['spieltag'].unique()))
         tag_matches = future[future['spieltag'] == spieltag]
+
         with st.form("tipp_form"):
             tipps = {}
             for idx, row in tag_matches.iterrows():
                 c1, c2, c3 = st.columns([4, 1, 1])
                 c1.write(f"**{row['heim']}** - **{row['gast']}**")
-                tipps[idx] = (c2.number_input("H", min_value=0, step=1, key=f"h_{idx}"), c3.number_input("G", min_value=0, step=1, key=f"g_{idx}"))
-            user = st.text_input("Dein Name:")
-            if st.form_submit_button("Speichern"):
-    if user.strip():
-        try:
-            conn = get_conn()
-            with conn.session as session:
-                for idx, val in tipps.items():
-                    row = tag_matches.loc[idx]
-                    # Alten Tipp löschen (falls vorhanden)
-                    session.execute(
-                        text('DELETE FROM tipps WHERE "user"=:u AND saison=:s AND spieltag=:st AND heim=:h AND gast=:g'),
-                        {"u": user, "s": aktuelle_saison, "st": int(row['spieltag']), "h": row['heim'], "g": row['gast']}
-                    )
-                    # Neuen Tipp einfügen
-                    session.execute(
-                        text('INSERT INTO tipps ("user", saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte) VALUES (:u, :s, :st, :h, :g, :th, :tg, 0)'),
-                        {"u": user, "s": aktuelle_saison, "st": int(row['spieltag']), "h": row['heim'], "g": row['gast'], "th": val[0], "tg": val[1]}
-                    )
-                session.commit() # WICHTIG: Schreibt die Daten final in die Cloud
-            st.success("Tipps erfolgreich in der Cloud gespeichert!")
-        except Exception as e:
-            st.error(f"Fehler beim Speichern: {e}")
+                tipps[idx] = (
+                    c2.number_input("H", min_value=0, step=1, key=f"h_{idx}"), 
+                    c3.number_input("G", min_value=0, step=1, key=f"g_{idx}")
+                )
+            
+            user = st.text_input("Dein Name (Pflichtfeld zum Speichern):")
+            
+            if st.form_submit_button("Tipps jetzt speichern"):
+                if user.strip():
+                    try:
+                        conn = get_conn()
+                        with conn.session as session:
+                            for idx, val in tipps.items():
+                                row = tag_matches.loc[idx]
+                                # 1. Alten Tipp des Users für dieses Spiel löschen
+                                session.execute(
+                                    text('DELETE FROM tipps WHERE "user"=:u AND saison=:s AND spieltag=:st AND heim=:h AND gast=:g'),
+                                    {"u": user, "s": aktuelle_saison, "st": int(row['spieltag']), "h": row['heim'], "g": row['gast']}
+                                )
+                                # 2. Neuen Tipp einfügen
+                                session.execute(
+                                    text('INSERT INTO tipps ("user", saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte) VALUES (:u, :s, :st, :h, :g, :th, :tg, 0)'),
+                                    {"u": user, "s": aktuelle_saison, "st": int(row['spieltag']), "h": row['heim'], "g": row['gast'], "th": val[0], "tg": val[1]}
+                                )
+                            session.commit()
+                        st.success(f"Tipps für {user} wurden erfolgreich gespeichert!")
+                    except Exception as e:
+                        st.error(f"Datenbankfehler: {e}")
+                else:
+                    st.error("Bitte gib einen Namen ein, bevor du speicherst!")
     else:
-        st.error("Name fehlt!")
+        st.write("Aktuell stehen keine Spiele zum Tippen bereit.")
 
 def show_highscore():
     st.title("🏆 Hall of Fame")
