@@ -66,29 +66,20 @@ def load_data_from_db():
 # ==========================================
 
 def save_tipp(user, saison, spieltag, heim, gast, th, tg):
+    """Speichert den Tipp und gibt Erfolg/Fehler zurück."""
     try:
         conn = sqlite3.connect(DB_FILE)
         c = conn.cursor()
-        
-        # Bestehenden Tipp löschen
+        # Wichtig: user=? in der WHERE-Klausel und beim INSERT
         c.execute("DELETE FROM tipps WHERE user=? AND saison=? AND spieltag=? AND heim=? AND gast=?", 
                   (user, saison, spieltag, heim, gast))
-        
-        # Neuen Tipp einfügen
         c.execute("INSERT INTO tipps (user, saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte) VALUES (?,?,?,?,?,?,?,?)", 
                   (user, saison, spieltag, heim, gast, th, tg, 0))
-        
         conn.commit()
         conn.close()
-        
-        # Rückgabe für die App: Erfolgreich
-        return True, f"Tipp für {heim} gegen {gast} wurde gespeichert!"
-
+        return True, f"Tipp gespeichert: {heim} vs. {gast} ({th}:{tg})"
     except Exception as e:
-        # Falls doch mal die DB gesperrt ist oder ein Fehler auftritt
-        if 'conn' in locals():
-            conn.close()
-        return False, f"Fehler beim Speichern: {str(e)}"
+        return False, f"Fehler: {str(e)}"
 
 def evaluate_tipps(df, user=None):
     conn = sqlite3.connect(DB_FILE)
@@ -352,16 +343,12 @@ def show_vereinsanalyse(df, seasons):
 
 def show_tippspiel(df):
     st.title("🎯 Tippspiel")
-    
-    # Saison ermitteln
     all_seasons = sorted(df["saison"].unique(), reverse=True)
     aktuelle_saison = all_seasons[0]
     st.info(f"Aktuelle Saison: {aktuelle_saison}")
 
     # --- TEIL 1: TIPPS ABGEBEN ---
-    st.subheader("Deine Tipps")
-    
-    # Spiele filtern, die noch kein Ergebnis haben
+    #st.subheader("Deine Tipps")
     future_matches = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())].copy()
 
     if future_matches.empty:
@@ -371,58 +358,42 @@ def show_tippspiel(df):
         ausgewaehlter_tag = st.selectbox("Wähle einen Spieltag zum Tippen aus:", spieltage)
         tag_matches = future_matches[future_matches['spieltag'] == ausgewaehlter_tag]
 
-        # Das Formular für die Tippabgabe
         with st.form("tipp_form"):
             tipp_input_data = {}
-            
             for idx, row in tag_matches.iterrows():
                 h_name = str(row['heim']).strip()
                 g_name = str(row['gast']).strip()
-                
                 col1, col2, col3 = st.columns([4, 1, 1])
                 col1.write(f"**{h_name}** - **{g_name}**")
-                
-                # Eingabefelder für Tore
                 t_h = col2.number_input("H", min_value=0, step=1, value=0, key=f"h_{idx}")
                 t_g = col3.number_input("G", min_value=0, step=1, value=0, key=f"g_{idx}")
-                
-                # Daten zwischenspeichern für den Submit
                 tipp_input_data[idx] = (t_h, t_g)
             
             st.divider()
+            user_name_input = st.text_input("Dein Name (erforderlich zum Speichern):", value="", placeholder="z.B. Max_Mustermann")
             
-            # HIER: Die Namensabfrage direkt im Formular (Pflichtfeld zum Speichern)
-            user_name_input = st.text_input("Dein Name (erforderlich zum Speichern):", 
-                                            value="", 
-                                            placeholder="z.B. Max_Mustermann")
-            
-            # Speicher-Button
             if st.form_submit_button("Tipps speichern"):
                 if not user_name_input.strip():
-                    st.error("❌ Bitte gib deinen Namen ein, damit die Tipps zugeordnet werden können!")
+                    st.error("❌ Bitte gib deinen Namen ein!")
                 else:
-                    # Speichere jeden Tipp einzeln mit dem eingegebenen Namen
+                    success_count = 0
                     for idx, row in tag_matches.iterrows():
                         th, tg = tipp_input_data[idx]
-                        save_tipp(user_name_input.strip(), aktuelle_saison, row['spieltag'], row['heim'], row['gast'], th, tg)
+                        success, _ = save_tipp(user_name_input.strip(), aktuelle_saison, row['spieltag'], row['heim'], row['gast'], th, tg)
+                        if success:
+                            success_count += 1
                     
-                    st.success(f"✅ Tipps für '{user_name_input}' wurden erfolgreich gespeichert!")
-                    st.rerun()
+                    if success_count > 0:
+                        st.success(f"✅ {success_count} Tipps für '{user_name_input}' erfolgreich gespeichert!")
+                        st.rerun()
 
     st.divider()
-
     # --- TEIL 2: ERGEBNISSE ANZEIGEN ---
     st.subheader("Deine Ergebnisse & Punkte")
-    
-    # Hier gibt der User seinen Namen ein, um SEINE Punkte zu sehen
     view_user = st.text_input("Gib deinen Namen ein, um deine Punkte zu sehen:", key="view_res")
-    
     if view_user.strip():
-        # Führt die Auswertung für diesen spezifischen User aus
         evaluate_tipps(df, view_user.strip()) 
-        
         conn = sqlite3.connect(DB_FILE)
-        # SQL Abfrage mit Filter auf den User
         query_auswertung = """
             SELECT t.spieltag as Sp, t.heim as Heim, t.gast as Gast, 
                    t.tipp_heim || ':' || t.tipp_gast as 'Dein Tipp',
@@ -436,13 +407,12 @@ def show_tippspiel(df):
         try:
             results_df = pd.read_sql_query(query_auswertung, conn, params=(view_user.strip(), aktuelle_saison))
             conn.close()
-
             if not results_df.empty:
                 st.dataframe(results_df, use_container_width=True, hide_index=True)
             else:
                 st.write(f"Keine gewerteten Tipps für '{view_user}' gefunden.")
         except Exception as e:
-            st.error(f"Fehler bei der Abfrage der Ergebnisse: {e}")
+            st.error(f"Fehler bei der Abfrage: {e}")
             if conn: conn.close()
 
 def show_highscore(df):

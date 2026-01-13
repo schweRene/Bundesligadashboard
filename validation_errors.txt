@@ -1174,3 +1174,699 @@ STATUS: 46.4% der Saison absolviert.
 ------------------------------------------------------------
 ✅ VALIDIERUNG: Keine logischen Fehler gefunden.
 ============================================================
+
+============================================================
+PRÜFUNG VOM: 2026-01-13 21:23:23
+SAISON-FORTSCHRITT: 145 gespielt / 17 offen (Gesamt: 162)
+STATUS: 89.5% der Saison absolviert.
+------------------------------------------------------------
+❌ VALIDIERUNG: 162 Fehler gefunden:
+  - Paarung ('1. FC Köln', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', '1.FC Augsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', '1.FC Augsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('VfB Stuttgart', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('TSG Hoffenheim', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SV Werder Bremen', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', '1. FC Union Berlin'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SV Werder Bremen', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', '1. FC Union Berlin'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('TSG Hoffenheim', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', '1. FC Köln'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SV Werder Bremen', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', '1.FC Augsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Balance '1. FC Köln': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'SC Freiburg': 8 Heim / 10 Auswärts (Soll: 17/17).
+  - Balance 'SV Werder Bremen': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance '1. FC Union Berlin': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'FC St Pauli': 8 Heim / 10 Auswärts (Soll: 17/17).
+  - Balance 'VfB Stuttgart': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Hamburger SV': 10 Heim / 8 Auswärts (Soll: 17/17).
+  - Balance 'FSV Mainz 05': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'FC Bayern München': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Borussia Dortmund': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance '1. FC Heidenheim': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'VfL Wolfsburg': 10 Heim / 8 Auswärts (Soll: 17/17).
+  - Balance 'Borussia Mönchengladbach': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Bayer 04 Leverkusen': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance '1.FC Augsburg': 10 Heim / 8 Auswärts (Soll: 17/17).
+  - Balance 'RB Leipzig': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'TSG Hoffenheim': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Eintracht Frankfurt': 8 Heim / 10 Auswärts (Soll: 17/17).
+============================================================
+
+============================================================
+PRÜFUNG VOM: 2026-01-13 21:37:24
+SAISON-FORTSCHRITT: 145 gespielt / 17 offen (Gesamt: 162)
+STATUS: 89.5% der Saison absolviert.
+------------------------------------------------------------
+❌ VALIDIERUNG: 162 Fehler gefunden:
+  - Paarung ('1. FC Köln', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', '1.FC Augsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', '1.FC Augsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('VfB Stuttgart', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('TSG Hoffenheim', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SV Werder Bremen', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', '1. FC Union Berlin'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SV Werder Bremen', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', '1. FC Union Berlin'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('TSG Hoffenheim', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', '1. FC Köln'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SV Werder Bremen', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', '1.FC Augsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Balance 'Hamburger SV': 10 Heim / 8 Auswärts (Soll: 17/17).
+  - Balance 'SV Werder Bremen': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'VfL Wolfsburg': 10 Heim / 8 Auswärts (Soll: 17/17).
+  - Balance 'SC Freiburg': 8 Heim / 10 Auswärts (Soll: 17/17).
+  - Balance 'FC Bayern München': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Borussia Dortmund': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Eintracht Frankfurt': 8 Heim / 10 Auswärts (Soll: 17/17).
+  - Balance 'FSV Mainz 05': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'FC St Pauli': 8 Heim / 10 Auswärts (Soll: 17/17).
+  - Balance 'VfB Stuttgart': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Bayer 04 Leverkusen': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance '1.FC Augsburg': 10 Heim / 8 Auswärts (Soll: 17/17).
+  - Balance 'Borussia Mönchengladbach': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance '1. FC Union Berlin': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance '1. FC Köln': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'TSG Hoffenheim': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance '1. FC Heidenheim': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'RB Leipzig': 9 Heim / 9 Auswärts (Soll: 17/17).
+============================================================
+
+============================================================
+PRÜFUNG VOM: 2026-01-13 21:42:55
+SAISON-FORTSCHRITT: 145 gespielt / 17 offen (Gesamt: 162)
+STATUS: 89.5% der Saison absolviert.
+------------------------------------------------------------
+❌ VALIDIERUNG: 162 Fehler gefunden:
+  - Paarung ('1. FC Köln', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', '1.FC Augsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', '1.FC Augsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('VfB Stuttgart', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('TSG Hoffenheim', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SV Werder Bremen', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', '1. FC Union Berlin'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SV Werder Bremen', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', '1. FC Union Berlin'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('TSG Hoffenheim', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', '1. FC Köln'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SV Werder Bremen', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', '1.FC Augsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Balance 'SV Werder Bremen': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Eintracht Frankfurt': 8 Heim / 10 Auswärts (Soll: 17/17).
+  - Balance 'VfL Wolfsburg': 10 Heim / 8 Auswärts (Soll: 17/17).
+  - Balance 'FC Bayern München': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Borussia Mönchengladbach': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'SC Freiburg': 8 Heim / 10 Auswärts (Soll: 17/17).
+  - Balance 'FSV Mainz 05': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Borussia Dortmund': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Hamburger SV': 10 Heim / 8 Auswärts (Soll: 17/17).
+  - Balance 'VfB Stuttgart': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance '1.FC Augsburg': 10 Heim / 8 Auswärts (Soll: 17/17).
+  - Balance 'TSG Hoffenheim': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance '1. FC Heidenheim': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'RB Leipzig': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Bayer 04 Leverkusen': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'FC St Pauli': 8 Heim / 10 Auswärts (Soll: 17/17).
+  - Balance '1. FC Union Berlin': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance '1. FC Köln': 9 Heim / 9 Auswärts (Soll: 17/17).
+============================================================
+
+============================================================
+PRÜFUNG VOM: 2026-01-13 21:57:41
+SAISON-FORTSCHRITT: 145 gespielt / 17 offen (Gesamt: 162)
+STATUS: 89.5% der Saison absolviert.
+------------------------------------------------------------
+❌ VALIDIERUNG: 162 Fehler gefunden:
+  - Paarung ('1. FC Köln', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', '1.FC Augsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', '1.FC Augsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('VfB Stuttgart', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('TSG Hoffenheim', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SV Werder Bremen', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', '1. FC Union Berlin'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Borussia Dortmund'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FSV Mainz 05', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'Bayer 04 Leverkusen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'FC St Pauli'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SV Werder Bremen', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', '1. FC Union Berlin'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('TSG Hoffenheim', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SC Freiburg', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', '1. FC Köln'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1.FC Augsburg', 'Borussia Mönchengladbach'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'Eintracht Frankfurt'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC Bayern München', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'RB Leipzig'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Hamburger SV', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('SV Werder Bremen', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Köln', 'FC Bayern München'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Union Berlin', '1.FC Augsburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Dortmund', 'SV Werder Bremen'): 1 statt 2 Spiele gefunden.
+  - Paarung ('1. FC Heidenheim', 'FSV Mainz 05'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Bayer 04 Leverkusen', 'Hamburger SV'): 1 statt 2 Spiele gefunden.
+  - Paarung ('RB Leipzig', 'SC Freiburg'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Borussia Mönchengladbach', 'TSG Hoffenheim'): 1 statt 2 Spiele gefunden.
+  - Paarung ('Eintracht Frankfurt', 'VfB Stuttgart'): 1 statt 2 Spiele gefunden.
+  - Paarung ('FC St Pauli', 'VfL Wolfsburg'): 1 statt 2 Spiele gefunden.
+  - Balance 'Borussia Dortmund': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance '1. FC Union Berlin': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Bayer 04 Leverkusen': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'SV Werder Bremen': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'RB Leipzig': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Hamburger SV': 10 Heim / 8 Auswärts (Soll: 17/17).
+  - Balance 'FSV Mainz 05': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance '1. FC Heidenheim': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'Borussia Mönchengladbach': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance '1.FC Augsburg': 10 Heim / 8 Auswärts (Soll: 17/17).
+  - Balance 'TSG Hoffenheim': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'SC Freiburg': 8 Heim / 10 Auswärts (Soll: 17/17).
+  - Balance 'Eintracht Frankfurt': 8 Heim / 10 Auswärts (Soll: 17/17).
+  - Balance 'VfL Wolfsburg': 10 Heim / 8 Auswärts (Soll: 17/17).
+  - Balance '1. FC Köln': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'FC St Pauli': 8 Heim / 10 Auswärts (Soll: 17/17).
+  - Balance 'VfB Stuttgart': 9 Heim / 9 Auswärts (Soll: 17/17).
+  - Balance 'FC Bayern München': 9 Heim / 9 Auswärts (Soll: 17/17).
+============================================================
+
+============================================================
+PRÜFUNG VOM: 2026-01-13 22:12:20
+SAISON-FORTSCHRITT: 145 gespielt / 161 offen (Gesamt: 306)
+STATUS: 47.4% der Saison absolviert.
+------------------------------------------------------------
+✅ VALIDIERUNG: Keine logischen Fehler gefunden.
+============================================================
+
+============================================================
+PRÜFUNG VOM: 2026-01-13 22:38:14
+SAISON-FORTSCHRITT: 145 gespielt / 161 offen (Gesamt: 306)
+STATUS: 47.4% der Saison absolviert.
+------------------------------------------------------------
+✅ VALIDIERUNG: Keine logischen Fehler gefunden.
+============================================================

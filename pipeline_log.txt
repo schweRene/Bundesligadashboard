@@ -44,3 +44,16 @@
 [2026-01-12 20:12:02] START: Notfall-Reparatur gestartet.
 [2026-01-12 20:46:50] START: Pipeline mit Timeout-Schutz gestartet.
 [2026-01-12 20:48:03] SUCCESS: Alle Daten geladen.
+[2026-01-13 20:36:07] START: Pipeline gestartet.
+[2026-01-13 21:21:39] START: Intelligentes Update gestartet.
+[2026-01-13 21:23:23] ENDE: Pipeline erfolgreich beendet.
+[2026-01-13 21:35:26] START: Intelligentes Update gestartet.
+[2026-01-13 21:37:24] ENDE: Pipeline erfolgreich beendet.
+[2026-01-13 21:40:40] START: Intelligentes Update gestartet.
+[2026-01-13 21:42:55] ENDE: Pipeline erfolgreich beendet.
+[2026-01-13 21:52:37] START: Intelligentes Update gestartet.
+[2026-01-13 21:57:42] ENDE: Pipeline erfolgreich beendet.
+[2026-01-13 22:10:44] START: Intelligentes Update gestartet.
+[2026-01-13 22:12:20] ENDE: Pipeline erfolgreich beendet.
+[2026-01-13 22:38:00] START: Intelligentes Update gestartet.
+[2026-01-13 22:38:14] ENDE: Update Spieltag 15-17 erfolgreich.

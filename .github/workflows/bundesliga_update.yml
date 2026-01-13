@@ -1,0 +1,41 @@
+name: Bundesliga Auto Update
+
+on:
+  schedule:
+    # Läuft täglich um 22:15 Uhr UTC (ca. 23:15 Uhr deutsche Zeit)
+    - cron: '15 22 * * *'
+  workflow_dispatch:
+    # Erlaubt es dir, das Update jederzeit manuell in GitHub zu starten
+
+jobs:
+  build-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v3
+
+      - name: Python installieren
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Abhängigkeiten installieren
+        run: |
+          pip install requests beautifulsoup4 sqlalchemy psycopg2-binary pandas
+
+      - name: Update-Skript ausführen
+        env:
+          # Hier wird dein Secret aus den GitHub Settings geladen
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: python update_db.py
+
+      - name: Änderungen speichern
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          # Füge alle Dateien hinzu, die sich geändert haben könnten
+          git add bundesliga.db bundesliga_2026.csv pipeline_log.txt
+          # Nur committen, wenn es wirklich Änderungen gibt
+          git commit -m "Auto-Update Spielstand $(date +'%Y-%m-%d %H:%M')" || echo "Keine Änderungen zum Committen"
+          git push
