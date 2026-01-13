@@ -13,23 +13,36 @@ from datetime import datetime
 # ==========================================
 
 def get_conn():
-    """Erstellt die Verbindung über die Streamlit Cloud Secrets."""
     return st.connection("postgresql", type="sql")
 
 def init_db():
-    """In der Cloud-Version bleiben Tabellen in Supabase bestehen."""
-    pass
+    """Fügt die Computer-Dummies mit den korrekten Werten (20, 17, 14) ein."""
+    try:
+        conn = get_conn()
+        res = conn.query("SELECT COUNT(*) as count FROM hall_of_fame", ttl=0)
+        if res.iloc[0]['count'] == 0:
+            with conn.session as session:
+                dummies = [
+                    ('Computer 1', 'Historisch', 20),
+                    ('Computer 2', 'Historisch', 17),
+                    ('Computer 3', 'Historisch', 14)
+                ]
+                for name, saison, punkte in dummies:
+                    session.execute(
+                        text('INSERT INTO hall_of_fame (name, saison, punkte) VALUES (:n, :s, :p)'),
+                        {"n": name, "s": saison, "p": punkte}
+                    )
+                session.commit()
+    except Exception:
+        pass
 
 def load_data_from_db():
     try:
         conn = get_conn()
         df = conn.query("SELECT * FROM spiele", ttl=0)
-        if df.empty:
-            return pd.DataFrame()
-        
+        if df.empty: return pd.DataFrame()
         df.columns = df.columns.str.strip().str.lower()
         
-        # Original Meidericher SV Logik
         def rename_msv(row, team_col):
             team_name = str(row[team_col])
             if team_name == "Meidericher SV" and row["saison"] >= "1966/67":
@@ -38,17 +51,14 @@ def load_data_from_db():
 
         df["heim"] = df.apply(lambda r: rename_msv(r, "heim"), axis=1)
         df["gast"] = df.apply(lambda r: rename_msv(r, "gast"), axis=1)
-        
-        # Sicherstellen, dass Tore Ganzzahlen sind (gegen Float-Anzeige)
         df["tore_heim"] = pd.to_numeric(df["tore_heim"], errors='coerce')
         df["tore_gast"] = pd.to_numeric(df["tore_gast"], errors='coerce')
         return df
-    except Exception as e:
-        st.error(f"Fehler beim Laden der Daten: {e}")
+    except Exception:
         return pd.DataFrame()
 
 # ==========================================
-# 2. TIPPSPIEL LOGIK (Originale Namen & Abläufe)
+# 2. TIPPSPIEL LOGIK 
 # ==========================================
 
 def save_tipp(user, saison, spieltag, heim, gast, th, tg):
@@ -97,26 +107,23 @@ def evaluate_tipps(df_spiele, user=None):
         pass
 
 # ==========================================
-# 3. HELPER & BERECHNUNGEN (ORIGINAL)
+# 3.  BERECHNUNGEN 
 # ==========================================
 
 @st.cache_data
 def calculate_table(df, saison):
-    df_saison = df[df["saison"] == saison].copy()
-    if df_saison.empty: return pd.DataFrame()
-    df_saison = df_saison.dropna(subset=["tore_heim", "tore_gast"])
-    teams = pd.unique(df_saison[["heim", "gast"]].values.ravel("K"))
+    df_s = df[df["saison"] == saison].copy().dropna(subset=["tore_heim", "tore_gast"])
+    if df_s.empty: return pd.DataFrame()
+    teams = pd.unique(df_s[["heim", "gast"]].values.ravel("K"))
     stats = {t: {'Spiele': 0, 'S': 0, 'U': 0, 'N': 0, 'T': 0, 'G': 0, 'Punkte': 0} for t in teams}
-    for _, row in df_saison.iterrows():
+    for _, row in df_s.iterrows():
         h, g = row['heim'], row['gast']
-        try:
-            th, tg = int(row['tore_heim']), int(row['tore_gast'])
-            stats[h]['Spiele'] += 1; stats[g]['Spiele'] += 1
-            stats[h]['T'] += th; stats[h]['G'] += tg; stats[g]['T'] += tg; stats[g]['G'] += th
-            if th > tg: stats[h]['S'] += 1; stats[h]['Punkte'] += 3; stats[g]['N'] += 1
-            elif th < tg: stats[g]['S'] += 1; stats[g]['Punkte'] += 3; stats[h]['N'] += 1
-            else: stats[h]['U'] += 1; stats[h]['Punkte'] += 1; stats[g]['U'] += 1; stats[g]['Punkte'] += 1
-        except: continue
+        th, tg = int(row['tore_heim']), int(row['tore_gast'])
+        stats[h]['Spiele'] += 1; stats[g]['Spiele'] += 1
+        stats[h]['T'] += th; stats[h]['G'] += tg; stats[g]['T'] += tg; stats[g]['G'] += th
+        if th > tg: stats[h]['S'] += 1; stats[h]['Punkte'] += 3; stats[g]['N'] += 1
+        elif th < tg: stats[g]['S'] += 1; stats[g]['Punkte'] += 3; stats[h]['N'] += 1
+        else: stats[h]['U'] += 1; stats[h]['Punkte'] += 1; stats[g]['U'] += 1; stats[g]['Punkte'] += 1
     table = pd.DataFrame.from_dict(stats, orient='index').reset_index().rename(columns={'index': 'Team'})
     table['Diff'] = table['T'] - table['G']
     table = table.sort_values(by=['Punkte', 'Diff', 'T'], ascending=False).reset_index(drop=True)
@@ -125,17 +132,15 @@ def calculate_table(df, saison):
 
 @st.cache_data
 def compute_ewige_tabelle(df):
-    if df.empty: return pd.DataFrame()
-    df_local = df.dropna(subset=["tore_heim", "tore_gast"]).copy()
-    h = df_local.rename(columns={"heim": "Team", "tore_heim": "GF", "tore_gast": "GA"})[["Team", "GF", "GA"]]
-    a = df_local.rename(columns={"gast": "Team", "tore_gast": "GF", "tore_heim": "GA"})[["Team", "GF", "GA"]]
+    df_l = df.dropna(subset=["tore_heim", "tore_gast"]).copy()
+    h = df_l.rename(columns={"heim": "Team", "tore_heim": "GF", "tore_gast": "GA"})[["Team", "GF", "GA"]]
+    a = df_l.rename(columns={"gast": "Team", "tore_gast": "GF", "tore_heim": "GA"})[["Team", "GF", "GA"]]
     all_m = pd.concat([h, a])
     all_m['P']=0; all_m['S']=0; all_m['U']=0; all_m['N']=0
     all_m.loc[all_m['GF'] > all_m['GA'], ['P', 'S']] = [3, 1]
     all_m.loc[all_m['GF'] == all_m['GA'], ['P', 'U']] = [1, 1]
     all_m.loc[all_m['GF'] < all_m['GA'], ['N']] = 1
     ewige = all_m.groupby("Team").agg(Spiele=('Team','size'), S=('S','sum'), U=('U','sum'), N=('N','sum'), T=('GF','sum'), G=('GA','sum'), Punkte=('P','sum')).reset_index()
-    # FIX: Sicherstellen, dass Integer angezeigt werden
     cols = ['Spiele', 'S', 'U', 'N', 'T', 'G', 'Punkte']
     ewige[cols] = ewige[cols].fillna(0).astype(int)
     ewige = ewige.sort_values(by=["Punkte", "T"], ascending=False).reset_index(drop=True)
@@ -143,7 +148,7 @@ def compute_ewige_tabelle(df):
     return ewige
 
 # ==========================================
-# 4. MODERNES DESIGN (DARKMODE OPTIMIERT)
+# 4. MODERNES DESIGN 
 # ==========================================
 
 def display_styled_table(df, type="standard"):
@@ -228,49 +233,42 @@ def show_meisterstatistik(df, seasons):
 def show_vereinsanalyse(df, seasons):
     st.title("📈 Vereinsanalyse")
     teams = sorted(df["heim"].unique())
-    # FIX: Kein fester Verein, Suche wiederhergestellt
-    verein = st.selectbox("Verein suchen oder auswählen", teams, index=None, placeholder="Vereinsname eingeben...")
+    verein = st.selectbox("Verein auswählen", teams, index=None, placeholder="Wähle einen Verein...")
     
-    if not verein:
-        st.info("Bitte wähle einen Verein aus.")
-        return
+    if verein:
+        erfolge = []
+        for s in seasons:
+            t = calculate_table(df, s)
+            if not t.empty and verein in t["Team"].values:
+                platz = t[t["Team"] == verein]["Platz"].values[0]
+                erfolge.append({"Saison": s, "Platz": int(platz)})
+        
+        if erfolge:
+            pdf = pd.DataFrame(erfolge)
+            fig = px.line(pdf, x="Saison", y="Platz", markers=True, text="Platz", title=f"Platzierungen von {verein}")
+            fig.update_traces(textposition="top center")
+            fig.update_yaxes(autorange="reversed")
+            st.plotly_chart(fig, use_container_width=True)
 
-    st.subheader(f"Platzierungen: {verein}")
-    erfolge = []
-    for s in reversed(seasons):
-        t = calculate_table(df, s)
-        if not t.empty and verein in t["Team"].values:
-            platz = t[t["Team"] == verein]["Platz"].values[0]
-            erfolge.append({"Saison": s, "Platz": int(platz)})
-    
-    if erfolge:
-        pdf = pd.DataFrame(erfolge)
-        fig = px.line(pdf, x="Saison", y="Platz", markers=True, text="Platz")
-        fig.update_traces(textposition="top center")
-        fig.update_yaxes(autorange="reversed")
-        st.plotly_chart(fig, use_container_width=True)
-
-    # Direktvergleich Logik (Original)
-    st.subheader("Direktvergleich")
-    v_spiele = df[((df["heim"] == verein) | (df["gast"] == verein))].dropna(subset=["tore_heim", "tore_gast"])
-    bilanz_list = []
-    for _, r in v_spiele.iterrows():
-        is_h = r["heim"] == verein
-        gegner = r["gast"] if is_h else r["heim"]
-        try:
+        st.subheader("Direktvergleich")
+        v_spiele = df[((df["heim"] == verein) | (df["gast"] == verein))].dropna(subset=["tore_heim", "tore_gast"])
+        bilanz_list = []
+        for _, r in v_spiele.iterrows():
+            is_h = r["heim"] == verein
+            gegner = r["gast"] if is_h else r["heim"]
             gf, ga = (int(r["tore_heim"]), int(r["tore_gast"])) if is_h else (int(r["tore_gast"]), int(r["tore_heim"]))
             res = "S" if gf > ga else ("U" if gf == ga else "N")
-            bilanz_list.append({"Gegner": gegner, "Ergebnis": res})
-        except: continue
+            bilanz_list.append({"Gegner": gegner, "Bilanz": res})
 
-    if bilanz_list:
-        b_df = pd.DataFrame(bilanz_list)
-        final_b = b_df.groupby("Gegner")["Ergebnis"].value_counts().unstack(fill_value=0)
-        for c in ["S", "U", "N"]: 
-            if c not in final_b: final_b[c] = 0
-        final_b["Spiele"] = final_b["S"] + final_b["U"] + final_b["N"]
-        final_b = final_b[["Spiele", "S", "U", "N"]].sort_values("Spiele", ascending=False).reset_index()
-        display_styled_table(final_b)
+        if bilanz_list:
+            b_df = pd.DataFrame(bilanz_list)
+            # Nur die Bilanz-Zusammenfassung (S-U-N) anzeigen, keine Spiel-Einzelliste
+            final_b = b_df.groupby("Gegner")["Bilanz"].value_counts().unstack(fill_value=0)
+            for c in ["S", "U", "N"]: 
+                if c not in final_b: final_b[c] = 0
+            final_b["Spiele"] = final_b["S"] + final_b["U"] + final_b["N"]
+            final_b = final_b[["Spiele", "S", "U", "N"]].sort_values("Spiele", ascending=False).reset_index()
+            display_styled_table(final_b)
 
 def show_tippspiel(df):
     st.title("🎯 Tippspiel")
@@ -310,9 +308,8 @@ def show_tippspiel(df):
         res = conn.query(sql, params={"u": view_user.strip(), "s": aktuelle_saison}, ttl=0)
         if not res.empty: st.dataframe(res)
 
-def show_highscore(df):
+def show_highscore():
     st.title("🏆 Hall of Fame")
-    evaluate_tipps(df)
     conn = get_conn()
     hof_df = conn.query('SELECT name, saison, punkte FROM hall_of_fame ORDER BY punkte DESC', ttl=0)
     if not hof_df.empty:
@@ -324,8 +321,7 @@ def show_highscore(df):
 
 def main():
     st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
-    st.markdown("<style>[data-testid='stSidebar'] { min-width: 200px !important; }</style>", unsafe_allow_html=True)
-    
+    init_db() # Dummies mit 20, 17, 14 Punkten laden
     df = load_data_from_db()
     if df.empty: return
     seasons = sorted(df["saison"].unique(), reverse=True)
