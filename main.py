@@ -10,8 +10,10 @@ from sqlalchemy import text
 # ==========================================
 
 def get_conn():
-    """Nutzt die URL direkt aus den Secrets."""
-    return st.connection("postgresql", type="sql")
+    # Wir erzwingen die Nutzung des Pooler-Hosts als String
+    # und hängen die Projekt-ID explizit an den User
+    return st.connection("postgresql", type="sql", 
+                         url="postgresql://postgres.scspxyixfumfhfkodsit:zz2r9OSjV8L@aws-0-eu-central-1.pooler.supabase.com:6543/postgres")
 
 def check_connection():
     """Einfacher Test, ob die DB antwortet."""
