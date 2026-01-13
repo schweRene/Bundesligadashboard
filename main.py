@@ -10,18 +10,28 @@ from sqlalchemy import text
 # ==========================================
 
 def get_conn():
-    """Erstellt eine Verbindung zur PostgreSQL-Datenbank."""
-    return st.connection("postgresql", type="sql")
+    """Erstellt eine Verbindung mit expliziten Projekt-Optionen."""
+    # Wir holen die Daten aus den Secrets
+    creds = st.secrets["connections"]["postgresql"]
+    
+    # Wir bauen die URL manuell zusammen
+    # Das Format für den Pooler ist: user.project:pass@host:port/db
+    user_with_project = f"{creds['username']}.{creds['project']}"
+    conn_url = f"postgresql://{user_with_project}:{creds['password']}@{creds['host']}:{creds['port']}/{creds['database']}"
+    
+    return st.connection("postgresql", type="sql", url=conn_url)
 
 def check_connection():
-    """Testet aktiv, ob wir die Datenbank erreichen können."""
+    """Testet die Verbindung mit einer einfachen SQL-Abfrage."""
     try:
         conn = get_conn()
-        with conn.session as session:
-            session.execute(text("SELECT 1"))
-        return True, "✅ Verbindung zu Supabase erfolgreich hergestellt!"
+        # Wir führen eine echte SQL-Abfrage aus, um sicherzugehen
+        with conn.session as s:
+            result = s.execute(text("SELECT current_user, current_database();"))
+            row = result.fetchone()
+        return True, f"✅ Verbunden als: {row[0]} auf DB: {row[1]}"
     except Exception as e:
-        return False, f"❌ KEINE VERBINDUNG ZUR DATENBANK: {e}"
+        return False, f"❌ Verbindung fehlgeschlagen: {str(e)}"
 
 def load_data_from_db():
     """Lädt die Spieldaten aus der Tabelle 'spiele'."""
