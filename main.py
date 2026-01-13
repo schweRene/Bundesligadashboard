@@ -142,26 +142,15 @@ def compute_ewige_tabelle(df):
     return ewige
 
 # ==========================================
-# 4. MODERNES DESIGN (Darkmode Safe)
+# 4. MODERNES DESIGN
 # ==========================================
 
 def display_styled_table(df, type="standard"):
     css = """
     <style>
-    .mystyle { 
-        width: 100%; border-collapse: collapse; 
-        color: var(--text-color) !important; 
-        background-color: transparent !important;
-    }
-    .mystyle th { 
-        background-color: #8B0000 !important; 
-        color: white !important; padding: 12px; 
-        text-align: center !important; text-transform: uppercase;
-    }
-    .mystyle td { 
-        padding: 10px; border-bottom: 1px solid rgba(128,128,128,0.3);
-        text-align: center !important; 
-    }
+    .mystyle { width: 100%; border-collapse: collapse; color: var(--text-color) !important; background-color: transparent !important; }
+    .mystyle th { background-color: #8B0000 !important; color: white !important; padding: 12px; text-align: center !important; text-transform: uppercase; }
+    .mystyle td { padding: 10px; border-bottom: 1px solid rgba(128,128,128,0.3); text-align: center !important; }
     .mystyle tr:nth-child(even) { background-color: rgba(128,128,128,0.05); }
     .res-bold { font-weight: bold; font-size: 1.1em; color: var(--text-color) !important; }
     </style>
@@ -230,8 +219,11 @@ def show_vereinsanalyse(df, seasons):
         
         if erfolge:
             pdf = pd.DataFrame(erfolge)
-            # Fix Skalierung: 1 bis 18, keine halben Schritte
+            # Sortieren für chronologische Reihenfolge im Diagramm (älteste Saison links)
+            pdf = pdf.sort_values("Saison")
+            
             fig = px.line(pdf, x="Saison", y="Platz", markers=True, text="Platz", title=f"Platzierungen: {verein}")
+            # Fix: Range von 1 bis 18, nur ganze Zahlen
             fig.update_yaxes(autorange="reversed", tick0=1, dtick=1, range=[18.5, 0.5])
             fig.update_traces(textposition="top center")
             st.plotly_chart(fig, use_container_width=True)
@@ -243,7 +235,6 @@ def show_vereinsanalyse(df, seasons):
             is_h = r["heim"] == verein
             gegner = r["gast"] if is_h else r["heim"]
             if gegner not in bilanz_dict: bilanz_dict[gegner] = {"Spiele":0, "S":0, "U":0, "N":0, "T":0, "G":0}
-            
             gf, ga = (int(r["tore_heim"]), int(r["tore_gast"])) if is_h else (int(r["tore_gast"]), int(r["tore_heim"]))
             bilanz_dict[gegner]["Spiele"] += 1
             bilanz_dict[gegner]["T"] += gf
@@ -320,7 +311,7 @@ def main():
     elif page == "Ewige Tabelle":
         st.title("📚 Ewige Tabelle")
         display_styled_table(compute_ewige_tabelle(df))
-    elif page == "Meister": show_meisterstatistik(df, seasons)
+    elif page == "Meisterschaften": show_meisterstatistik(df, seasons)
     elif page == "Vereinsanalyse": show_vereinsanalyse(df, seasons)
     elif page == "Tippspiel": show_tippspiel(df)
     elif page == "Highscore": show_highscore()
