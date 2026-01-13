@@ -303,10 +303,28 @@ def show_tippspiel(df):
                 tipps[idx] = (c2.number_input("H", min_value=0, step=1, key=f"h_{idx}"), c3.number_input("G", min_value=0, step=1, key=f"g_{idx}"))
             user = st.text_input("Dein Name:")
             if st.form_submit_button("Speichern"):
-                if user.strip():
-                    # Speicherlogik...
-                    st.success("Gespeichert!")
-                else: st.error("Name fehlt!")
+    if user.strip():
+        try:
+            conn = get_conn()
+            with conn.session as session:
+                for idx, val in tipps.items():
+                    row = tag_matches.loc[idx]
+                    # Alten Tipp löschen (falls vorhanden)
+                    session.execute(
+                        text('DELETE FROM tipps WHERE "user"=:u AND saison=:s AND spieltag=:st AND heim=:h AND gast=:g'),
+                        {"u": user, "s": aktuelle_saison, "st": int(row['spieltag']), "h": row['heim'], "g": row['gast']}
+                    )
+                    # Neuen Tipp einfügen
+                    session.execute(
+                        text('INSERT INTO tipps ("user", saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte) VALUES (:u, :s, :st, :h, :g, :th, :tg, 0)'),
+                        {"u": user, "s": aktuelle_saison, "st": int(row['spieltag']), "h": row['heim'], "g": row['gast'], "th": val[0], "tg": val[1]}
+                    )
+                session.commit() # WICHTIG: Schreibt die Daten final in die Cloud
+            st.success("Tipps erfolgreich in der Cloud gespeichert!")
+        except Exception as e:
+            st.error(f"Fehler beim Speichern: {e}")
+    else:
+        st.error("Name fehlt!")
 
 def show_highscore():
     st.title("🏆 Hall of Fame")
