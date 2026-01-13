@@ -219,95 +219,58 @@ def show_spieltag_ansicht(df):
         display_styled_table(anzeige_df)
 
 def show_tippspiel(df):
-    """Die Seite für das Tippspiel mit direkter Supabase-Anbindung."""
+    """Die Seite für das Tippspiel - Robust ohne st.form."""
     st.title("🎯 Tippspiel")
     
-    # 1. Saison bestimmen
-    saisons = sorted(df["saison"].unique(), reverse=True)
-    aktuelle_saison = seasons[0] if seasons else "2025/26"
+    aktuelle_saison = sorted(df["saison"].unique(), reverse=True)[0]
     
-    st.subheader("Deine Tipps abgeben")
-    
-    # Nur Spiele ohne Ergebnis (NaN) der aktuellen Saison
+    # Filter für Spiele ohne Ergebnis (NaN)
     zukunft_spiele = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())].copy()
     
     if zukunft_spiele.empty:
-        st.info(f"Keine offenen Spiele für die Saison {aktuelle_saison} zum Tippen verfügbar.")
-    else:
-        spieltag_tippen = st.selectbox("Wähle den Spieltag:", sorted(zukunft_spiele['spieltag'].unique()))
-        spiele_auswahl = zukunft_spiele[zukunft_spiele['spieltag'] == spieltag_tippen]
+        st.info("Keine offenen Spiele zum Tippen gefunden.")
+        return
 
-        # Das Formular für die Eingabe
-        with st.form("tipp_form"):
-            tipp_input_daten = {}
-            for idx, zeile in spiele_auswahl.iterrows():
-                spalte1, spalte2, spalte3 = st.columns([4, 1, 1])
-                spalte1.write(f"**{zeile['heim']}** gegen **{zeile['gast']}**")
-                h_input = spalte2.number_input("H", min_value=0, max_value=20, step=1, key=f"h_{idx}")
-                g_input = spalte3.number_input("G", min_value=0, max_value=20, step=1, key=f"g_{idx}")
-                tipp_input_daten[idx] = {"h": h_input, "g": g_input, "heim": zeile['heim'], "gast": zeile['gast']}
-            
-            nutzer_name = st.text_input("Dein Name für die Wertung:")
-            submit_button = st.form_submit_button("Tipps jetzt speichern")
+    spieltag_tippen = st.selectbox("Wähle den Spieltag:", sorted(zukunft_spiele['spieltag'].unique()))
+    spiele_auswahl = zukunft_spiele[zukunft_spiele['spieltag'] == spieltag_tippen]
 
-        # LOGIK NACH DEM KLICK (WICHTIG: Bleibt durch diese Platzierung sichtbar)
-        if submit_button:
-            if not nutzer_name.strip():
-                st.error("⚠️ Bitte gib einen Namen ein, bevor du speicherst.")
-            else:
-                try:
-                    conn = get_conn()
-                    with conn.session as session:
-                        for idx, daten in tipp_input_daten.items():
-                            # SQL-Befehl passend zu deiner Struktur (user, saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte)
-                            sql = text("""
-                                INSERT INTO tipps ("user", saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte)
-                                VALUES (:u, :s, :st, :h, :g, :th, :tg, :p)
-                            """)
-                            session.execute(sql, {
-                                "u": nutzer_name.strip(),
-                                "s": aktuelle_saison,
-                                "st": int(spieltag_tippen),
-                                "h": daten["heim"],
-                                "g": daten["gast"],
-                                "th": int(daten["h"]),
-                                "tg": int(daten["g"]),
-                                "p": 0
-                            })
-                        session.commit()
-                    
-                    st.success(f"✅ Erfolg! Die Tipps für '{nutzer_name}' wurden in Supabase gespeichert.")
-                    st.balloons()
-                except Exception as e:
-                    st.error(f"❌ Fehler beim Speichern: {e}")
-
-    # --- Unterer Teil: Auswertung ---
-    st.divider()
-    st.subheader("Deine Punkte-Übersicht")
-    auswertung_nutzer = st.text_input("Name eingeben zum Suchen:", key="view_res")
+    st.subheader(f"Tipps für Spieltag {spieltag_tippen}")
     
+    # Wir speichern die Eingaben direkt in einem Dictionary
+    aktuelle_eingaben = {}
+    
+    for idx, zeile in spiele_auswahl.iterrows():
+        cols = st.columns([3, 1, 1])
+        cols[0].write(f"**{zeile['heim']}** - **{zeile['gast']}**")
+        h_tipp = cols[1].number_input("H", 0, 20, 0, key=f"h_{idx}")
+        g_tipp = cols[2].number_input("G", 0, 20, 0, key=f"g_{idx}")
+        aktuelle_eingaben[idx] = (h_tipp, g_tipp, zeile['heim'], zeile['gast'])
+    
+    nutzer_name = st.text_input("Dein Name:", key="user_name")
+    
+    if st.button("🚀 Tipps in Cloud speichern"):
+        if not nutzer_name.strip():
+            st.error("Bitte gib einen Namen ein!")
+        else:
+            try:
+                # Hier rufen wir die Speicherfunktion für jeden Tipp auf
+                for idx, (th, tg, h, g) in aktuelle_eingaben.items():
+                    save_tipp(nutzer_name.strip(), aktuelle_saison, spieltag_tippen, h, g, th, tg)
+                
+                st.success(f"✅ Tipps für {nutzer_name} wurden gespeichert!")
+                st.balloons()
+            except Exception as e:
+                st.error(f"❌ Fehler: {e}")
+
+    st.divider()
+    st.subheader("Meine Punkte")
+    auswertung_nutzer = st.text_input("Name suchen:", key="view_res")
     if auswertung_nutzer.strip():
-        evaluate_tipps(df, auswertung_nutzer.strip()) 
+        evaluate_tipps(df, auswertung_nutzer.strip())
         conn = get_conn()
-        sql_auswertung = text("""
-            SELECT t.spieltag as "Sp", t.heim as "Heim", t.gast as "Gast", 
-                   t.tipp_heim || ':' || t.tipp_gast as "Dein Tipp",
-                   s.tore_heim || ':' || s.tore_gast as "Ergebnis",
-                   t.punkte as "Pkt"
-            FROM tipps t
-            JOIN spiele s ON t.saison = s.saison AND t.heim = s.heim AND t.gast = s.gast
-            WHERE t."user" = :u AND t.saison = :s AND s.tore_heim IS NOT NULL
-            ORDER BY t.spieltag DESC
-        """)
-        
-        try:
-            ergebnisse_df = conn.query(sql_auswertung, params={"u": auswertung_nutzer.strip(), "s": aktuelle_saison}, ttl=0)
-            if not ergebnisse_df.empty:
-                st.dataframe(ergebnisse_df, use_container_width=True, hide_index=True)
-            else:
-                st.info("Noch keine ausgewerteten Tipps für diesen Namen gefunden.")
-        except Exception as e:
-            st.error(f"Fehler beim Laden der Übersicht: {e}")
+        sql = text('SELECT spieltag as "SP", heim, gast, tipp_heim || \':\' || tipp_gast as "Tipp", punkte FROM tipps WHERE "user" = :u')
+        res = conn.query(sql, params={"u": auswertung_nutzer.strip()}, ttl=0)
+        st.dataframe(res)
 
 # ==========================================
 # 6. HAUPTPROGRAMM (MAIN)
