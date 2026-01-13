@@ -52,56 +52,61 @@ def load_data_from_db():
 # ==========================================
 
 def save_tipp(user, saison, spieltag, heim, gast, th, tg):
-    """Speichert einen Tipp dauerhaft in der Supabase-Datenbank."""
-    conn = get_conn()
-    with conn.session as session:
-        # In PostgreSQL ist 'user' ein geschütztes Wort, daher setzen wir es in Anführungszeichen.
-        # Zuerst löschen wir einen eventuell bereits vorhandenen Tipp für diese Paarung.
-        session.execute(
-            text('DELETE FROM tipps WHERE "user" = :u AND saison = :s AND spieltag = :st AND heim = :h AND gast = :g'),
-            {"u": user, "s": saison, "st": spieltag, "h": heim, "g": gast}
-        )
-        # Jetzt fügen wir den neuen Tipp in die Tabelle ein.
-        session.execute(
-            text('INSERT INTO tipps ("user", saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte) '
-                 'VALUES (:u, :s, :st, :h, :g, :th, :tg, 0)'),
-            {"u": user, "s": saison, "st": spieltag, "h": heim, "g": gast, "th": th, "tg": tg}
-        )
-        session.commit()
-    return True
+    """Speichert einen einzelnen Tipp in der Supabase-Datenbank mit Fehlerprüfung."""
+    try:
+        conn = get_conn()
+        with conn.session as session:
+            sql = text("""
+                INSERT INTO tipps ("user", saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte)
+                VALUES (:u, :s, :st, :h, :g, :th, :tg, :p)
+            """)
+            session.execute(sql, {
+                "u": user, "s": saison, "st": spieltag, 
+                "h": heim, "g": gast, "th": th, "tg": tg, "p": 0
+            })
+            session.commit()
+    except Exception as e:
+        # Dies zeigt uns in der App sofort an, wenn Supabase den Zugriff verweigert
+        st.error(f"Datenbank-Fehler beim Speichern von {heim} vs {gast}: {e}")
 
-def evaluate_tipps(df, user=None):
-    """Vergleicht die Tipps mit den echten Ergebnissen und berechnet die Punkte in der Cloud-Datenbank."""
+def evaluate_tipps(df_spiele, user):
+    """Vergleicht Tipps mit echten Ergebnissen und aktualisiert die Punkte in der DB."""
     conn = get_conn()
-    if user:
-        tipps_df = conn.query('SELECT * FROM tipps WHERE "user" = :u', params={"u": user}, ttl=0)
-    else:
-        tipps_df = conn.query('SELECT * FROM tipps', ttl=0)
-        
-    with conn.session as session:
-        for idx, row in tipps_df.iterrows():
-            # Finde das passende Spiel im Datensatz der Saison
-            match = df[(df['saison'] == row['saison']) & (df['heim'] == row['heim']) & (df['gast'] == row['gast'])]
+    try:
+        with conn.session as session:
+            # Wir holen nur Tipps, die noch 0 Punkte haben (ungewertet)
+            sql_tipps = text('SELECT * FROM tipps WHERE "user" = :u AND punkte = 0')
+            tipps = conn.query(sql_tipps, params={"u": user}, ttl=0)
             
-            if not match.empty and pd.notna(match.iloc[0]['tore_heim']):
-                echt_heim = int(match.iloc[0]['tore_heim'])
-                echt_gast = int(match.iloc[0]['tore_gast'])
-                tipp_heim = int(row['tipp_heim'])
-                tipp_gast = int(row['tipp_gast'])
+            for _, tipp in tipps.iterrows():
+                # Finde das echte Ergebnis im übergebenen DataFrame
+                match = df_spiele[
+                    (df_spiele['saison'] == tipp['saison']) & 
+                    (df_spiele['heim'] == tipp['heim']) & 
+                    (df_spiele['gast'] == tipp['gast'])
+                ]
                 
-                punkte = 0
-                if echt_heim == tipp_heim and echt_gast == tipp_gast:
-                    punkte = 3 # Genaues Ergebnis
-                elif (echt_heim - echt_gast) == (tipp_heim - tipp_gast):
-                    punkte = 2 # Richtige Differenz
-                elif (echt_heim > echt_gast and tipp_heim > tipp_gast) or (echt_heim < echt_gast and tipp_heim < tipp_gast):
-                    punkte = 1 # Richtige Tendenz (Sieg/Niederlage)
+                if not match.empty and pd.notna(match.iloc[0]['tore_heim']):
+                    t_h_echt = int(match.iloc[0]['tore_heim'])
+                    t_g_echt = int(match.iloc[0]['tore_gast'])
+                    t_h_tipp = int(tipp['tipp_heim'])
+                    t_g_tipp = int(tipp['tipp_gast'])
                     
-                session.execute(
-                    text('UPDATE tipps SET punkte = :p WHERE "user" = :u AND saison = :s AND heim = :h AND gast = :g'),
-                    {"p": punkte, "u": row['user'], "s": row['saison'], "h": row['heim'], "g": row['gast']}
-                )
-        session.commit()
+                    pkt = 0
+                    if t_h_echt == t_h_tipp and t_g_echt == t_g_tipp:
+                        pkt = 3  # Volltreffer
+                    elif (t_h_echt - t_g_echt) == (t_h_tipp - t_g_tipp):
+                        pkt = 2  # Differenz
+                    elif (t_h_echt > t_g_echt and t_h_tipp > t_g_tipp) or \
+                         (t_h_echt < t_g_echt and t_h_tipp < t_g_tipp):
+                        pkt = 1  # Tendenz
+                    
+                    if pkt > 0:
+                        sql_update = text('UPDATE tipps SET punkte = :p WHERE id = :tid')
+                        session.execute(sql_update, {"p": pkt, "tid": tipp['id']})
+            session.commit()
+    except Exception as e:
+        st.error(f"Fehler bei der Punkteberechnung: {e}")
 
 # ==========================================
 # 3. HILFSFUNKTIONEN & BERECHNUNGEN
@@ -216,13 +221,20 @@ def show_spieltag_ansicht(df):
 def show_tippspiel(df):
     """Die Seite für das Tippspiel mit direkter Supabase-Anbindung."""
     st.title("🎯 Tippspiel")
+    
+    # Sicherstellen, dass Saisons vorhanden sind
+    if df.empty or "saison" not in df.columns:
+        st.error("Keine Saisondaten gefunden.")
+        return
+
     aktuelle_saison = sorted(df["saison"].unique(), reverse=True)[0]
     
     st.subheader("Deine Tipps abgeben")
+    # Nur Spiele anzeigen, bei denen tore_heim wirklich NULL/NaN ist
     zukunft_spiele = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())].copy()
     
     if zukunft_spiele.empty:
-        st.info("Keine zukünftigen Spiele zum Tippen verfügbar.")
+        st.info(f"Keine offenen Spiele für die Saison {aktuelle_saison} zum Tippen verfügbar.")
     else:
         spieltag_tippen = st.selectbox("Wähle den Spieltag:", sorted(zukunft_spiele['spieltag'].unique()))
         spiele_auswahl = zukunft_spiele[zukunft_spiele['spieltag'] == spieltag_tippen]
@@ -232,27 +244,35 @@ def show_tippspiel(df):
             for idx, zeile in spiele_auswahl.iterrows():
                 spalte1, spalte2, spalte3 = st.columns([4, 1, 1])
                 spalte1.write(f"**{zeile['heim']}** gegen **{zeile['gast']}**")
-                heim_tipp = spalte2.number_input("H", min_value=0, step=1, key=f"h_{idx}")
-                gast_tipp = spalte3.number_input("G", min_value=0, step=1, key=f"g_{idx}")
+                heim_tipp = spalte2.number_input("H", min_value=0, max_value=20, step=1, key=f"h_{idx}")
+                gast_tipp = spalte3.number_input("G", min_value=0, max_value=20, step=1, key=f"g_{idx}")
                 tipp_daten[idx] = (heim_tipp, gast_tipp)
             
             nutzer_name = st.text_input("Dein Name für die Wertung:")
-            if st.form_submit_button("Tipps jetzt speichern"):
+            submit = st.form_submit_button("Tipps jetzt speichern")
+            
+            if submit:
                 if nutzer_name.strip():
+                    # Alle Tipps des Formulars verarbeiten
                     for idx, zeile in spiele_auswahl.iterrows():
                         th, tg = tipp_daten[idx]
                         save_tipp(nutzer_name.strip(), aktuelle_saison, zeile['spieltag'], zeile['heim'], zeile['gast'], th, tg)
-                    # Hier ist die wichtige Bestätigung für den UX-Test
+                    
                     st.success(f"✅ Deine Tipps für Spieltag {spieltag_tippen} wurden gespeichert, {nutzer_name}!")
+                    st.balloons()
                 else:
                     st.error("Bitte gib einen Namen ein, um die Tipps zu speichern.")
 
     st.divider()
     st.subheader("Deine Punkte-Übersicht")
     auswertung_nutzer = st.text_input("Name eingeben zum Suchen:", key="view_res")
+    
     if auswertung_nutzer.strip():
+        # Punkte live berechnen
         evaluate_tipps(df, auswertung_nutzer.strip()) 
+        
         conn = get_conn()
+        # SQL-Query zum Anzeigen der gewerteten Tipps
         sql_auswertung = text("""
             SELECT t.spieltag as "Sp", t.heim as "Heim", t.gast as "Gast", 
                    t.tipp_heim || ':' || t.tipp_gast as "Dein Tipp",
@@ -263,11 +283,15 @@ def show_tippspiel(df):
             WHERE t."user" = :u AND t.saison = :s AND s.tore_heim IS NOT NULL
             ORDER BY t.spieltag DESC
         """)
-        ergebnisse_df = conn.query(sql_auswertung, params={"u": auswertung_nutzer.strip(), "s": aktuelle_saison}, ttl=0)
-        if not ergebnisse_df.empty:
-            st.dataframe(ergebnisse_df, use_container_width=True, hide_index=True)
-        else:
-            st.write("Keine ausgewerteten Tipps gefunden.")
+        
+        try:
+            ergebnisse_df = conn.query(sql_auswertung, params={"u": auswertung_nutzer.strip(), "s": aktuelle_saison}, ttl=0)
+            if not ergebnisse_df.empty:
+                st.dataframe(ergebnisse_df, use_container_width=True, hide_index=True)
+            else:
+                st.info("Noch keine ausgewerteten Tipps (Spiele müssen beendet sein).")
+        except Exception as e:
+            st.error(f"Fehler beim Laden der Übersicht: {e}")
 
 # ==========================================
 # 6. HAUPTPROGRAMM (MAIN)
