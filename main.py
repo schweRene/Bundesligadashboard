@@ -16,7 +16,7 @@ def get_conn():
     return st.connection("postgresql", type="sql")
 
 def init_db():
-    """Fügt die Computer-Dummies mit den korrekten Werten (20, 17, 14) ein."""
+    """Fügt die Computer-Dummies mit den korrekten Werten (20, 17, 14) ein, falls leer."""
     try:
         conn = get_conn()
         res = conn.query("SELECT COUNT(*) as count FROM hall_of_fame", ttl=0)
@@ -65,11 +65,9 @@ def save_tipp(user, saison, spieltag, heim, gast, th, tg):
     try:
         conn = get_conn()
         with conn.session as session:
-            # Löschen alter Tipps (Postgres Syntax)
             del_sql = text('DELETE FROM tipps WHERE "user" = :u AND saison = :s AND spieltag = :st AND heim = :h AND gast = :g')
             session.execute(del_sql, {"u": user, "s": saison, "st": int(spieltag), "h": heim, "g": gast})
             
-            # Neu Einfügen
             ins_sql = text('''INSERT INTO tipps ("user", saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte)
                               VALUES (:u, :s, :st, :h, :g, :th, :tg, 0)''')
             session.execute(ins_sql, {"u": user, "s": saison, "st": int(spieltag), "h": heim, "g": gast, "th": int(th), "tg": int(tg)})
@@ -96,10 +94,7 @@ def evaluate_tipps(df_spiele, user=None):
                 if not match.empty and pd.notna(match.iloc[0]['tore_heim']):
                     e_h, e_g = int(match.iloc[0]['tore_heim']), int(match.iloc[0]['tore_gast'])
                     t_h, t_g = int(tipp['tipp_heim']), int(tipp['tipp_gast'])
-                    
-                    # Deine Original-Punkte-Logik
                     pkt = 3 if (e_h == t_h and e_g == t_g) else (1 if (e_h > e_g and t_h > t_g) or (e_h < e_g and t_h < t_g) or (e_h == e_g and t_h == t_g) else 0)
-                    
                     upd = text('UPDATE tipps SET punkte = :p WHERE id = :tid')
                     session.execute(upd, {"p": pkt, "tid": tipp['id']})
             session.commit()
@@ -107,7 +102,7 @@ def evaluate_tipps(df_spiele, user=None):
         pass
 
 # ==========================================
-# 3.  BERECHNUNGEN 
+# 3. BERECHNUNGEN 
 # ==========================================
 
 @st.cache_data
@@ -148,11 +143,10 @@ def compute_ewige_tabelle(df):
     return ewige
 
 # ==========================================
-# 4. MODERNES DESIGN 
+# 4. MODERNES DESIGN (Darkmode Safe)
 # ==========================================
 
 def display_styled_table(df, type="standard"):
-    # Dein Layout, aber mit dynamischen Farben für den Darkmode
     css = """
     <style>
     .mystyle { 
@@ -170,21 +164,17 @@ def display_styled_table(df, type="standard"):
         text-align: center !important; 
     }
     .mystyle tr:nth-child(even) { background-color: rgba(128,128,128,0.05); }
-    
-    /* Spieltag-Ergebnis Style */
     .res-bold { font-weight: bold; font-size: 1.1em; color: var(--text-color) !important; }
     </style>
     """
     html = df.to_html(index=False, classes='mystyle', escape=False)
-    
     if type == "spieltag":
         html = html.replace('<td>', '<td class="res-bold">', df.shape[0])
-
     st.markdown(css, unsafe_allow_html=True)
     st.write(html, unsafe_allow_html=True)
 
 # ==========================================
-# 5. SEITEN (EXAKTE REPRODUKTION)
+# 5. SEITEN
 # ==========================================
 
 def show_startseite():
@@ -197,14 +187,11 @@ def show_spieltag_ansicht(df):
     seasons = sorted(df["saison"].unique(), reverse=True)
     st.sidebar.markdown("---")
     saison_sel = st.sidebar.selectbox("Saison für Spieltage", seasons, key="view_saison")
-    
     df_saison = df[df["saison"] == saison_sel]
     played = df_saison.dropna(subset=["tore_heim", "tore_gast"])
     latest_md = int(played["spieltag"].max()) if not played.empty else 1
-    
     selected_spieltag = st.sidebar.selectbox("Spieltag wählen", list(range(1, 35)), index=int(latest_md) - 1)
     st.markdown(f"<h1 style='text-align: center; color: darkred;'>⚽ Spieltagsergebnisse {selected_spieltag}. Spieltag ({saison_sel})</h1>", unsafe_allow_html=True)
-
     day_matches = df[(df["saison"] == saison_sel) & (df["spieltag"] == selected_spieltag)].copy()
     if not day_matches.empty:
         display_df = pd.DataFrame()
@@ -220,7 +207,6 @@ def show_meisterstatistik(df, seasons):
         t = calculate_table(df, s)
         if not t.empty:
             meister_data.append({"Saison": s, "Meister": t.iloc[0]["Team"]})
-    
     if meister_data:
         m_df = pd.DataFrame(meister_data)
         stats = m_df["Meister"].value_counts().reset_index()
@@ -234,7 +220,6 @@ def show_vereinsanalyse(df, seasons):
     st.title("📈 Vereinsanalyse")
     teams = sorted(df["heim"].unique())
     verein = st.selectbox("Verein auswählen", teams, index=None, placeholder="Wähle einen Verein...")
-    
     if verein:
         erfolge = []
         for s in seasons:
@@ -242,14 +227,12 @@ def show_vereinsanalyse(df, seasons):
             if not t.empty and verein in t["Team"].values:
                 platz = t[t["Team"] == verein]["Platz"].values[0]
                 erfolge.append({"Saison": s, "Platz": int(platz)})
-        
         if erfolge:
             pdf = pd.DataFrame(erfolge)
             fig = px.line(pdf, x="Saison", y="Platz", markers=True, text="Platz", title=f"Platzierungen von {verein}")
             fig.update_traces(textposition="top center")
             fig.update_yaxes(autorange="reversed")
             st.plotly_chart(fig, use_container_width=True)
-
         st.subheader("Direktvergleich")
         v_spiele = df[((df["heim"] == verein) | (df["gast"] == verein))].dropna(subset=["tore_heim", "tore_gast"])
         bilanz_list = []
@@ -259,10 +242,8 @@ def show_vereinsanalyse(df, seasons):
             gf, ga = (int(r["tore_heim"]), int(r["tore_gast"])) if is_h else (int(r["tore_gast"]), int(r["tore_heim"]))
             res = "S" if gf > ga else ("U" if gf == ga else "N")
             bilanz_list.append({"Gegner": gegner, "Bilanz": res})
-
         if bilanz_list:
             b_df = pd.DataFrame(bilanz_list)
-            # Nur die Bilanz-Zusammenfassung (S-U-N) anzeigen, keine Spiel-Einzelliste
             final_b = b_df.groupby("Gegner")["Bilanz"].value_counts().unstack(fill_value=0)
             for c in ["S", "U", "N"]: 
                 if c not in final_b: final_b[c] = 0
@@ -274,13 +255,11 @@ def show_tippspiel(df):
     st.title("🎯 Tippspiel")
     all_seasons = sorted(df["saison"].unique(), reverse=True)
     aktuelle_saison = all_seasons[0]
-
     future_matches = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())].copy()
     if not future_matches.empty:
         spieltage = sorted(future_matches['spieltag'].unique())
         ausgewaehlter_tag = st.selectbox("Wähle einen Spieltag zum Tippen aus:", spieltage)
         tag_matches = future_matches[future_matches['spieltag'] == ausgewaehlter_tag]
-
         with st.form("tipp_form"):
             tipp_input_data = {}
             for idx, row in tag_matches.iterrows():
@@ -289,8 +268,7 @@ def show_tippspiel(df):
                 t_h = col2.number_input("H", min_value=0, step=1, value=0, key=f"h_{idx}")
                 t_g = col3.number_input("G", min_value=0, step=1, value=0, key=f"g_{idx}")
                 tipp_input_data[idx] = (t_h, t_g)
-            
-            user_name_input = st.text_input("Dein Name (erforderlich zum Speichern):")
+            user_name_input = st.text_input("Dein Name:")
             if st.form_submit_button("Tipps speichern"):
                 if user_name_input.strip():
                     for idx, row in tag_matches.iterrows():
@@ -298,7 +276,6 @@ def show_tippspiel(df):
                         save_tipp(user_name_input.strip(), aktuelle_saison, row['spieltag'], row['heim'], row['gast'], th, tg)
                     st.success("Tipps gespeichert!")
                     st.rerun()
-
     st.divider()
     view_user = st.text_input("Gib deinen Namen ein, um deine Punkte zu sehen:")
     if view_user.strip():
@@ -321,7 +298,7 @@ def show_highscore():
 
 def main():
     st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
-    init_db() # Dummies mit 20, 17, 14 Punkten laden
+    init_db() 
     df = load_data_from_db()
     if df.empty: return
     seasons = sorted(df["saison"].unique(), reverse=True)
@@ -332,13 +309,15 @@ def main():
     elif page == "Spieltage": show_spieltag_ansicht(df)
     elif page == "Saisontabelle":
         s_sel = st.sidebar.selectbox("Saison wählen", seasons)
+        st.title(f"📅 Tabelle Saison {s_sel}")
         display_styled_table(calculate_table(df, s_sel))
     elif page == "Ewige Tabelle":
+        st.title("📚 Ewige Tabelle")
         display_styled_table(compute_ewige_tabelle(df))
     elif page == "Meister": show_meisterstatistik(df, seasons)
     elif page == "Vereinsanalyse": show_vereinsanalyse(df, seasons)
     elif page == "Tippspiel": show_tippspiel(df)
-    elif page == "Highscore": show_highscore(df)
+    elif page == "Highscore": show_highscore()
 
 if __name__ == "__main__":
     main()
