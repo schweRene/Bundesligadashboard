@@ -161,16 +161,22 @@ def show_startseite():
 def show_spieltag_ansicht(df):
     seasons = sorted(df["saison"].unique(), reverse=True)
     st.sidebar.markdown("---")
-    s_sel = st.sidebar.selectbox("Saison wählen", seasons, key="sb_s)
+    # HIER war der Fehler (Anführungszeichen bei key ergänzt):
+    s_sel = st.sidebar.selectbox("Saison wählen", seasons, key="sb_s") 
+    
     df_s = df[df["saison"] == s_sel]
     l_md = get_latest_played_matchday(df_s)
     s_md = st.sidebar.selectbox("Spieltag wählen", list(range(1, 35)), index=l_md-1)
+    
     st.markdown(f"<h1 style='text-align: center; color: darkred;'>⚽ Ergebnisse {s_md}. Spieltag</h1>", unsafe_allow_html=True)
     matches = df[(df["saison"] == s_sel) & (df["spieltag"] == s_md)].copy()
+    
     if not matches.empty:
-        res_df = pd.DataFrame({'Heim': matches['heim'], 
-                               'Ergebnis': matches.apply(lambda r: f"{int(r['tore_heim'])} : {int(r['tore_gast'])}" if pd.notna(r['tore_heim']) else "vs", axis=1),
-                               'Gast': matches['gast']})
+        res_df = pd.DataFrame({
+            'Heim': matches['heim'], 
+            'Ergebnis': matches.apply(lambda r: f"{int(r['tore_heim'])} : {int(r['tore_gast'])}" if pd.notna(r['tore_heim']) else "vs", axis=1),
+            'Gast': matches['gast']
+        })
         display_styled_table(res_df, type="spieltag")
 
 def show_meisterstatistik(df, seasons):
