@@ -112,8 +112,7 @@ def calculate_table(df, saison):
     teams = pd.unique(df_s[["heim", "gast"]].values.ravel("K"))
     stats = {t: {'Spiele': 0, 'S': 0, 'U': 0, 'N': 0, 'T': 0, 'G': 0, 'Punkte': 0} for t in teams}
     for _, row in df_s.iterrows():
-        h, g = row['heim'], row['gast']
-        th, tg = int(row['tore_heim']), int(row['tore_gast'])
+        h, g, th, tg = row['heim'], row['gast'], int(row['tore_heim']), int(row['tore_gast'])
         stats[h]['Spiele'] += 1; stats[g]['Spiele'] += 1
         stats[h]['T'] += th; stats[h]['G'] += tg; stats[g]['T'] += tg; stats[g]['G'] += th
         if th > tg: stats[h]['S'] += 1; stats[h]['Punkte'] += 3; stats[g]['N'] += 1
@@ -219,7 +218,8 @@ def show_meisterstatistik(df, seasons):
 def show_vereinsanalyse(df, seasons):
     st.title("📈 Vereinsanalyse")
     teams = sorted(df["heim"].unique())
-    verein = st.selectbox("Verein auswählen", teams, index=None, placeholder="Wähle einen Verein...")
+    verein = st.selectbox("Verein auswählen", teams, index=None)
+    
     if verein:
         erfolge = []
         for s in seasons:
@@ -227,63 +227,69 @@ def show_vereinsanalyse(df, seasons):
             if not t.empty and verein in t["Team"].values:
                 platz = t[t["Team"] == verein]["Platz"].values[0]
                 erfolge.append({"Saison": s, "Platz": int(platz)})
+        
         if erfolge:
             pdf = pd.DataFrame(erfolge)
-            fig = px.line(pdf, x="Saison", y="Platz", markers=True, text="Platz", title=f"Platzierungen von {verein}")
+            # Fix Skalierung: 1 bis 18, keine halben Schritte
+            fig = px.line(pdf, x="Saison", y="Platz", markers=True, text="Platz", title=f"Platzierungen: {verein}")
+            fig.update_yaxes(autorange="reversed", tick0=1, dtick=1, range=[18.5, 0.5])
             fig.update_traces(textposition="top center")
-            fig.update_yaxes(autorange="reversed")
             st.plotly_chart(fig, use_container_width=True)
+
         st.subheader("Direktvergleich")
         v_spiele = df[((df["heim"] == verein) | (df["gast"] == verein))].dropna(subset=["tore_heim", "tore_gast"])
-        bilanz_list = []
+        bilanz_dict = {}
         for _, r in v_spiele.iterrows():
             is_h = r["heim"] == verein
             gegner = r["gast"] if is_h else r["heim"]
+            if gegner not in bilanz_dict: bilanz_dict[gegner] = {"Spiele":0, "S":0, "U":0, "N":0, "T":0, "G":0}
+            
             gf, ga = (int(r["tore_heim"]), int(r["tore_gast"])) if is_h else (int(r["tore_gast"]), int(r["tore_heim"]))
-            res = "S" if gf > ga else ("U" if gf == ga else "N")
-            bilanz_list.append({"Gegner": gegner, "Bilanz": res})
-        if bilanz_list:
-            b_df = pd.DataFrame(bilanz_list)
-            final_b = b_df.groupby("Gegner")["Bilanz"].value_counts().unstack(fill_value=0)
-            for c in ["S", "U", "N"]: 
-                if c not in final_b: final_b[c] = 0
-            final_b["Spiele"] = final_b["S"] + final_b["U"] + final_b["N"]
-            final_b = final_b[["Spiele", "S", "U", "N"]].sort_values("Spiele", ascending=False).reset_index()
-            display_styled_table(final_b)
+            bilanz_dict[gegner]["Spiele"] += 1
+            bilanz_dict[gegner]["T"] += gf
+            bilanz_dict[gegner]["G"] += ga
+            if gf > ga: bilanz_dict[gegner]["S"] += 1
+            elif gf < ga: bilanz_dict[gegner]["N"] += 1
+            else: bilanz_dict[gegner]["U"] += 1
+
+        if bilanz_dict:
+            res_df = pd.DataFrame.from_dict(bilanz_dict, orient='index').reset_index().rename(columns={'index': 'Gegner'})
+            res_df = res_df[["Gegner", "Spiele", "S", "U", "N", "T", "G"]].sort_values("Spiele", ascending=False)
+            display_styled_table(res_df)
 
 def show_tippspiel(df):
     st.title("🎯 Tippspiel")
-    all_seasons = sorted(df["saison"].unique(), reverse=True)
-    aktuelle_saison = all_seasons[0]
-    future_matches = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())].copy()
-    if not future_matches.empty:
-        spieltage = sorted(future_matches['spieltag'].unique())
-        ausgewaehlter_tag = st.selectbox("Wähle einen Spieltag zum Tippen aus:", spieltage)
-        tag_matches = future_matches[future_matches['spieltag'] == ausgewaehlter_tag]
+    aktuelle_saison = sorted(df["saison"].unique(), reverse=True)[0]
+    future = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())]
+    
+    if not future.empty:
+        st.info("Hinweis: Zum Speichern der Tipps muss unten zwingend ein Name eingetragen werden.")
+        spieltag = st.selectbox("Spieltag wählen", sorted(future['spieltag'].unique()))
+        tag_matches = future[future['spieltag'] == spieltag]
+
         with st.form("tipp_form"):
-            tipp_input_data = {}
+            tipps = {}
             for idx, row in tag_matches.iterrows():
-                col1, col2, col3 = st.columns([4, 1, 1])
-                col1.write(f"**{row['heim']}** - **{row['gast']}**")
-                t_h = col2.number_input("H", min_value=0, step=1, value=0, key=f"h_{idx}")
-                t_g = col3.number_input("G", min_value=0, step=1, value=0, key=f"g_{idx}")
-                tipp_input_data[idx] = (t_h, t_g)
-            user_name_input = st.text_input("Dein Name:")
-            if st.form_submit_button("Tipps speichern"):
-                if user_name_input.strip():
-                    for idx, row in tag_matches.iterrows():
-                        th, tg = tipp_input_data[idx]
-                        save_tipp(user_name_input.strip(), aktuelle_saison, row['spieltag'], row['heim'], row['gast'], th, tg)
-                    st.success("Tipps gespeichert!")
-                    st.rerun()
-    st.divider()
-    view_user = st.text_input("Gib deinen Namen ein, um deine Punkte zu sehen:")
-    if view_user.strip():
-        evaluate_tipps(df, view_user.strip())
-        conn = get_conn()
-        sql = text('SELECT t.spieltag, t.heim, t.gast, t.tipp_heim, t.tipp_gast, s.tore_heim, s.tore_gast, t.punkte FROM tipps t JOIN spiele s ON t.saison=s.saison AND t.heim=s.heim AND t.gast=s.gast WHERE t."user"=:u AND t.saison=:s AND s.tore_heim IS NOT NULL')
-        res = conn.query(sql, params={"u": view_user.strip(), "s": aktuelle_saison}, ttl=0)
-        if not res.empty: st.dataframe(res)
+                c1, c2, c3 = st.columns([4, 1, 1])
+                c1.write(f"**{row['heim']}** - **{row['gast']}**")
+                tipps[idx] = (c2.number_input("H", min_value=0, step=1, key=f"h_{idx}"), 
+                              c3.number_input("G", min_value=0, step=1, key=f"g_{idx}"))
+            
+            user = st.text_input("Dein Name (Pflichtfeld zum Speichern):")
+            if st.form_submit_button("Tipps jetzt speichern"):
+                if user.strip():
+                    conn = get_conn()
+                    with conn.session as s:
+                        for idx, val in tipps.items():
+                            row = tag_matches.loc[idx]
+                            s.execute(text('DELETE FROM tipps WHERE "user"=:u AND saison=:s AND spieltag=:st AND heim=:h AND gast=:g'),
+                                      {"u":user, "s":aktuelle_saison, "st":int(row['spieltag']), "h":row['heim'], "g":row['gast']})
+                            s.execute(text('INSERT INTO tipps ("user", saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte) VALUES (:u,:s,:st,:h,:g,:th,:tg,0)'),
+                                      {"u":user, "s":aktuelle_saison, "st":int(row['spieltag']), "h":row['heim'], "g":row['gast'], "th":val[0], "tg":val[1]})
+                        s.commit()
+                    st.success("Erfolgreich gespeichert!")
+                else:
+                    st.error("Bitte gib einen Namen ein!")
 
 def show_highscore():
     st.title("🏆 Hall of Fame")
@@ -309,7 +315,7 @@ def main():
     elif page == "Spieltage": show_spieltag_ansicht(df)
     elif page == "Saisontabelle":
         s_sel = st.sidebar.selectbox("Saison wählen", seasons)
-        st.title(f"📅 Tabelle Saison {s_sel}")
+        st.title(f"📅 Saisontabelle {s_sel}")
         display_styled_table(calculate_table(df, s_sel))
     elif page == "Ewige Tabelle":
         st.title("📚 Ewige Tabelle")
