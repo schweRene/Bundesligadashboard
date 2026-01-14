@@ -126,9 +126,13 @@ def calculate_table(df, saison):
 
 @st.cache_data
 def compute_ewige_tabelle(df):
-    df_l = df.dropna(subset=["tore_heim", "tore_gast"]).copy()
-    h = df_l.rename(columns={"heim": "Team", "tore_heim": "GF", "tore_gast": "GA"})[["Team", "GF", "GA"]]
-    a = df_l.rename(columns={"gast": "Team", "tore_gast": "GF", "tore_heim": "GA"})[["Team", "GF", "GA"]]
+    # Erstelle eine Kopie, um die Namen für diese Ansicht zu vereinheitlichen
+    df_clean = df.dropna(subset=["tore_heim", "tore_gast"]).copy()
+    df_clean["heim"] = df_clean["heim"].replace(["Meidericher SV", "Meiderich"], "MSV Duisburg")
+    df_clean["gast"] = df_clean["gast"].replace(["Meidericher SV", "Meiderich"], "MSV Duisburg")
+
+    h = df_clean.rename(columns={"heim": "Team", "tore_heim": "GF", "tore_gast": "GA"})[["Team", "GF", "GA"]]
+    a = df_clean.rename(columns={"gast": "Team", "tore_gast": "GF", "tore_heim": "GA"})[["Team", "GF", "GA"]]
     all_m = pd.concat([h, a])
     all_m['P']=0; all_m['S']=0; all_m['U']=0; all_m['N']=0
     all_m.loc[all_m['GF'] > all_m['GA'], ['P', 'S']] = [3, 1]
@@ -220,51 +224,37 @@ def show_meisterstatistik(df, seasons):
 
 def show_vereinsanalyse(df, seasons):
     st.title("📈 Vereinsanalyse")
-    teams = sorted(df["heim"].unique())
+    
+    # Namen für die Analyse vereinheitlichen
+    df_clean = df.copy()
+    df_clean["heim"] = df_clean["heim"].replace(["Meidericher SV", "Meiderich"], "MSV Duisburg")
+    df_clean["gast"] = df_clean["gast"].replace(["Meidericher SV", "Meiderich"], "MSV Duisburg")
+    
+    # Teams aus den bereinigten Daten laden
+    teams = sorted(df_clean["heim"].unique())
     verein = st.selectbox("Verein auswählen", teams, index=None)
     
     if verein:
         erfolge = []
         for s in seasons:
-            # Tabelle für jede Saison berechnen, um den Platz zu finden
-            t = calculate_table(df, s)
+            # Wir nutzen df_clean, damit calculate_table die Punkte für den fusionierten Verein zählt
+            t = calculate_table(df_clean, s)
             if not t.empty and verein in t["Team"].values:
                 platz = t[t["Team"] == verein]["Platz"].values[0]
                 erfolge.append({"Saison": s, "Platz": int(platz)})
         
         if erfolge:
-            pdf = pd.DataFrame(erfolge)
+            pdf = pd.DataFrame(erfolge).sort_values("Saison")
+            fig = px.line(pdf, x="Saison", y="Platz", markers=True, text="Platz", 
+                         title=f"Platzierungen im Zeitverlauf: {verein}")
             
-            # WICHTIG: Chronologische Sortierung (von alt nach neu)
-            # Damit die Kurve von links nach rechts durch die Zeit läuft
-            pdf = pdf.sort_values("Saison")
-            
-            # Erstellung des Liniendiagramms
-            fig = px.line(
-                pdf, 
-                x="Saison", 
-                y="Platz", 
-                markers=True, 
-                text="Platz", 
-                title=f"Platzierungen im Zeitverlauf: {verein}"
-            )
-            
-            # WICHTIG: Skalierung fixieren (1 bis 18)
-            # autorange="reversed" sorgt dafür, dass Platz 1 oben ist
-            fig.update_yaxes(
-                autorange="reversed", 
-                tick0=1, 
-                dtick=1, 
-                range=[18.5, 0.5],  # Begrenzt die Anzeige exakt auf die 18 Plätze
-                gridcolor='rgba(128,128,128,0.2)'
-            )
-            
+            fig.update_yaxes(autorange="reversed", tick0=1, dtick=1, range=[18.5, 0.5], 
+                             gridcolor='rgba(128,128,128,0.2)')
             fig.update_traces(textposition="top center")
             st.plotly_chart(fig, use_container_width=True)
 
-        # Der restliche Code für den Direktvergleich (Tore/Gegentore)
         st.subheader("Direktvergleich")
-        v_spiele = df[((df["heim"] == verein) | (df["gast"] == verein))].dropna(subset=["tore_heim", "tore_gast"])
+        v_spiele = df_clean[((df_clean["heim"] == verein) | (df_clean["gast"] == verein))].dropna(subset=["tore_heim", "tore_gast"])
         bilanz_dict = {}
         for _, r in v_spiele.iterrows():
             is_h = r["heim"] == verein
@@ -282,7 +272,6 @@ def show_vereinsanalyse(df, seasons):
 
         if bilanz_dict:
             res_df = pd.DataFrame.from_dict(bilanz_dict, orient='index').reset_index().rename(columns={'index': 'Gegner'})
-            # Bilanz-Spalte ist weg, Tore (T) und Gegentore (G) sind da
             res_df = res_df[["Gegner", "Spiele", "S", "U", "N", "T", "G"]].sort_values("Spiele", ascending=False)
             display_styled_table(res_df)
 
@@ -333,28 +322,29 @@ def show_tippspiel(df):
     else:
         st.info("Keine weiteren Spiele zum Tippen verfügbar.")
 
-    # 2. AUSWERTUNG (Fix für UnhashableParamError)
+    # 2. AUSWERTUNG 
     st.markdown("---")
     st.subheader("📊 Deine Tippspiel-Auswertung")
     
     check_user = st.text_input("Name eingeben, um deine Punktzahl zu sehen:", key="check_user_stats")
     
     if check_user:
-        conn = get_conn()
-        # Fix: Wir nutzen params als Dictionary und stellen sicher, dass saison ein String ist
-        query = """
-            SELECT t.spieltag, t.heim, t.gast, t.tipp_heim, t.tipp_gast, t.punkte, s.tore_heim, s.tore_gast
-            FROM tipps t
-            JOIN spiele s ON t.saison = s.saison AND t.spieltag = s.spieltag AND t.heim = s.heim
-            WHERE t."user" = :u AND t.saison = :s
-            ORDER BY t.spieltag DESC, t.heim ASC
-        """
-        # .query() von Streamlit mag manchmal keine komplexen SQLAlchemy-Objekte im Cache
-        user_tipps = conn.query(query, params={"u": str(check_user), "s": str(aktuelle_saison)}, ttl=0)
+        # Ladebalken anzeigen
+        with st.spinner('Lade deine Punkte...'):
+            conn = get_conn()
+            query = """
+                SELECT t.spieltag, t.heim, t.gast, t.tipp_heim, t.tipp_gast, t.punkte, s.tore_heim, s.tore_gast
+                FROM tipps t
+                JOIN spiele s ON t.saison = s.saison AND t.spieltag = s.spieltag AND t.heim = s.heim
+                WHERE t."user" = :u AND t.saison = :s
+                ORDER BY t.spieltag DESC, t.heim ASC
+            """
+            user_tipps = conn.query(query, params={"u": str(check_user), "s": str(aktuelle_saison)}, ttl=0)
         
         if not user_tipps.empty:
+            # Name aus der Metrik entfernt, wie gewünscht
             gesamt_pkt = int(user_tipps['punkte'].sum())
-            st.metric(f"Deine aktuellen Gesamtpunkte", f"{gesamt_pkt} Pkt.")
+            st.metric("Deine aktuellen Gesamtpunkte", f"{gesamt_pkt} Pkt.")
 
             user_tipps['Ergebnis'] = user_tipps.apply(
                 lambda r: f"{int(r['tore_heim'])}:{int(r['tore_gast'])}" if pd.notna(r['tore_heim']) else "-", axis=1
