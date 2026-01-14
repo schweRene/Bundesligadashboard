@@ -288,16 +288,19 @@ def show_vereinsanalyse(df, seasons):
 
 def show_tippspiel(df):
     st.title("⚽ Tippspiel")
-    aktuelle_saison = "2026"
+    # Dynamisch die aktuellste Saison aus den Daten ermitteln
+    if not df.empty:
+        aktuelle_saison = str(df["saison"].max())
+    else:
+        aktuelle_saison = "2026" # Fallback, falls df leer ist
     
-    # 1. Zukünftige Spiele zum Tippen anzeigen
-    future = df[(df["saison"] == aktuelle_saison) & (df["tore_heim"].isna())].sort_values(["spieltag", "datum"])
+    # Sortierung nur nach spieltag, da kein Datumsfeld vorhanden ist
+    future = df[(df["saison"] == aktuelle_saison) & (df["tore_heim"].isna())].sort_values(["spieltag"])
     
     if not future.empty:
         st.subheader("Gib deine Tipps ab")
         user = st.text_input("Dein Name:", key="tipp_user")
         
-        # Nur den nächsten anstehenden Spieltag zum Tippen vorschlagen
         next_st = future["spieltag"].min()
         st.info(f"Aktueller Spieltag zum Tippen: {next_st}")
         
@@ -311,7 +314,6 @@ def show_tippspiel(df):
                 with col2: tipps_input[idx] = st.text_input("Tipp (H:G)", placeholder="0:0", key=f"in_{idx}")
                 with col3: st.write(row["gast"])
             
-            # WICHTIG: Deine existierende Funktion heißt save_tipp
             if st.form_submit_button("Tipps speichern"):
                 if not user:
                     st.error("Bitte gib einen Namen ein!")
@@ -320,18 +322,14 @@ def show_tippspiel(df):
     else:
         st.write("Momentan keine zukünftigen Spiele zum Tippen verfügbar.")
 
-    # ==========================================================
-    # AB HIER DIE ERGÄNZUNG FÜR DIE AUSWERTUNG
-    # ==========================================================
+    # --- AUSWERTUNG & HIGHSCORE ---
     st.markdown("---")
     st.subheader("📊 Deine Punkte-Auswertung")
     
-    # Separater Name-Input für die Auswertung
     check_user = st.text_input("Name eingeben, um Punkte zu prüfen:", key="check_user_stats")
     
     if check_user:
         conn = get_conn()
-        # Deine SQL-Abfrage bleibt gleich, nutzt aber get_conn()
         query = text("""
             SELECT t.spieltag, t.heim, t.gast, t.tipp_heim, t.tipp_gast, t.punkte, s.tore_heim, s.tore_gast
             FROM tipps t
@@ -342,16 +340,13 @@ def show_tippspiel(df):
         user_tipps = conn.query(query, params={"u": check_user, "s": aktuelle_saison}, ttl=0)
         
         if not user_tipps.empty:
-            # Gesamtpunkte anzeigen
             gesamt_pkt = int(user_tipps['punkte'].sum())
             st.metric(f"Gesamtpunkte von {check_user}", f"{gesamt_pkt} Pkt.")
 
-            # Prüfung auf Saisonende mit deinen Spaltennamen
             offene_spiele = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())]
             
             if offene_spiele.empty:
                 st.success("🏁 Die Saison ist beendet!")
-                
                 check_hof = conn.query(text('SELECT * FROM hall_of_fame WHERE name = :n AND saison = :s'), 
                                        params={"n": check_user, "s": aktuelle_saison}, ttl=0)
                 
@@ -368,7 +363,6 @@ def show_tippspiel(df):
             else:
                 st.info("Eintrag in den Highscore erst nach dem 34. Spieltag möglich.")
 
-            # Deine Funktion display_styled_table für die Details nutzen
             with st.expander("Details deiner Tipps ansehen"):
                 user_tipps['Ergebnis'] = user_tipps.apply(
                     lambda r: f"{int(r['tore_heim'])}:{int(r['tore_gast'])}" if pd.notna(r['tore_heim']) else "-", axis=1
