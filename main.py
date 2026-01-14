@@ -287,56 +287,99 @@ def show_vereinsanalyse(df, seasons):
             display_styled_table(res_df)
 
 def show_tippspiel(df):
-    st.title("🎯 Tippspiel")
-    # Ermittlung der aktuellsten Saison aus den Daten
-    aktuelle_saison = sorted(df["saison"].unique(), reverse=True)[0]
-    st.subheader(f"Tipps abgeben für Saison: {aktuelle_saison}")
+    st.title("⚽ Tippspiel")
+    aktuelle_saison = "2026"
     
-    # Filter für Spiele, die noch kein Ergebnis haben
-    future = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())]
+    # 1. Zukünftige Spiele zum Tippen anzeigen
+    future = df[(df["saison"] == aktuelle_saison) & (df["tore_heim"].isna())].sort_values(["spieltag", "datum"])
     
     if not future.empty:
-        st.info("Hinweis: Zum Speichern der Tipps muss unten zwingend ein Name eingetragen werden.")
-        spieltag = st.selectbox("Spieltag wählen", sorted(future['spieltag'].unique()))
-        tag_matches = future[future['spieltag'] == spieltag]
-
+        st.subheader("Gib deine Tipps ab")
+        user = st.text_input("Dein Name:", key="tipp_user")
+        
+        # Nur den nächsten anstehenden Spieltag zum Tippen vorschlagen
+        next_st = future["spieltag"].min()
+        st.info(f"Aktueller Spieltag zum Tippen: {next_st}")
+        
+        current_st_df = future[future["spieltag"] == next_st]
+        
         with st.form("tipp_form"):
-            tipps = {}
-            for idx, row in tag_matches.iterrows():
-                c1, c2, c3 = st.columns([4, 1, 1])
-                c1.write(f"**{row['heim']}** - **{row['gast']}**")
-                tipps[idx] = (
-                    c2.number_input("H", min_value=0, step=1, key=f"h_{idx}"), 
-                    c3.number_input("G", min_value=0, step=1, key=f"g_{idx}")
-                )
+            tipps_input = {}
+            for idx, row in current_st_df.iterrows():
+                col1, col2, col3 = st.columns([2, 1, 2])
+                with col1: st.write(row["heim"])
+                with col2: tipps_input[idx] = st.text_input("Tipp (H:G)", placeholder="0:0", key=f"in_{idx}")
+                with col3: st.write(row["gast"])
             
-            user = st.text_input("Dein Name (Pflichtfeld zum Speichern):")
-            
-            if st.form_submit_button("Tipps jetzt speichern"):
-                if user.strip():
-                    try:
-                        conn = get_conn()
-                        with conn.session as session:
-                            for idx, val in tipps.items():
-                                row = tag_matches.loc[idx]
-                                # 1. Alten Tipp des Users für dieses Spiel löschen
-                                session.execute(
-                                    text('DELETE FROM tipps WHERE "user"=:u AND saison=:s AND spieltag=:st AND heim=:h AND gast=:g'),
-                                    {"u": user, "s": aktuelle_saison, "st": int(row['spieltag']), "h": row['heim'], "g": row['gast']}
-                                )
-                                # 2. Neuen Tipp einfügen
-                                session.execute(
-                                    text('INSERT INTO tipps ("user", saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte) VALUES (:u, :s, :st, :h, :g, :th, :tg, 0)'),
-                                    {"u": user, "s": aktuelle_saison, "st": int(row['spieltag']), "h": row['heim'], "g": row['gast'], "th": val[0], "tg": val[1]}
-                                )
-                            session.commit()
-                        st.success(f"Tipps für {user} wurden erfolgreich gespeichert!")
-                    except Exception as e:
-                        st.error(f"Datenbankfehler: {e}")
+            # WICHTIG: Deine existierende Funktion heißt save_tipp
+            if st.form_submit_button("Tipps speichern"):
+                if not user:
+                    st.error("Bitte gib einen Namen ein!")
                 else:
-                    st.error("Bitte gib einen Namen ein, bevor du speicherst!")
+                    save_tipp(user, aktuelle_saison, next_st, tipps_input, current_st_df)
     else:
-        st.write("Aktuell stehen keine Spiele zum Tippen bereit.")
+        st.write("Momentan keine zukünftigen Spiele zum Tippen verfügbar.")
+
+    # ==========================================================
+    # AB HIER DIE ERGÄNZUNG FÜR DIE AUSWERTUNG
+    # ==========================================================
+    st.markdown("---")
+    st.subheader("📊 Deine Punkte-Auswertung")
+    
+    # Separater Name-Input für die Auswertung
+    check_user = st.text_input("Name eingeben, um Punkte zu prüfen:", key="check_user_stats")
+    
+    if check_user:
+        conn = get_conn()
+        # Deine SQL-Abfrage bleibt gleich, nutzt aber get_conn()
+        query = text("""
+            SELECT t.spieltag, t.heim, t.gast, t.tipp_heim, t.tipp_gast, t.punkte, s.tore_heim, s.tore_gast
+            FROM tipps t
+            JOIN spiele s ON t.saison = s.saison AND t.spieltag = s.spieltag AND t.heim = s.heim
+            WHERE t."user" = :u AND t.saison = :s
+            ORDER BY t.spieltag DESC, t.heim ASC
+        """)
+        user_tipps = conn.query(query, params={"u": check_user, "s": aktuelle_saison}, ttl=0)
+        
+        if not user_tipps.empty:
+            # Gesamtpunkte anzeigen
+            gesamt_pkt = int(user_tipps['punkte'].sum())
+            st.metric(f"Gesamtpunkte von {check_user}", f"{gesamt_pkt} Pkt.")
+
+            # Prüfung auf Saisonende mit deinen Spaltennamen
+            offene_spiele = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())]
+            
+            if offene_spiele.empty:
+                st.success("🏁 Die Saison ist beendet!")
+                
+                check_hof = conn.query(text('SELECT * FROM hall_of_fame WHERE name = :n AND saison = :s'), 
+                                       params={"n": check_user, "s": aktuelle_saison}, ttl=0)
+                
+                if check_hof.empty:
+                    if st.button("In Hall of Fame verewigen"):
+                        with conn.session as session:
+                            session.execute(
+                                text('INSERT INTO hall_of_fame (name, saison, punkte) VALUES (:n, :s, :p)'),
+                                {"n": check_user, "s": aktuelle_saison, "p": gesamt_pkt}
+                            )
+                            session.commit()
+                        st.balloons()
+                        st.success("Eintrag erfolgreich!")
+            else:
+                st.info("Eintrag in den Highscore erst nach dem 34. Spieltag möglich.")
+
+            # Deine Funktion display_styled_table für die Details nutzen
+            with st.expander("Details deiner Tipps ansehen"):
+                user_tipps['Ergebnis'] = user_tipps.apply(
+                    lambda r: f"{int(r['tore_heim'])}:{int(r['tore_gast'])}" if pd.notna(r['tore_heim']) else "-", axis=1
+                )
+                user_tipps['Tipp'] = user_tipps.apply(lambda r: f"{int(r['tipp_heim'])}:{int(r['tipp_gast'])}", axis=1)
+                
+                ausgabe = user_tipps[['spieltag', 'heim', 'gast', 'Tipp', 'Ergebnis', 'punkte']].copy()
+                ausgabe.columns = ['ST', 'Heim', 'Gast', 'Tipp', 'Real', 'Pkt']
+                display_styled_table(ausgabe)
+        else:
+            st.warning("Keine Tipps für diesen Namen gefunden.")
 
 def show_highscore():
     st.title("🏆 Hall of Fame")
@@ -354,24 +397,35 @@ def main():
     init_db() 
     df = load_data_from_db()
     if df.empty: return
+
+    # Korrekter Aufruf deiner Funktion aus Zeile 70 (ohne Import!)
+    evaluate_tipps(df)
+
     seasons = sorted(df["saison"].unique(), reverse=True)
     
     page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
 
-    if page == "Startseite": show_startseite()
-    elif page == "Spieltage": show_spieltag_ansicht(df)
+    if page == "Startseite": 
+        show_startseite()
+    elif page == "Spieltage": 
+        show_spieltag_ansicht(df)
     elif page == "Saisontabelle":
         s_sel = st.sidebar.selectbox("Saison wählen", seasons)
         st.title(f"Saison {s_sel}") 
-        from main import calculate_table
+        # KEIN "from main import..." mehr! 
+        # Wir rufen deine Funktion aus Zeile 98 direkt auf:
         display_styled_table(calculate_table(df, s_sel))
     elif page == "Ewige Tabelle":
         st.title("📚 Ewige Tabelle")
         display_styled_table(compute_ewige_tabelle(df))
-    elif page == "Meisterschaften": show_meisterstatistik(df, seasons)
-    elif page == "Vereinsanalyse": show_vereinsanalyse(df, seasons)
-    elif page == "Tippspiel": show_tippspiel(df)
-    elif page == "Highscore": show_highscore()
+    elif page == "Meisterschaften": 
+        show_meisterstatistik(df, seasons)
+    elif page == "Vereinsanalyse": 
+        show_vereinsanalyse(df, seasons)
+    elif page == "Tippspiel": 
+        show_tippspiel(df)
+    elif page == "Highscore": 
+        show_highscore()
 
 if __name__ == "__main__":
     main()
