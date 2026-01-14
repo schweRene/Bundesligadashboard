@@ -126,11 +126,12 @@ def calculate_table(df, saison):
 
 @st.cache_data
 def compute_ewige_tabelle(df):
-    # Erstelle eine Kopie, um die Namen für diese Ansicht zu vereinheitlichen
+    # 1. Namen vereinheitlichen (MSV Duisburg Fix)
     df_clean = df.dropna(subset=["tore_heim", "tore_gast"]).copy()
     df_clean["heim"] = df_clean["heim"].replace(["Meidericher SV", "Meiderich"], "MSV Duisburg")
     df_clean["gast"] = df_clean["gast"].replace(["Meidericher SV", "Meiderich"], "MSV Duisburg")
 
+    # 2. Berechnung der Statistiken
     h = df_clean.rename(columns={"heim": "Team", "tore_heim": "GF", "tore_gast": "GA"})[["Team", "GF", "GA"]]
     a = df_clean.rename(columns={"gast": "Team", "tore_gast": "GF", "tore_heim": "GA"})[["Team", "GF", "GA"]]
     all_m = pd.concat([h, a])
@@ -138,11 +139,24 @@ def compute_ewige_tabelle(df):
     all_m.loc[all_m['GF'] > all_m['GA'], ['P', 'S']] = [3, 1]
     all_m.loc[all_m['GF'] == all_m['GA'], ['P', 'U']] = [1, 1]
     all_m.loc[all_m['GF'] < all_m['GA'], ['N']] = 1
-    ewige = all_m.groupby("Team").agg(Spiele=('Team','size'), S=('S','sum'), U=('U','sum'), N=('N','sum'), T=('GF','sum'), G=('GA','sum'), Punkte=('P','sum')).reset_index()
+    
+    ewige = all_m.groupby("Team").agg(
+        Spiele=('Team','size'), 
+        S=('S','sum'), 
+        U=('U','sum'), 
+        N=('N','sum'), 
+        T=('GF','sum'), 
+        G=('GA','sum'), 
+        Punkte=('P','sum')
+    ).reset_index()
+    
     cols = ['Spiele', 'S', 'U', 'N', 'T', 'G', 'Punkte']
     ewige[cols] = ewige[cols].fillna(0).astype(int)
+    
+    # Sortieren und Platzierung vergeben
     ewige = ewige.sort_values(by=["Punkte", "T"], ascending=False).reset_index(drop=True)
     ewige.insert(0, "Platz", range(1, len(ewige) + 1))
+    
     return ewige
 
 # ==========================================
@@ -289,7 +303,7 @@ def show_tippspiel(df):
         mask = (df["saison"] == aktuelle_saison) & (df["spieltag"] == selected_st) & (df["tore_heim"].isna())
         current_st_df = df[mask].sort_values("heim")
 
-        st.subheader(f"Gib deinen Tipp für den {selected_st} . Spieltag ein")
+        st.subheader(f"Gib deinen Tipp für den {selected_st}. Spieltag ein")
 
         with st.form("tipp_form"):
             tipps_data = {} # Hier speichern wir die Werte der Number-Inputs
