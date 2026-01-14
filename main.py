@@ -292,74 +292,80 @@ def show_tippspiel(df):
     aktuelle_saison = str(df["saison"].max())
 
     # 1. SPIELTAGS-AUSWAHL
-    # Liste aller Spieltage der aktuellen Saison, die noch ungespielte Spiele haben
     offene_spieltage = sorted(df[(df["saison"] == aktuelle_saison) & (df["tore_heim"].isna())]["spieltag"].unique())
 
     if offene_spieltage:
         selected_st = st.selectbox("Spieltag auswählen zum Tippen:", offene_spieltage)
         
-        # Nur die offenen Spiele des gewählten Spieltags anzeigen
         mask = (df["saison"] == aktuelle_saison) & (df["spieltag"] == selected_st) & (df["tore_heim"].isna())
         current_st_df = df[mask].sort_values("heim")
 
+        st.subheader(f"Gib deinen Tipp für den Spieltag {selected_st} ein")
+
         with st.form("tipp_form"):
-            # Name als Pflichtfeld im Formular
-            user = st.text_input("Dein Name:")
-            st.write(f"### Deine Tipps für Spieltag {selected_st}")
+            tipps_data = {} # Hier speichern wir die Werte der Number-Inputs
             
-            tipps_input = {}
             for idx, row in current_st_df.iterrows():
-                col1, col2, col3 = st.columns([2, 1, 2])
-                with col1:
+                col_h, col_th, col_vs, col_tg, col_g = st.columns([3, 2, 1, 2, 3])
+                with col_h: 
                     st.write(f"**{row['heim']}**")
-                with col2:
-                    tipps_input[idx] = st.text_input("H:G", placeholder="0:0", key=f"tipp_{idx}", label_visibility="collapsed")
-                with col3:
+                with col_th: 
+                    th = st.number_input("Heim", min_value=0, max_value=20, value=0, step=1, key=f"h_{idx}", label_visibility="collapsed")
+                with col_vs: 
+                    st.write(":")
+                with col_tg: 
+                    tg = st.number_input("Gast", min_value=0, max_value=20, value=0, step=1, key=f"g_{idx}", label_visibility="collapsed")
+                with col_g: 
                     st.write(f"**{row['gast']}**")
+                tipps_data[idx] = (th, tg)
+
+            st.markdown("---")
+            # Name als Pflichtfeld direkt über dem Button
+            user_name = st.text_input("Dein Name (Pflichtfeld):", key="tipp_user_name")
             
-            submitted = st.form_submit_button("Tipps speichern")
-            if submitted:
-                if not user:
+            if st.form_submit_button("Tipp speichern"):
+                if not user_name:
                     st.error("Bitte gib deinen Namen ein!")
                 else:
-                    # Deine funktionierende save_tipp wird aufgerufen
-                    save_tipp(user, aktuelle_saison, selected_st, tipps_input, current_st_df)
+                    # Umwandlung in das Format, das deine save_tipp erwartet (H:G als String)
+                    formatted_tipps = {idx: f"{val[0]}:{val[1]}" for idx, val in tipps_data.items()}
+                    save_tipp(user_name, aktuelle_saison, selected_st, formatted_tipps, current_st_df)
     else:
-        st.info("Alle Spiele der Saison wurden bereits gespielt.")
+        st.info("Keine weiteren Spiele zum Tippen verfügbar.")
 
-    # 2. AUSWERTUNG (Historie inklusive Spieltag 17)
+    # 2. AUSWERTUNG (Fix für UnhashableParamError)
     st.markdown("---")
     st.subheader("📊 Deine Punkte-Auswertung")
     
-    check_user = st.text_input("Name eingeben, um alle bisherigen Tipps zu sehen:", key="check_user_stats")
+    check_user = st.text_input("Name eingeben, um Punkte zu prüfen:", key="check_user_stats")
     
     if check_user:
         conn = get_conn()
-        # Der JOIN sorgt dafür, dass wir Tore und Tipps zusammenführen (auch für Spieltag 17)
-        query = text("""
+        # Fix: Wir nutzen params als Dictionary und stellen sicher, dass saison ein String ist
+        query = """
             SELECT t.spieltag, t.heim, t.gast, t.tipp_heim, t.tipp_gast, t.punkte, s.tore_heim, s.tore_gast
             FROM tipps t
             JOIN spiele s ON t.saison = s.saison AND t.spieltag = s.spieltag AND t.heim = s.heim
             WHERE t."user" = :u AND t.saison = :s
             ORDER BY t.spieltag DESC, t.heim ASC
-        """)
-        user_tipps = conn.query(query, params={"u": check_user, "s": aktuelle_saison}, ttl=0)
+        """
+        # .query() von Streamlit mag manchmal keine komplexen SQLAlchemy-Objekte im Cache
+        user_tipps = conn.query(query, params={"u": str(check_user), "s": str(aktuelle_saison)}, ttl=0)
         
         if not user_tipps.empty:
             gesamt_pkt = int(user_tipps['punkte'].sum())
             st.metric(f"Gesamtpunkte von {check_user}", f"{gesamt_pkt} Pkt.")
 
-            # Ergebnisse formatieren (zeigt auch 0 Punkte und richtige Ergebnisse an)
             user_tipps['Ergebnis'] = user_tipps.apply(
                 lambda r: f"{int(r['tore_heim'])}:{int(r['tore_gast'])}" if pd.notna(r['tore_heim']) else "-", axis=1
             )
-            user_tipps['Dein Tipp'] = user_tipps.apply(lambda r: f"{int(r['tipp_heim'])}:{int(r['tipp_gast'])}", axis=1)
+            user_tipps['Tipp'] = user_tipps.apply(lambda r: f"{int(r['tipp_heim'])}:{int(r['tipp_gast'])}", axis=1)
             
-            ausgabe = user_tipps[['spieltag', 'heim', 'gast', 'Dein Tipp', 'Ergebnis', 'punkte']].copy()
+            ausgabe = user_tipps[['spieltag', 'heim', 'gast', 'Tipp', 'Ergebnis', 'punkte']].copy()
             ausgabe.columns = ['ST', 'Heim', 'Gast', 'Tipp', 'Real', 'Pkt']
             display_styled_table(ausgabe)
         else:
-            st.warning("Keine Tipps unter diesem Namen gefunden.")
+            st.info("Keine Tipps gefunden.")
 
 def show_highscore():
     st.title("🏆 Hall of Fame")
