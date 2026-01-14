@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-from main import load_data_from_db
+
 
 def show_mobile_startseite():
     st.markdown("<h1 style='text-align: center; color: darkred;'>⚽Bundesliga-Dashboard</h1>", unsafe_allow_html=True)
@@ -10,7 +10,9 @@ def show_mobile_startseite():
 
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
-    st.set_page_config(page_title="Bundesligadashboard", layout="centered")
+    st.set_page_config(page_title="Bundesliga Dashboard", layout="centered")
+
+    from main import load_data_from_db
 
     #Laden der Daten aus der Hauptdatei
     df = load_data_from_db()
