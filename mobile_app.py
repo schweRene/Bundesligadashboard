@@ -87,39 +87,42 @@ def show_mobile_saisontabelle(df):
     
     table_df = pd.DataFrame(stats).sort_values(by=["Pkt", "Diff"], ascending=False).reset_index(drop=True)
 
-    # 3. Echte HTML-Tabelle für Mobile (verhindert Umbrüche)
-    # Wir nutzen CSS, um die Breite exakt zu steuern
-    html_table = """
-    <style>
-        .mobile-table { width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px; }
-        .mobile-table th { background-color: #8B0000; color: white; padding: 8px; text-align: left; }
-        .mobile-table td { padding: 10px 8px; border-bottom: 1px solid #ddd; color: black !important; }
-        .mobile-table tr:nth-child(even) { background-color: #f2f2f2; }
-        .mobile-table tr:nth-child(odd) { background-color: white; }
-    </style>
-    <table class="mobile-table">
-        <tr>
-            <th style="width: 10%;">#</th>
-            <th style="width: 60%;">Verein</th>
-            <th style="width: 15%; text-align: center;">Sp</th>
-            <th style="width: 15%; text-align: center;">Pkt</th>
-        </tr>
-    """
+    # 3. HTML-Tabelle sicher zusammenbauen
+    # Wir definieren den Style separat als EINEN String ohne f-String-Variablen
+    table_style = (
+        "<style>"
+        ".m-tab { width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px; margin-top: 10px; }"
+        ".m-tab th { background-color: #8B0000; color: white !important; padding: 10px 5px; text-align: left; }"
+        ".m-tab td { padding: 12px 5px; border-bottom: 1px solid #eee; color: black !important; background-color: white; }"
+        "</style>"
+    )
 
+    # Header-Zeile
+    table_html = table_style + (
+        "<table class='m-tab'>"
+        "<tr>"
+        "<th style='width: 10%;'>#</th>"
+        "<th style='width: 60%;'>Verein</th>"
+        "<th style='width: 15%; text-align: center;'>Sp</th>"
+        "<th style='width: 15%; text-align: center;'>Pkt</th>"
+        "</tr>"
+    )
+
+    # Zeilen hinzufügen
     for i, row in table_df.iterrows():
-        html_table += f"""
-        <tr>
-            <td>{i+1}</td>
-            <td style="font-weight: bold;">{row['Team']}</td>
-            <td style="text-align: center;">{row['Sp']}</td>
-            <td style="text-align: center; font-weight: bold; color: #8B0000 !important;">{row['Pkt']}</td>
-        </tr>
-        """
+        table_html += (
+            f"<tr>"
+            f"<td>{i+1}</td>"
+            f"<td style='font-weight: bold;'>{row['Team']}</td>"
+            f"<td style='text-align: center;'>{row['Sp']}</td>"
+            f"<td style='text-align: center; font-weight: bold; color: #8B0000 !important;'>{row['Pkt']}</td>"
+            f"</tr>"
+        )
     
-    html_table += "</table>"
+    table_html += "</table>"
     
-    # Anzeige der Tabelle
-    st.markdown(html_table, unsafe_allow_html=True)    
+    # 4. Ausgabe mit explizitem unsafe_allow_html
+    st.markdown(table_html, unsafe_allow_html=True)  
 
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
