@@ -10,7 +10,7 @@ def show_mobile_startseite():
         st.caption("Bildquelle: Pixabay")
 
 def show_mobile_spieltage(df):
-    st.markdown("<h2 style='text-align: center;'>⚽ {selected_spieltag}. Spieltag</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>⚽ {selected_st}. Spieltag</h2>", unsafe_allow_html=True)
 
     # Saison- Und Spieltagsauswahl
     saisons = sorted(df["saison"].unique(), reverse=True)
