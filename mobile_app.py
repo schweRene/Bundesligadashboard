@@ -9,7 +9,7 @@ def show_mobile_startseite():
         st.image("bundesliga.jpg", use_container_width=True)
         st.caption("Bildquelle: Pixabay")
 
-def show_mobile_spieltqage(df):
+def show_mobile_spieltage(df):
     st.markdown("<h2 style='text-align: center;'>⚽ Spieltage</h2>", unsafe_allow_html=True)
 
     # Saison- Und Spieltagsauswahl
@@ -61,7 +61,7 @@ def run_mobile_main():
     if menu == "Startseite":
         show_mobile_startseite()
     elif menu == "Spieltage":
-        show_mobile_spieltqage()
+        show_mobile_spieltage()
     elif menu == "Saisontabelle":
         st.subheader("Saisontabelle")
     elif menu == "Ewige Tabelle":
