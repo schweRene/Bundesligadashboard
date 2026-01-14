@@ -295,12 +295,12 @@ def show_tippspiel(df):
     offene_spieltage = sorted(df[(df["saison"] == aktuelle_saison) & (df["tore_heim"].isna())]["spieltag"].unique())
 
     if offene_spieltage:
-        selected_st = st.selectbox("Spieltag auswählen zum Tippen:", offene_spieltage)
+        selected_st = st.selectbox("Spieltag auswählen:", offene_spieltage)
         
         mask = (df["saison"] == aktuelle_saison) & (df["spieltag"] == selected_st) & (df["tore_heim"].isna())
         current_st_df = df[mask].sort_values("heim")
 
-        st.subheader(f"Gib deinen Tipp für den Spieltag {selected_st} ein")
+        st.subheader(f"Gib deinen Tipp für den {selected_st} . Spieltag ein")
 
         with st.form("tipp_form"):
             tipps_data = {} # Hier speichern wir die Werte der Number-Inputs
@@ -321,7 +321,7 @@ def show_tippspiel(df):
 
             st.markdown("---")
             # Name als Pflichtfeld direkt über dem Button
-            user_name = st.text_input("Dein Name (Pflichtfeld):", key="tipp_user_name")
+            user_name = st.text_input("Gib deinen Namen ein", placeholder="Pflichtfeld", key="tipp_user_name")
             
             if st.form_submit_button("Tipp speichern"):
                 if not user_name:
@@ -335,9 +335,9 @@ def show_tippspiel(df):
 
     # 2. AUSWERTUNG (Fix für UnhashableParamError)
     st.markdown("---")
-    st.subheader("📊 Deine Punkte-Auswertung")
+    st.subheader("📊 Deine Tippspiel-Auswertung")
     
-    check_user = st.text_input("Name eingeben, um Punkte zu prüfen:", key="check_user_stats")
+    check_user = st.text_input("Name eingeben, um deine Punktzahl zu sehen:", key="check_user_stats")
     
     if check_user:
         conn = get_conn()
@@ -354,7 +354,7 @@ def show_tippspiel(df):
         
         if not user_tipps.empty:
             gesamt_pkt = int(user_tipps['punkte'].sum())
-            st.metric(f"Gesamtpunkte von {check_user}", f"{gesamt_pkt} Pkt.")
+            st.metric(f"Deine aktuellen Gesamtpunkte", f"{gesamt_pkt} Pkt.")
 
             user_tipps['Ergebnis'] = user_tipps.apply(
                 lambda r: f"{int(r['tore_heim'])}:{int(r['tore_gast'])}" if pd.notna(r['tore_heim']) else "-", axis=1
