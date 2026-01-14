@@ -10,8 +10,6 @@ def show_mobile_startseite():
         st.caption("Bildquelle: Pixabay")
 
 def show_mobile_spieltage(df):
-    st.markdown(f"<h2 style='text-align: center; color: darkred;'>⚽ {selected_st}. Spieltag</h2>", unsafe_allow_html=True)
-
     # Saison- Und Spieltagsauswahl
     saisons = sorted(df["saison"].unique(), reverse=True)
     selected_saison = st.selectbox("Saison wählen:", saisons, key="sb_saison")
@@ -21,6 +19,8 @@ def show_mobile_spieltage(df):
     default_st = int(df[df["saison"] == selected_saison]["spieltag"].max())
     selected_st = st.selectbox("Spieltag wählen:", spieltage, index=spieltage.index(default_st))
 
+    st.markdown(f"<h2 style='text-align: center; color: darkred;'>⚽ {selected_st}. Spieltag</h2>", unsafe_allow_html=True)
+    
     #Spiele filtern
     mask = (df["saison"] == selected_saison) & (df["spieltag"] == selected_st)
     current_df = df[mask].copy()
