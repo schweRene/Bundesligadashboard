@@ -10,7 +10,7 @@ def show_mobile_startseite():
         st.caption("Bildquelle: Pixabay")
 
 def show_mobile_spieltage(df):
-    # 1. Auswahl-Logik
+    # 1. Auswahl-Logik (Saison und Spieltag)
     saisons = sorted(df["saison"].unique(), reverse=True)
     selected_saison = st.selectbox("Saison wählen:", saisons, key="sb_saison")
 
@@ -25,26 +25,34 @@ def show_mobile_spieltage(df):
     mask = (df["saison"] == selected_saison) & (df["spieltag"] == selected_st)
     current_df = df[mask].copy()
 
-    # 4. Cards anzeigen
+    # 4. Anzeige der Spiele (Karten-Layout mit Spalten)
     for _, row in current_df.iterrows():
         tore_h = int(row['tore_heim']) if pd.notna(row['tore_heim']) else "-"
         tore_g = int(row['tore_gast']) if pd.notna(row['tore_gast']) else "-"
         
-        # Wir bauen den HTML-String in einer Variable zusammen (sauberer)
-        card_html = (
-            f'<div style="border: 2px solid #8B0000; border-radius: 10px; padding: 15px; '
-            f'margin-bottom: 12px; background-color: white; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);">'
-            f'<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">'
-            f'<div style="flex: 1; text-align: left; font-weight: bold; color: black !important; font-size: 14px;">{row["heim"]}</div>'
-            f'<div style="flex: 0.5; text-align: center; background-color: #8B0000; color: white !important; '
-            f'border-radius: 5px; padding: 5px 10px; font-weight: bold; font-size: 16px; margin: 0 10px; min-width: 65px;">'
-            f'{tore_h} : {tore_g}</div>'
-            f'<div style="flex: 1; text-align: right; font-weight: bold; color: black !important; font-size: 14px;">{row["gast"]}</div>'
-            f'</div></div>'
-        )
-        
-        # WICHTIG: Das unsafe_allow_html muss hier stehen!
-        st.markdown(card_html, unsafe_allow_html=True)
+        # Ein Container mit Rahmen erzeugt die "Card"
+        with st.container(border=True):
+            # Wir teilen die Karte in 3 Spalten auf: [Heim | Ergebnis | Gast]
+            col_heim, col_score, col_gast = st.columns([4, 2, 4])
+            
+            with col_heim:
+                # Heimteam: Linksbündig, Fett
+                # Wir nutzen hier st.write/st.markdown ohne CSS für die Namen,
+                # damit Streamlit die Farbe (Schwarz/Weiß) passend zum Modus wählt.
+                st.markdown(f"**{row['heim']}**")
+            
+            with col_score:
+                # Ergebnis-Box: Hintergrund Dunkelrot wie Desktop
+                st.markdown(f"""
+                    <div style='background-color: #8B0000; color: white; text-align: center; 
+                    border-radius: 5px; font-weight: bold; padding: 2px;'>
+                        {tore_h}:{tore_g}
+                    </div>
+                """, unsafe_allow_html=True)
+            
+            with col_gast:
+                # Gastteam: Rechtsbündig, Fett
+                st.markdown(f"<div style='text-align: right;'><b>{row['gast']}</b></div>", unsafe_allow_html=True)
 
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
