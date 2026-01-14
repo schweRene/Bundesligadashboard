@@ -10,39 +10,35 @@ def show_mobile_startseite():
         st.caption("Bildquelle: Pixabay")
 
 def show_mobile_spieltage(df):
-    # Saison- Und Spieltagsauswahl
+    # 1. ERST die Auswahlmöglichkeiten definieren
     saisons = sorted(df["saison"].unique(), reverse=True)
     selected_saison = st.selectbox("Saison wählen:", saisons, key="sb_saison")
 
     spieltage = sorted(df[df["saison"] == selected_saison]["spieltag"].unique())
-    #Standardmäßig den aktuellesten/letzten Spieltag wählen
     default_st = int(df[df["saison"] == selected_saison]["spieltag"].max())
+    
+    # Hier wird die Variable 'selected_st' erst erschaffen:
     selected_st = st.selectbox("Spieltag wählen:", spieltage, index=spieltage.index(default_st))
 
+    # 2. JETZT erst die Überschrift anzeigen (jetzt ist 'selected_st' bekannt)
     st.markdown(f"<h2 style='text-align: center; color: darkred;'>⚽ {selected_st}. Spieltag</h2>", unsafe_allow_html=True)
-    
-    #Spiele filtern
+
+    # 3. Spiele filtern und Cards anzeigen (mit dem Desktop-Design)
     mask = (df["saison"] == selected_saison) & (df["spieltag"] == selected_st)
     current_df = df[mask].copy()
 
-    st.markdown(f"<h3 style='text-align: center;'>{selected_st}. Spieltag</h3>", unsafe_allow_html=True)
-
-    #Spiele als "Cards" anzeigen
     for _, row in current_df.iterrows():
         with st.container():
-            #ein schmaler Rahmen um jedes Spiel
             st.markdown(f"""
                 <div style="border: 2px solid #8B0000; border-radius: 10px; padding: 10px; margin-bottom: 10px; background-color: #ffffff; color: #333333 !important;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="flex: 1; text-align: left; font-weight: bold; font-size: 0.9em;">
+                        <div style="flex: 1; text-align: left; font-weight: bold; font-size: 0.9em; color: #333333 !important;">
                             {row['heim']}
                         </div>
-                        
                         <div style="flex: 0.6; text-align: center; font-size: 1.1em; background-color: #8B0000; color: white !important; border-radius: 5px; padding: 4px 8px; font-weight: bold; min-width: 60px;">
                             {int(row['tore_heim']) if pd.notna(row['tore_heim']) else '-'} : {int(row['tore_gast']) if pd.notna(row['tore_gast']) else '-'}
                         </div>
-                        
-                        <div style="flex: 1; text-align: right; font-weight: bold; font-size: 0.9em;">
+                        <div style="flex: 1; text-align: right; font-weight: bold; font-size: 0.9em; color: #333333 !important;">
                             {row['gast']}
                         </div>
                     </div>
