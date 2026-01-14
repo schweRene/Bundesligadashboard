@@ -4,6 +4,7 @@ import sqlite3
 import datetime
 from sqlalchemy import create_engine, text
 
+
 from update_scrapper import run_scrapper, update_csv_from_db
 from check_table import show_table, save_table_to_txt
 from validate_bundesliga_csv import validate_csv
@@ -12,6 +13,7 @@ from validate_bundesliga_csv import validate_csv
 DB_NAME = "bundesliga.db"
 SAISON = "2025/26"
 LOG_FILE = "pipeline_log.txt"
+
 
 def log_pipeline_run(status, message):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -72,7 +74,7 @@ def run_pipeline():
     update_csv_from_db()    # CSV aktualisieren
     validate_csv()          # Logik-Check
     save_table_to_txt()     # Tabelle berechnen & exportieren
-    
+   
     log_pipeline_run("ENDE", f"Update Spieltag {start_st}-{max_st} erfolgreich.")
     print(f"{'='*50}\nALLE DATEN AKTUALISIERT!\n{'='*50}")
 
