@@ -10,7 +10,7 @@ def show_mobile_startseite():
         st.caption("Bildquelle: Pixabay")
 
 def show_mobile_spieltage(df):
-    st.markdown("<h2 style='text-align: center;'>⚽ Spieltage</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>⚽ {selected_spieltag}. Spieltag</h2>", unsafe_allow_html=True)
 
     # Saison- Und Spieltagsauswahl
     saisons = sorted(df["saison"].unique(), reverse=True)
@@ -32,16 +32,16 @@ def show_mobile_spieltage(df):
         with st.container():
             #ein schmaler Rahmen um jedes Spiel
             st.markdown(f"""
-                        <div style="border: 1px solid #ddd; border-radius: 10px; padding: 10px; margin-bottom: 10px; background-color: #f9f9f9;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="flex: 1; text-align: left; font-weight: bold;">{row['heim']}</div>
-                    <div style="flex: 0.5; text-align: center; font-size: 1.2em; background: #eee; border-radius: 5px; padding: 2px 5px;">
-                        {int(row['tore_heim']) if pd.notna(row['tore_heim']) else '-'} : {int(row['tore_gast']) if pd.notna(row['tore_gast']) else '-'}
+                <div style="border: 1px solid #ddd; border-radius: 10px; padding: 10px; margin-bottom: 10px; background-color: #f9f9f9; color: #333 !important;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex: 1; text-align: left; font-weight: bold; color: #333 !important;">{row['heim']}</div>
+                        <div style="flex: 0.6; text-align: center; font-size: 1.2em; background: #333; color: white; border-radius: 5px; padding: 2px 5px; font-weight: bold;">
+                            {int(row['tore_heim']) if pd.notna(row['tore_heim']) else '-'} : {int(row['tore_gast']) if pd.notna(row['tore_gast']) else '-'}
+                        </div>
+                        <div style="flex: 1; text-align: right; font-weight: bold; color: #333 !important;">{row['gast']}</div>
                     </div>
-                    <div style="flex: 1; text-align: right; font-weight: bold;">{row['gast']}</div>
                 </div>
-            </div>
-            """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
 
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
