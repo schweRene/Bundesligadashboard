@@ -10,40 +10,46 @@ def show_mobile_startseite():
         st.caption("Bildquelle: Pixabay")
 
 def show_mobile_spieltage(df):
-    # 1. ERST die Auswahlmöglichkeiten definieren
+    # 1. Auswahl-Logik (Saison und Spieltag)
     saisons = sorted(df["saison"].unique(), reverse=True)
     selected_saison = st.selectbox("Saison wählen:", saisons, key="sb_saison")
 
     spieltage = sorted(df[df["saison"] == selected_saison]["spieltag"].unique())
     default_st = int(df[df["saison"] == selected_saison]["spieltag"].max())
-    
-    # Hier wird die Variable 'selected_st' erst erschaffen:
     selected_st = st.selectbox("Spieltag wählen:", spieltage, index=spieltage.index(default_st))
 
-    # 2. JETZT erst die Überschrift anzeigen (jetzt ist 'selected_st' bekannt)
+    # 2. Überschrift (f-String korrigiert und nach der Definition von selected_st)
     st.markdown(f"<h2 style='text-align: center; color: darkred;'>⚽ {selected_st}. Spieltag</h2>", unsafe_allow_html=True)
 
-    # 3. Spiele filtern und Cards anzeigen (mit dem Desktop-Design)
+    # Spiele filtern
     mask = (df["saison"] == selected_saison) & (df["spieltag"] == selected_st)
     current_df = df[mask].copy()
 
+    # 3. Cards im Desktop-Farbschema
     for _, row in current_df.iterrows():
-        with st.container():
-            st.markdown(f"""
-                <div style="border: 2px solid #8B0000; border-radius: 10px; padding: 10px; margin-bottom: 10px; background-color: #ffffff; color: #333333 !important;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="flex: 1; text-align: left; font-weight: bold; font-size: 0.9em; color: #333333 !important;">
-                            {row['heim']}
-                        </div>
-                        <div style="flex: 0.6; text-align: center; font-size: 1.1em; background-color: #8B0000; color: white !important; border-radius: 5px; padding: 4px 8px; font-weight: bold; min-width: 60px;">
-                            {int(row['tore_heim']) if pd.notna(row['tore_heim']) else '-'} : {int(row['tore_gast']) if pd.notna(row['tore_gast']) else '-'}
-                        </div>
-                        <div style="flex: 1; text-align: right; font-weight: bold; font-size: 0.9em; color: #333333 !important;">
-                            {row['gast']}
-                        </div>
+        # Tore formatieren (NaN abfangen)
+        tore_h = int(row['tore_heim']) if pd.notna(row['tore_heim']) else "-"
+        tore_g = int(row['tore_gast']) if pd.notna(row['tore_gast']) else "-"
+        
+        st.markdown(f"""
+            <div style="border: 2px solid #8B0000; border-radius: 10px; padding: 15px; margin-bottom: 12px; background-color: white; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    
+                    <div style="flex: 1; text-align: left; font-weight: bold; color: #000000 !important; font-size: 14px; line-height: 1.2;">
+                        {row['heim']}
                     </div>
+                    
+                    <div style="flex: 0.5; text-align: center; background-color: #8B0000; color: white !important; border-radius: 5px; padding: 5px 10px; font-weight: bold; font-size: 16px; margin: 0 10px; min-width: 65px;">
+                        {tore_h} : {tore_g}
+                    </div>
+                    
+                    <div style="flex: 1; text-align: right; font-weight: bold; color: #000000 !important; font-size: 14px; line-height: 1.2;">
+                        {row['gast']}
+                    </div>
+                    
                 </div>
-                """, unsafe_allow_html=True)
+            </div>
+            """, unsafe_allow_html=True)
 
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
