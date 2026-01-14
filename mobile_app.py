@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import pandas as pd
 
 
 def show_mobile_startseite():
@@ -7,6 +8,40 @@ def show_mobile_startseite():
     if os.path.exists("bundesliga.jpg"):
         st.image("bundesliga.jpg", use_container_width=True)
         st.caption("Bildquelle: Pixabay")
+
+def show_mobile_spieltqage(df):
+    st.markdown("<h2 style='text-align: center;'>⚽ Spieltage</h2>", unsafe_allow_html=True)
+
+    # Saison- Und Spieltagsauswahl
+    saisons = sorted(df["saison"].unique(), reverse=True)
+    selected_saison = st.selectbox("Saison wählen:", saisons, key="sb_saison")
+
+    spieltage = sorted(df[df["saison"] == selected_saison]["spieltag"].unique())
+    #Standardmäßig den aktuellesten/letzten Spieltag wählen
+    default_st = int(df[df["saison"] == selected_saison]["spieltag"].max())
+    selected_st = st.selectbox("Spieltag wählen:", spieltage, index=spieltage.index(default_st))
+
+    #Spiele filtern
+    mask = (df["saison"] == selected_saison) & (df["spieltag"] == selected_st)
+    current_df = df[mask].copy()
+
+    st.markdown(f"{selected_st}. Spieltag")
+
+    #Spiele als "Cards" anzeigen
+    for _, row in current_df.iterrows():
+        with st.container():
+            #ein schmaler Rahmen um jedes Spiel
+            st.markdown(f"""
+                        <div style="border: 1px solid #ddd; border-radius: 10px; padding: 10px; margin-bottom: 10px; background-color: #f9f9f9;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="flex: 1; text-align: left; font-weight: bold;">{row['heim']}</div>
+                    <div style="flex: 0.5; text-align: center; font-size: 1.2em; background: #eee; border-radius: 5px; padding: 2px 5px;">
+                        {int(row['tore_heim']) if pd.notna(row['tore_heim']) else '-'} : {int(row['tore_gast']) if pd.notna(row['tore_gast']) else '-'}
+                    </div>
+                    <div style="flex: 1; text-align: right; font-weight: bold;">{row['gast']}</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
@@ -26,7 +61,7 @@ def run_mobile_main():
     if menu == "Startseite":
         show_mobile_startseite()
     elif menu == "Spieltage":
-        st.subheader("Spieltag")
+        show_mobile_spieltqage()
     elif menu == "Saisontabelle":
         st.subheader("Saisontabelle")
     elif menu == "Ewige Tabelle":
