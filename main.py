@@ -7,6 +7,7 @@ import plotly.express as px
 import os
 from sqlalchemy import text
 from datetime import datetime
+from mobile_app import run_mobile_main
 
 # ==========================================
 # 1. DATENBANK & SETUP (Cloud Version)
@@ -410,6 +411,12 @@ def show_highscore():
 # ==========================================
 
 def main():
+    qurey_params = st.query_params
+
+    if qurey_params == st.qurey_params:
+        run_mobile_main()
+        st.stop()
+    
     st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
     init_db() 
     df = load_data_from_db()
