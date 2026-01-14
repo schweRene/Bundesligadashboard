@@ -25,7 +25,7 @@ def show_mobile_spieltage(df):
     mask = (df["saison"] == selected_saison) & (df["spieltag"] == selected_st)
     current_df = df[mask].copy()
 
-    st.markdown(f"{selected_st}. Spieltag")
+    st.markdown(f"<h3 style='text-align: center;'>{selected_st}. Spieltag</h3>", unsafe_allow_html=True)
 
     #Spiele als "Cards" anzeigen
     for _, row in current_df.iterrows():
@@ -61,7 +61,7 @@ def run_mobile_main():
     if menu == "Startseite":
         show_mobile_startseite()
     elif menu == "Spieltage":
-        show_mobile_spieltage()
+        show_mobile_spieltage(df)
     elif menu == "Saisontabelle":
         st.subheader("Saisontabelle")
     elif menu == "Ewige Tabelle":
