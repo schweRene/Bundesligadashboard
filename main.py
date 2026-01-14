@@ -407,7 +407,32 @@ def main():
         display_styled_table(calculate_table(df, s_sel))
     elif page == "Ewige Tabelle":
         st.title("📚 Ewige Tabelle")
-        display_styled_table(compute_ewige_tabelle(df))
+        
+        # Daten berechnen
+        ewige_df = compute_ewige_tabelle(df)
+        
+        # --- TEIL A: Das Balkendiagramm für die Top 10 ---
+        top_10 = ewige_df.head(10)
+        
+        fig = px.bar(
+            top_10, 
+            x='Team', 
+            y='Punkte', 
+            text='Punkte',
+            title="Top 10",
+            color='Punkte',
+            color_continuous_scale='Viridis'
+        )
+        fig.update_traces(textposition='outside')
+        fig.update_layout(xaxis_title="Verein", yaxis_title="Gesamtpunkte", showlegend=False)
+        
+        st.plotly_chart(fig, use_container_width=True)    
+
+        # --- TEIL B: Die Tabelle ab Platz 11 ---
+        st.subheader("Rangliste ab Platz 11")
+        ab_platz_11 = ewige_df.iloc[10:] # Zeigt alles ab Index 10 (also Platz 11)
+        
+        display_styled_table(ab_platz_11)
     elif page == "Meisterschaften": 
         show_meisterstatistik(df, seasons)
     elif page == "Vereinsanalyse": 
