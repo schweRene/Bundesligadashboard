@@ -414,23 +414,35 @@ def main():
         # --- TEIL A: Das Balkendiagramm für die Top 10 ---
         top_10 = ewige_df.head(10)
         
+        # Wir berechnen einen Puffer für die Y-Achse (10% mehr als der Höchstwert),
+        # damit der Text oben nicht abgeschnitten wird.
+        max_punkte = top_10['Punkte'].max()
+        y_obergrenze = max_punkte * 1.15 
+
         fig = px.bar(
             top_10, 
             x='Team', 
             y='Punkte', 
             text='Punkte',
-            title="Top 10",
+            title="Top 10 der Ewigen Bundesliga-Tabelle",
             color='Punkte',
             color_continuous_scale='Viridis'
         )
-        fig.update_traces(textposition='outside')
-        fig.update_layout(xaxis_title="Verein", yaxis_title="Gesamtpunkte", showlegend=False)
         
-        st.plotly_chart(fig, use_container_width=True)    
+        # Hier fixen wir das Abschneiden:
+        fig.update_traces(textposition='outside') # Text über den Balken
+        fig.update_layout(
+            xaxis_title="Verein", 
+            yaxis_title="Gesamtpunkte", 
+            showlegend=False,
+            yaxis_range=[0, y_obergrenze] # Hier setzen wir das Limit manuell höher
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
 
         # --- TEIL B: Die Tabelle ab Platz 11 ---
         st.subheader("Rangliste ab Platz 11")
-        ab_platz_11 = ewige_df.iloc[10:] # Zeigt alles ab Index 10 (also Platz 11)
+        ab_platz_11 = ewige_df.iloc[10:] 
         
         display_styled_table(ab_platz_11)
     elif page == "Meisterschaften": 
