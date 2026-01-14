@@ -411,9 +411,9 @@ def show_highscore():
 # ==========================================
 
 def main():
-    qurey_params = st.query_params
+    query_params = st.query_params
 
-    if qurey_params == st.qurey_params:
+    if query_params == st.qurey_params:
         run_mobile_main()
         st.stop()
     
