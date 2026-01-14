@@ -330,9 +330,36 @@ def show_tippspiel(df):
                 if not user_name:
                     st.error("Bitte gib deinen Namen ein!")
                 else:
-                    # Umwandlung in das Format, das deine save_tipp erwartet (H:G als String)
-                    formatted_tipps = {idx: f"{val[0]}:{val[1]}" for idx, val in tipps_data.items()}
-                    save_tipp(user_name, aktuelle_saison, selected_st, formatted_tipps, current_st_df)
+                    erfolgreich = True
+                    fehler_meldung = ""
+                    
+                    # Da deine save_tipp jedes Spiel einzeln braucht, 
+                    # gehen wir hier in einer Schleife durch alle eingegebenen Tipps
+                    for idx, (th, tg) in tipps_data.items():
+                        row = current_st_df.loc[idx]
+                        heim_team = row["heim"]
+                        gast_team = row["gast"]
+                        
+                        # Aufruf deiner Funktion mit allen 7 Parametern
+                        status, msg = save_tipp(
+                            user_name, 
+                            aktuelle_saison, 
+                            selected_st, 
+                            heim_team, 
+                            gast_team, 
+                            th, 
+                            tg
+                        )
+                        
+                        if not status:
+                            erfolgreich = False
+                            fehler_meldung = msg
+                    
+                    if erfolgreich:
+                        st.success(f"Tipps für Spieltag {selected_st} erfolgreich gespeichert!")
+                        st.rerun() # Seite neu laden, um die Auswertung unten direkt zu aktualisieren
+                    else:
+                        st.error(f"Fehler beim Speichern: {fehler_meldung}")
     else:
         st.info("Keine weiteren Spiele zum Tippen verfügbar.")
 
