@@ -61,17 +61,14 @@ def show_mobile_saisontabelle(df):
     saisons = sorted(df["saison"].unique(), reverse=True)
     selected_saison = st.selectbox("Saison wählen:", saisons, key="sb_tabelle_saison")
     
-    # 2. Daten filtern und Tabelle berechnen (Logik wie Desktop)
+    # 2. Daten filtern und Tabelle berechnen
     saison_df = df[df["saison"] == selected_saison]
-    
     stats = []
     teams = pd.concat([saison_df["heim"], saison_df["gast"]]).unique()
     
     for team in teams:
         h_games = saison_df[saison_df["heim"] == team]
         g_games = saison_df[saison_df["gast"] == team]
-        
-        # Nur abgeschlossene Spiele zählen
         h_played = h_games[h_games["tore_heim"].notna()]
         g_played = g_games[g_games["tore_gast"].notna()]
         
@@ -82,41 +79,47 @@ def show_mobile_saisontabelle(df):
              len(g_played[g_played["tore_gast"] > g_played["tore_heim"]]))
         u = (len(h_played[h_played["tore_heim"] == h_played["tore_gast"]]) + 
              len(g_played[g_played["tore_gast"] == g_played["tore_heim"]]))
-        n = sp - s - u
         
-        t_erz = h_played["tore_heim"].sum() + g_played["tore_gast"].sum()
-        t_erh = h_played["tore_gast"].sum() + g_played["tore_heim"].sum()
-        diff = int(t_erz - t_erh)
+        diff = int((h_played["tore_heim"].sum() + g_played["tore_gast"].sum()) - 
+                   (h_played["tore_gast"].sum() + g_played["tore_heim"].sum()))
         pkt = int(s * 3 + u)
-        
         stats.append({"Team": team, "Sp": sp, "Diff": diff, "Pkt": pkt})
     
-    # Sortieren: Punkte, dann Differenz
     table_df = pd.DataFrame(stats).sort_values(by=["Pkt", "Diff"], ascending=False).reset_index(drop=True)
-    table_df.index += 1 # Platzierung ab 1
-    
-    # 3. Anzeige als kompakte Liste (statt breiter Tabelle)
-    # Header
-    cols = st.columns([1, 4, 1, 1, 1])
-    cols[0].write("**#**")
-    cols[1].write("**Verein**")
-    cols[2].write("**Sp**")
-    cols[3].write("**+/-**")
-    cols[4].write("**Pkt**")
-    st.divider()
+
+    # 3. Echte HTML-Tabelle für Mobile (verhindert Umbrüche)
+    # Wir nutzen CSS, um die Breite exakt zu steuern
+    html_table = """
+    <style>
+        .mobile-table { width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px; }
+        .mobile-table th { background-color: #8B0000; color: white; padding: 8px; text-align: left; }
+        .mobile-table td { padding: 10px 8px; border-bottom: 1px solid #ddd; color: black !important; }
+        .mobile-table tr:nth-child(even) { background-color: #f2f2f2; }
+        .mobile-table tr:nth-child(odd) { background-color: white; }
+    </style>
+    <table class="mobile-table">
+        <tr>
+            <th style="width: 10%;">#</th>
+            <th style="width: 60%;">Verein</th>
+            <th style="width: 15%; text-align: center;">Sp</th>
+            <th style="width: 15%; text-align: center;">Pkt</th>
+        </tr>
+    """
 
     for i, row in table_df.iterrows():
-        # Jede Zeile bekommt einen leichten Hintergrund für bessere Lesbarkeit
-        with st.container():
-            c1, c2, c3, c4, c5 = st.columns([1, 4, 1, 1, 1])
-            c1.write(f"{i}")
-            c2.write(f"**{row['Team']}**")
-            c3.write(f"{row['Sp']}")
-            # Differenz farblich (grün/rot) markieren
-            diff_color = "green" if row['Diff'] > 0 else "red" if row['Diff'] < 0 else "gray"
-            c4.markdown(f"<span style='color:{diff_color};'>{row['Diff']}</span>", unsafe_allow_html=True)
-            c5.write(f"**{row['Pkt']}**")
-        st.divider()    
+        html_table += f"""
+        <tr>
+            <td>{i+1}</td>
+            <td style="font-weight: bold;">{row['Team']}</td>
+            <td style="text-align: center;">{row['Sp']}</td>
+            <td style="text-align: center; font-weight: bold; color: #8B0000 !important;">{row['Pkt']}</td>
+        </tr>
+        """
+    
+    html_table += "</table>"
+    
+    # Anzeige der Tabelle
+    st.markdown(html_table, unsafe_allow_html=True)    
 
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
