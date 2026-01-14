@@ -424,7 +424,7 @@ def main():
             x='Team', 
             y='Punkte', 
             text='Punkte',
-            title="Top 10 der Ewigen Bundesliga-Tabelle",
+            title="Top 10",
             color='Punkte',
             color_continuous_scale='Viridis'
         )
