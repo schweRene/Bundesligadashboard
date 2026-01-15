@@ -6,6 +6,7 @@ from sqlalchemy import text
 def show_mobile_startseite():
     # Überschrift: Zentriert, kein Umbruch (nowrap), optimierte Größe
     st.markdown("""
+
         <div style='text-align: center; margin-bottom: 40px;'>
             <h2 style='
                 color: #8B0000; 
@@ -17,6 +18,9 @@ def show_mobile_startseite():
                 ⚽ Bundesliga-Dashboard
             </h2>
         </div>
+        <h3 style='text-align: left; color: #8B0000; margin-bottom: 30px;'>
+            ⚽ Bundesliga-Dashboard
+        </h3>
     """, unsafe_allow_html=True)
     
     if os.path.exists("bundesliga.jpg"):
