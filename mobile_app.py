@@ -194,6 +194,73 @@ def show_mobile_ewige_tabelle(df):
     table_html += "</table>"
     st.markdown(table_html, unsafe_allow_html=True)
 
+def show_mobile_meisterschaften(df):
+    st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🏆Meisterschaften</h2>", unsafe_allow_html=True)
+
+    # Meister pro Saison ermitteln
+    titel_liste = []
+    saisons = df["saison"].unique()
+
+    for saison in saisons:
+        saison_df = df[df["saison"] == saison]
+        stats = []
+        teams = pd.concat([saison_df["heim"], saison_df["gast"]]).unique()
+
+        for team in teams:
+            h_played = saison_df[(saison_df["heim"] == team) & (saison_df["tore_heim"].notna())]
+            g_played = saison_df[(saison_df["gast"] == team) & (saison_df["tore_gast"].notna())]
+
+            s = (len(h_played[h_played["tore_heim"] > h_played["tore_gast"]]) +
+                 len(g_played[g_played["tore_gast"] > g_played["tore_heim"]]))
+            u = (len(h_played[h_played["tore_heim"] == h_played["tore_gast"]]) +
+                 len(g_played[g_played["tore_gast"] == g_played["tore_heim"]]))
+            
+            diff = (h_played["tore_heim"].sum() + g_played["tore_gast"].sum()) -\
+                   (h_played["tore_gast"].sum() + g_played["tore_heim"].sum())
+            
+            pkt = s * 3 + u
+            stats.append({"Team": team, "Pkt": pkt, "Diff": diff})
+        
+        # Tabellenerster diese Saison
+        temp_table = pd.DataFrame(stats).sort_values(by=["Pkt", "Diff"], ascending=False)
+        if not temp_table.empty:
+            meister = temp_table.iloc[0]["Team"]
+            titel_liste.append(meister)
+
+    #Zählen und Sortieren
+    meister_counts = pd.Series(titel_liste).value_counts().reset_index()
+    meister_counts.columns = ["Verein", "Titel"]
+
+
+    #HTML-Tabelle für Mobile
+    table_style = (
+        "<style>"
+        ".m-tab { width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 16px; }"
+        ".m-tab th { background-color: #8B0000; color: white !important; padding: 12px; text-align: left; }"
+        ".m-tab td { padding: 15px 12px; border-bottom: 1px solid #eee; color: black !important; background-color: white; }"
+        ".count-badge { background-color: #8B0000; color: white; padding: 4px 10px; border-radius: 50%; font-weight: bold; }"
+        "</style>"
+    )
+
+    table_html = table_style + (
+        "<table class='m-tab'>"
+        "<tr>"
+        "<th style='width: 70%;'>Verein</th>"
+        "<th style='width: 30%; text-align: center;'>Titel</th>"
+        "</tr>"
+    )
+
+    for _, row in meister_counts.iterrows():
+        table_html += (
+            f"<tr>"
+            f"<td style='font-weight: bold;'>{row['Verein']}</td>"
+            f"<td style='text-align: center;'><span class='count-badge'>{row['Titel']}</span></td>"
+            f"</tr>"
+        )
+    table_html += "</table>"
+
+    st.markdown(table_html, unsafe_allow_html=True)
+
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
     st.set_page_config(page_title="Bundesliga Dashboard", layout="centered")
@@ -218,7 +285,7 @@ def run_mobile_main():
     elif menu == "Ewige Tabelle":
         show_mobile_ewige_tabelle(df)
     elif menu == "Meisterschaften":
-        st.subheader("Meisterschaften")
+        show_mobile_meisterschaften(df)
     elif menu == "Vereinsanalyse":
         st.subheader("Vereinsanalyse")
     elif menu == "Tippspiel":
