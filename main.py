@@ -437,10 +437,10 @@ def show_highscore():
 # ==========================================
 
 def main():
-    # --- AUTOMATISCHE ERKENNUNG DER BILDSCHIRMBREITE ---
+    # 1. JavaScript zur Breitenerkennung
     import streamlit.components.v1 as components
     
-    # JavaScript, das die Breite an Streamlit sendet
+    # Wir senden die Breite an Streamlit
     components.html(
         """
         <script>
@@ -451,24 +451,19 @@ def main():
         height=0,
     )
 
-    # Breite aus dem Session State auslesen
-    # Wir prüfen, ob sich die Breite geändert hat, um einen Endlos-Loop zu vermeiden
-    detected_width = st.session_state.get("device_width")
-    
-    # Falls die Breite gerade erst vom JS übertragen wurde, speichern und neustarten
-    # (Das sorgt dafür, dass die App sofort umschaltet)
-    if detected_width is not None and st.session_state.get("_last_width") != detected_width:
-        st.session_state._last_width = detected_width
-        st.rerun()
+    # 2. Breite aus Session State abrufen
+    # Falls noch nicht erkannt, nehmen wir 1200 (Desktop) als Fallback
+    detected_width = st.session_state.get("device_width", 1200)
 
-    # Prüfung: URL-Parameter ODER schmaler Bildschirm (jetzt bis 1000px für große Handys)
-    current_width = detected_width if detected_width else 1200
+    # 3. Die Weiche (Logik)
     query_params = st.query_params
     
-    if query_params.get("view") == "mobile" or current_width < 1000:
+    # Wir erhöhen den Schwellenwert auf 1100px, damit auch große Handys 
+    # im Querformat oder mit hoher Auflösung sicher als "Mobile" erkannt werden.
+    if query_params.get("view") == "mobile" or detected_width < 1100:
         from mobile_app import run_mobile_main
         run_mobile_main()
-        st.stop()
+        st.stop() # Verhindert das Laden der Desktop-Konfiguration
     
     st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
     
