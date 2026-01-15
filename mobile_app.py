@@ -542,7 +542,7 @@ def run_mobile_main():
     elif menu == "Tippspiel":
         show_mobile_tippspiel(df)
     elif menu == "Highscore":
-        st.subheader("Highscore")    
+        show_mobile_highscore(df)    
 
 if __name__ == "__main__":
     run_mobile_main()
