@@ -1,10 +1,10 @@
 import streamlit as st
 import os
 import pandas as pd
-
+from sqlalchemy import text
 
 def show_mobile_startseite():
-    st.markdown("<h2 style='text-align: center; color: darkred;'>⚽Bundesliga-Dashboard</h1>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; color: darkred;'>⚽Bundesliga-Dashboard</h1>", unsafe_allow_html=True)
     if os.path.exists("bundesliga.jpg"):
         st.image("bundesliga.jpg", use_container_width=True)
         st.caption("Bildquelle: Pixabay")
@@ -350,6 +350,102 @@ def show_mobile_vereinsanalyse(df):
     table_html += "</table>"
     st.markdown(table_html, unsafe_allow_html=True)
 
+def show_mobile_tippspiel(df):
+    st.markdown("<h2 style='text-align: center; color: #8B0000;'>📝 Tippspiel</h2>", unsafe_allow_html=True)
+    
+    # --- LOGIK AUS DEINER MAIN.PY ---
+    aktuelle_saison = str(df["saison"].max())
+    offene_spieltage = sorted(df[(df["saison"] == aktuelle_saison) & (df["tore_heim"].isna())]["spieltag"].unique())
+
+    if offene_spieltage:
+        selected_st = st.selectbox("Spieltag auswählen:", offene_spieltage, key="mobile_tipp_st")
+        
+        mask = (df["saison"] == aktuelle_saison) & (df["spieltag"] == selected_st) & (df["tore_heim"].isna())
+        current_st_df = df[mask].sort_values("heim")
+
+        st.subheader(f"Tipps für den {selected_st}. Spieltag")
+
+        # --- MOBILE STYLING ANFANG ---
+        with st.form("mobile_tipp_form"):
+            tipps_data = {}
+            
+            for idx, row in current_st_df.iterrows():
+                # Wir nutzen einen Container mit Rahmen als "Karte" für jedes Spiel
+                with st.container(border=True):
+                    # Vereinsnamen zentriert und fett oben drüber
+                    st.markdown(f"""
+                        <div style='text-align: center; margin-bottom: 10px; font-size: 16px;'>
+                            <b>{row['heim']}</b> <span style='color: #8B0000;'>vs.</span> <b>{row['gast']}</b>
+                        </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Die Eingabefelder nebeneinander (groß genug für Daumen-Bedienung)
+                    col_th, col_divider, col_tg = st.columns([4, 1, 4])
+                    
+                    with col_th:
+                        th = st.number_input("Heim", min_value=0, max_value=20, value=0, step=1, 
+                                             key=f"h_{idx}", label_visibility="collapsed")
+                    with col_divider:
+                        st.markdown("<h3 style='text-align: center; margin-top: 5px;'>:</h3>", unsafe_allow_html=True)
+                    with col_tg:
+                        tg = st.number_input("Gast", min_value=0, max_value=20, value=0, step=1, 
+                                             key=f"g_{idx}", label_visibility="collapsed")
+                    
+                    tipps_data[idx] = (th, tg)
+
+            st.markdown("---")
+            user_name = st.text_input("Dein Name (Pflichtfeld):", placeholder="Name eingeben...", key="tipp_user_name_mobile")
+            
+            # Button über die volle Breite für Mobile
+            submit = st.form_submit_button("Tipps jetzt speichern", use_container_width=True)
+            # --- MOBILE STYLING ENDE ---
+
+            if submit:
+                if not user_name:
+                    st.error("Bitte gib deinen Namen ein!")
+                else:
+                    from main import save_tipp # Deine Original-Funktion
+                    erfolgreich = True
+                    for idx, (th, tg) in tipps_data.items():
+                        row = current_st_df.loc[idx]
+                        status, msg = save_tipp(user_name, aktuelle_saison, selected_st, 
+                                               row["heim"], row["gast"], th, tg)
+                        if not status: erfolgreich = False
+                    
+                    if erfolgreich:
+                        st.success("Tipps erfolgreich gespeichert!")
+                        st.rerun()
+    else:
+        st.info("Keine weiteren Spiele zum Tippen verfügbar.")
+
+    # --- AUSWERTUNG (UNTERER TEIL) ---
+    st.markdown("---")
+    st.subheader("📊 Deine Auswertung")
+    check_user = st.text_input("Name für Punkte-Check:", key="mobile_check_user")
+    
+    if check_user:
+        from main import get_conn, display_styled_table
+        conn = get_conn()
+        query = """
+            SELECT t.spieltag, t.heim, t.gast, t.tipp_heim, t.tipp_gast, t.punkte, s.tore_heim, s.tore_gast
+            FROM tipps t
+            JOIN spiele s ON t.saison = s.saison AND t.spieltag = s.spieltag AND t.heim = s.heim
+            WHERE t."user" = :u AND t.saison = :s
+            ORDER BY t.spieltag DESC, t.heim ASC
+        """
+        user_tipps = conn.query(query, params={"u": str(check_user), "s": str(aktuelle_saison)}, ttl=0)
+        
+        if not user_tipps.empty:
+            st.metric("Gesamtpunkte", f"{int(user_tipps['punkte'].sum())} Pkt.")
+            
+            # Kompakte Tabellen-Aufbereitung
+            user_tipps['Real'] = user_tipps.apply(lambda r: f"{int(r['tore_heim'])}:{int(r['tore_gast'])}" if pd.notna(r['tore_heim']) else "-", axis=1)
+            user_tipps['Tipp'] = user_tipps.apply(lambda r: f"{int(r['tipp_heim'])}:{int(r['tipp_gast'])}", axis=1)
+            
+            ausgabe = user_tipps[['spieltag', 'heim', 'gast', 'Tipp', 'Real', 'punkte']].copy()
+            ausgabe.columns = ['ST', 'Heim', 'Gast', 'Tipp', 'Real', 'Pkt']
+            display_styled_table(ausgabe)
+
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
     st.set_page_config(page_title="Bundesliga Dashboard", layout="centered")
@@ -378,11 +474,9 @@ def run_mobile_main():
     elif menu == "Vereinsanalyse":
         show_mobile_vereinsanalyse(df)
     elif menu == "Tippspiel":
-        st.subheader("Tippspiel")
+        show_mobile_tippspiel(df)
     elif menu == "Highscore":
         st.subheader("Highscore")    
 
 if __name__ == "__main__":
     run_mobile_main()
-
-
