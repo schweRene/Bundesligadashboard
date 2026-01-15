@@ -279,11 +279,21 @@ def show_mobile_meisterschaften(df):
 def show_mobile_vereinsanalyse(df):
     st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🔍 Vereinsanalyse</h2>", unsafe_allow_html=True)
 
-    alle_teams = sorted(pd.concat([df["heim"], df["gast"]]).unique())
-    selected_team = st.selectbox("Verein auswählen:", alle_teams)
+    # 1. Auswahl des Haupt-Vereins
+    # Wir fügen einen leeren String am Anfang ein, damit die Box leer startet
+    alle_teams = [""] + sorted(pd.concat([df["heim"], df["gast"]]).unique().tolist())
+    
+    # placeholder hilft dem User zu wissen, was er tun soll
+    selected_team = st.selectbox("Verein suchen oder wählen:", alle_teams, index=0)
 
+    # Wenn noch nichts ausgewählt wurde, brechen wir hier ab
+    if selected_team == "":
+        st.info("Bitte gib einen Vereinsnamen ein oder wähle einen aus der Liste.")
+        return
+
+    # 2. Logik: Statistik gegen jeden Gegner berechnen (identisch wie zuvor)
     gegner_stats = []
-    andere_teams = [t for t in alle_teams if t != selected_team]
+    andere_teams = [t for t in alle_teams if t != selected_team and t != ""]
 
     for gegner in andere_teams:
         duelle = df[((df["heim"] == selected_team) & (df["gast"] == gegner)) | 
@@ -294,19 +304,16 @@ def show_mobile_vereinsanalyse(df):
 
         s, u, n = 0, 0, 0
         for _, row in duelle.iterrows():
-            if row["tore_heim"] == row["tore_gast"]:
-                u += 1
+            if row["tore_heim"] == row["tore_gast"]: u += 1
             elif (row["heim"] == selected_team and row["tore_heim"] > row["tore_gast"]) or \
-                 (row["gast"] == selected_team and row["tore_gast"] > row["tore_heim"]):
-                s += 1
-            else:
-                n += 1
+                 (row["gast"] == selected_team and row["tore_gast"] > row["tore_heim"]): s += 1
+            else: n += 1
         
         gegner_stats.append({"Gegner": gegner, "Sp": sp, "S": s, "U": u, "N": n})
 
     analysis_df = pd.DataFrame(gegner_stats).sort_values(by="Sp", ascending=False)
 
-    # Kompaktes Design für 5 Spalten
+    # 3. HTML-Tabelle
     table_style = (
         "<style>"
         ".v-tab { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }"
