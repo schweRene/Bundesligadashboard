@@ -8,7 +8,7 @@ def show_mobile_startseite():
     st.markdown("""
 
         <div style='text-align: center; margin-bottom: 40px;'>
-            <h2 style='
+            <h3 style='
                 color: #8B0000; 
                 white-space: nowrap; 
                 display: inline-block;
@@ -16,11 +16,8 @@ def show_mobile_startseite():
                 margin: 0 auto;
             '>
                 ⚽ Bundesliga-Dashboard
-            </h2>
-        </div>
-        <h3 style='text-align: left; color: #8B0000; margin-bottom: 30px;'>
-            ⚽ Bundesliga-Dashboard
-        </h3>
+            </h3>
+        </div>        
     """, unsafe_allow_html=True)
     
     if os.path.exists("bundesliga.jpg"):
@@ -255,7 +252,7 @@ def show_mobile_meisterschaften(df):
             '>
                 <div style='width: 35px; height: 35px; border: 1px solid #888; border-radius: 50%;'></div>
             </div>
-            <h2 style='color: #8B0000; margin-top: 0;'>Anzahl Meisterschaften</h2>
+            <h2 style='color: #8B0000; margin-top: 0;'>Meisterschaften</h2>
         </div>
     """, unsafe_allow_html=True)
 
