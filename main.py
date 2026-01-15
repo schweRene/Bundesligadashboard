@@ -437,11 +437,10 @@ def show_highscore():
 # ==========================================
 
 def main():
-    # --- NEU: Automatische Erkennung der Bildschirmbreite ---
+    # --- AUTOMATISCHE ERKENNUNG DER BILDSCHIRMBREITE ---
     import streamlit.components.v1 as components
-    if "device_width" not in st.session_state:
-        st.session_state.device_width = 1200  # Standardwert
-
+    
+    # JavaScript, das die Breite an Streamlit sendet
     components.html(
         """
         <script>
@@ -452,15 +451,27 @@ def main():
         height=0,
     )
 
-    # Prüfung: URL-Parameter ODER schmaler Bildschirm (unter 800px)
+    # Breite aus dem Session State auslesen
+    # Wir prüfen, ob sich die Breite geändert hat, um einen Endlos-Loop zu vermeiden
+    detected_width = st.session_state.get("device_width")
+    
+    # Falls die Breite gerade erst vom JS übertragen wurde, speichern und neustarten
+    # (Das sorgt dafür, dass die App sofort umschaltet)
+    if detected_width is not None and st.session_state.get("_last_width") != detected_width:
+        st.session_state._last_width = detected_width
+        st.rerun()
+
+    # Prüfung: URL-Parameter ODER schmaler Bildschirm (jetzt bis 1000px für große Handys)
+    current_width = detected_width if detected_width else 1200
     query_params = st.query_params
-    if query_params.get("view") == "mobile" or st.session_state.get("device_width", 1200) < 800:
+    
+    if query_params.get("view") == "mobile" or current_width < 1000:
         from mobile_app import run_mobile_main
         run_mobile_main()
         st.stop()
-    # -------------------------------------------------------
     
     st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
+    
     init_db() 
     df = load_data_from_db()
     if df.empty: return
