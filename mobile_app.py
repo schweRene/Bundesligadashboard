@@ -4,10 +4,18 @@ import pandas as pd
 from sqlalchemy import text
 
 def show_mobile_startseite():
-    st.markdown("<h3 style='text-align: center; color: darkred;'>⚽Bundesliga-Dashboard</h1>", unsafe_allow_html=True)
+    # Überschrift zentriert mit Abstand nach unten
+    st.markdown("""
+        <h2 style='text-align: center; color: #8B0000; margin-bottom: 30px;'>
+            ⚽ Bundesliga-Dashboard
+        </h2>
+    """, unsafe_allow_html=True)
+    
     if os.path.exists("bundesliga.jpg"):
+        # Bild wird durch use_container_width=True im zentrierten Layout der App mittig eingepasst
         st.image("bundesliga.jpg", use_container_width=True)
-        st.caption("Bildquelle: Pixabay")
+        # Bildunterschrift ebenfalls zentriert
+        st.markdown("<div style='text-align: center; color: gray; font-size: 0.8rem;'>Bildquelle: Pixabay</div>", unsafe_allow_html=True)
 
 def show_mobile_spieltage(df):
     # 1. Auswahl der Saison
