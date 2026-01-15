@@ -252,7 +252,7 @@ def show_mobile_meisterschaften(df):
             '>
                 <div style='width: 35px; height: 35px; border: 1px solid #888; border-radius: 50%;'></div>
             </div>
-            <h2 style='color: #8B0000; margin-top: 0;'>Meisterschaften</h2>
+            <h4 style='color: #8B0000; margin-top: 0;'>Meisterschaften</h2>
         </div>
     """, unsafe_allow_html=True)
 
