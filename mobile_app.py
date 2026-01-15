@@ -438,13 +438,32 @@ def show_mobile_tippspiel(df):
         if not user_tipps.empty:
             st.metric("Gesamtpunkte", f"{int(user_tipps['punkte'].sum())} Pkt.")
             
-            # Kompakte Tabellen-Aufbereitung
-            user_tipps['Real'] = user_tipps.apply(lambda r: f"{int(r['tore_heim'])}:{int(r['tore_gast'])}" if pd.notna(r['tore_heim']) else "-", axis=1)
-            user_tipps['Tipp'] = user_tipps.apply(lambda r: f"{int(r['tipp_heim'])}:{int(r['tipp_gast'])}", axis=1)
-            
-            ausgabe = user_tipps[['spieltag', 'heim', 'gast', 'Tipp', 'Real', 'punkte']].copy()
-            ausgabe.columns = ['ST', 'Heim', 'Gast', 'Tipp', 'Real', 'Pkt']
-            display_styled_table(ausgabe)
+            if not user_tipps.empty:
+                st.metric("Gesamtpunkte", f"{int(user_tipps['punkte'].sum())} Pkt.")
+                
+                # --- MOBILE OPTIMIERTE ANZEIGE ---
+                for _, row in user_tipps.iterrows():
+                    with st.container(border=True):
+                        # Kopfzeile der Karte: Spieltag und Punkte
+                        col_st, col_pts = st.columns([1, 1])
+                        col_st.markdown(f"**ST {row['spieltag']}**")
+                        
+                        # Punkte farblich hervorheben
+                        punkte_farbe = "#28a745" if row['punkte'] > 0 else "#6c757d"
+                        col_pts.markdown(f"<div style='text-align: right;'><span style='background-color: {punkte_farbe}; color: white; padding: 2px 8px; border-radius: 10px;'>{int(row['punkte'])} Pkt.</span></div>", unsafe_allow_html=True)
+                        
+                        # Das Spiel
+                        st.markdown(f"<div style='text-align: center; margin: 5px 0;'>{row['heim']} vs. {row['gast']}</div>", unsafe_allow_html=True)
+                        
+                        # Ergebnis-Vergleich
+                        real_erg = f"{int(row['tore_heim'])}:{int(row['tore_gast'])}" if pd.notna(row['tore_heim']) else "-"
+                        tipp_erg = f"{int(row['tipp_heim'])}:{int(row['tipp_gast'])}"
+                        
+                        col_t, col_r = st.columns(2)
+                        col_t.caption(f"Dein Tipp: **{tipp_erg}**")
+                        col_r.markdown(f"<div style='text-align: right; font-size: 0.8rem; color: gray;'>Real: <b>{real_erg}</b></div>", unsafe_allow_html=True)
+            else:
+                st.warning("Keine Tipps für diesen User gefunden.")
 
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
@@ -480,3 +499,6 @@ def run_mobile_main():
 
 if __name__ == "__main__":
     run_mobile_main()
+
+
+   
