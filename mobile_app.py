@@ -124,6 +124,76 @@ def show_mobile_saisontabelle(df):
     # 4. Ausgabe mit explizitem unsafe_allow_html
     st.markdown(table_html, unsafe_allow_html=True)  
 
+def show_mobile_ewige_tabelle(df):
+    st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🏆 Ewige Tabelle</h2>", unsafe_allow_html=True)
+
+    # Daten berechnen (Logik für alle Saisons)
+    stats = []
+    teams = pd.concat([df["heim"], df["gast"]]).unique()
+
+    for team in teams:
+        h_played = df[(df["heim"] == team) & (df["tore_heim"].notna())]
+        g_played = df[(df["gast"] == team) & (df["tore_gast"].notna())]
+
+        sp = len(h_played) + len(g_played)
+        if sp == 0: continue
+
+        s = (len(h_played[h_played["tore_heim"] > h_played["tore_gast"]]) +
+             len(g_played[g_played["tore_gast"] > g_played[tore_heim]]))
+        u = (len(h_played[h_played["tore_heim"] == h_played[tore_gast]]) +
+             len(g_played[g_played["tore_gast"] == g_played["tore_heim"]]))
+        
+        pkt = int(s * 3 + u)
+        stats.append({"Team": team, "Sp": sp, "Pkt": pkt})
+
+    #Sortieren nach Punkten
+    ewige_df = pd.DataFrame(stats).sort_values(by="Pkt", ascending=False).reset_index(drop=True)
+
+    #Suchfunktion für Mobile
+    search_term = st.text_input("Verein suchen...", "").lower()
+    if search_term:
+        ewige_df = ewige_df[ewige_df["Team"].str.lower().contains(search_term)]
+
+    # HTML-Tabelle (Robutes Mobile-Design)
+    table_style = (
+        "<style>"
+        ".e-tab { width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px; }"
+        ".e-tab th { background-color: #8B0000; color: white !important; padding: 10px 5px; text-align: left; }"
+        ".e-tab td { padding: 12px 5px; border-bottom: 1px solid #eee; color: black !important; background-color: white; }"
+        ".top3 { background-color: #fff7e6 !important; font-weight: bold; }" # Gold-Touch für Top 3
+        "</style>"
+    )
+
+    table_html = table_style + (
+        "<table class='e-tab'>"
+        "<tr>"
+        "<th style='width: 15%;'>Platz</th>"
+        "<th style='width: 15%;'>Verein</th>"
+        "<th style='width: 15%; text-align: center;'>Sp</th>"
+        "<th style='width: 15%; text-align: center;'>Pkt</th>"
+        "</tr>"
+    )
+
+    for i, row in ewige_df.iterrows():
+        #Rang ermitteln (Index + 1)
+        rank = i + 1
+        special_class = "class='top3'" if rank <= 3 else ""
+
+        table_html += (
+            f"<tr {special_class}>"
+            f"<td>{rank}.</td>"
+            f"<td>{row['Team']}</td>"
+            f"<td style='text-align: center;'>{row['Sp']}</td>"
+            f"<td style='text-align: center; font-weight: bold; color: #8B0000 !important;'>{row['Pkt']}</td>"
+            f"</tr>"
+        )
+
+    table_html += "</table>"
+
+    st.markdown(table_html, unsafe_allow_html=True)
+
+
+
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
     st.set_page_config(page_title="Bundesliga Dashboard", layout="centered")
@@ -146,7 +216,7 @@ def run_mobile_main():
     elif menu == "Saisontabelle":
         show_mobile_saisontabelle(df)
     elif menu == "Ewige Tabelle":
-        st.subheader("Ewige Tabelle")
+        show_mobile_ewige_tabelle(df)
     elif menu == "Meisterschaften":
         st.subheader("Meisterschaften")
     elif menu == "Vereinsanalyse":
