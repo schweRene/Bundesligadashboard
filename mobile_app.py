@@ -281,21 +281,18 @@ def show_mobile_vereinsanalyse(df):
 
     # VEREINS-AUSWAHL: Wir setzen einen Platzhalter an Index 0
     alle_teams = sorted(pd.concat([df["heim"], df["gast"]]).unique().tolist())
-    # Der Trick: " " (Leerzeichen) oder ein Platzhalter sorgt dafür, dass nichts vorselektiert ist, was du löschen müsstest
-    options = ["Verein wählen..."] + alle_teams
+    # Mit einer leeren Auswahl starten 
+    options = [""] + alle_teams
     
-    selected_team = st.selectbox("Verein wählen:", options, index=0)
+    selected_team = st.selectbox("Verein wählen:", options, index=0, key="va_select")
 
     # Falls noch kein Verein gewählt wurde, zeigen wir nichts an
-    if selected_team == "Verein wählen...":
-        st.info("Verein wählen.")
-        return
+    if selected_team == "":
+        st.stop()     #Beendet die Ausführung hier, bis ein Verein gewählt wird
 
-    # Logik für Gegner-Statistik 
+    # Logik für Gegner-Statistik
     gegner_stats = []
-    andere_teams = [t for t in alle_teams if t != selected_team]
-
-    for gegner in andere_teams:
+    for gegner in [t for t in alle_teams if t != selected_team]:
         duelle = df[((df["heim"] == selected_team) & (df["gast"] == gegner)) | 
                     ((df["heim"] == gegner) & (df["gast"] == selected_team))].dropna(subset=["tore_heim", "tore_gast"])
         
@@ -308,7 +305,6 @@ def show_mobile_vereinsanalyse(df):
             elif (row["heim"] == selected_team and row["tore_heim"] > row["tore_gast"]) or \
                  (row["gast"] == selected_team and row["tore_gast"] > row["tore_heim"]): s += 1
             else: n += 1
-        
         gegner_stats.append({"Gegner": gegner, "Sp": sp, "S": s, "U": u, "N": n})
 
     analysis_df = pd.DataFrame(gegner_stats).sort_values(by="Sp", ascending=False)
