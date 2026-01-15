@@ -279,22 +279,19 @@ def show_mobile_meisterschaften(df):
 def show_mobile_vereinsanalyse(df):
     st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🔍 Vereinsanalyse</h2>", unsafe_allow_html=True)
 
-    # 1. Auswahl des Haupt-Vereins
-    # Wir fügen einen leeren String am Anfang ein, damit die Box leer startet
-    alle_teams = [""] + sorted(pd.concat([df["heim"], df["gast"]]).unique().tolist())
-
-    # Leerzeichen oder ein Platzhalter sorgt dafür, dass nichts vorselektiert ist
+    # VEREINS-AUSWAHL: Wir setzen einen Platzhalter an Index 0
+    alle_teams = sorted(pd.concat([df["heim"], df["gast"]]).unique().tolist())
+    # Der Trick: " " (Leerzeichen) oder ein Platzhalter sorgt dafür, dass nichts vorselektiert ist, was du löschen müsstest
     options = ["Verein wählen..."] + alle_teams
     
-    # placeholder hilft dem User zu wissen, was er tun soll
     selected_team = st.selectbox("Verein wählen:", options, index=0)
 
-    # Wenn noch nichts ausgewählt wurde, brechen wir hier ab
-    if selected_team == "":
-        st.info("Verein auswählen.")
+    # Falls noch kein Verein gewählt wurde, zeigen wir nichts an
+    if selected_team == "Verein wählen...":
+        st.info("Verein wählen.")
         return
 
-    # Logik für die Berechnung der Statistik 
+    # Logik für Gegner-Statistik 
     gegner_stats = []
     andere_teams = [t for t in alle_teams if t != selected_team]
 
@@ -316,20 +313,17 @@ def show_mobile_vereinsanalyse(df):
 
     analysis_df = pd.DataFrame(gegner_stats).sort_values(by="Sp", ascending=False)
 
-    # 3. HTML-Tabelle
+    # HTML Tabelle (S-U-N Design)
     table_style = (
         "<style>"
-        ".v-tab { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }"
-        ".v-tab th { background-color: #8B0000; color: white !important; padding: 5px 2px; text-align: center; }"
-        ".v-tab td { padding: 8px 2px; border-bottom: 1px solid #eee; color: black !important; background-color: white; text-align: center; overflow: hidden; }"
+        ".v-tab { width: 100%; border-collapse: collapse; font-size: 12px; }"
+        ".v-tab th { background-color: #8B0000; color: white !important; padding: 5px; text-align: center; }"
+        ".v-tab td { padding: 8px 4px; border-bottom: 1px solid #eee; color: black !important; background-color: white; text-align: center; }"
         ".v-tab td:first-child { text-align: left; font-weight: bold; width: 40%; }"
         "</style>"
     )
 
-    table_html = table_style + (
-        "<table class='v-tab'>"
-        "<tr><th style='width: 40%;'>Gegner</th><th>Sp</th><th>S</th><th>U</th><th>N</th></tr>"
-    )
+    table_html = table_style + "<table class='v-tab'><tr><th>Gegner</th><th>Sp</th><th>S</th><th>U</th><th>N</th></tr>"
 
     for _, row in analysis_df.iterrows():
         table_html += (
