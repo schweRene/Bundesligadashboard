@@ -400,11 +400,37 @@ def show_tippspiel(df):
             st.info("Keine Tipps gefunden.")
 
 def show_highscore():
-    st.title("🏆 Hall of Fame")
+    st.markdown("<h2 style='text-align: center; color: #8B0000;'>🏆 Hall of Fame</h2>", unsafe_allow_html=True)
     conn = get_conn()
-    hof_df = conn.query('SELECT name, saison, punkte FROM hall_of_fame ORDER BY punkte DESC', ttl=0)
+    # Begrenzung auf Top 10 via LIMIT 10
+    hof_df = conn.query('SELECT name, saison, punkte FROM hall_of_fame ORDER BY punkte DESC LIMIT 10', ttl=0)
+    
     if not hof_df.empty:
-        display_styled_table(hof_df)
+        # Spalten-Layout für Desktop-Karten (zentriert)
+        _, center_col, _ = st.columns([1, 2, 1])
+        with center_col:
+            for i, row in hof_df.iterrows():
+                rank = i + 1
+                medal = "🥇" if rank == 1 else "🥈" if rank == 2 else "🥉" if rank == 3 else f"{rank}."
+                border_style = "border: 2px solid #FFD700; box-shadow: 0px 0px 10px #FFD700;" if rank == 1 else "border: 1px solid #ddd;"
+                
+                st.markdown(f"""
+                    <div style='{border_style} border-radius: 10px; padding: 15px; margin-bottom: 15px; background-color: white;'>
+                        <table style='width: 100%; border: none;'>
+                            <tr style='border: none;'>
+                                <td style='width: 10%; font-size: 24px; text-align: center; border: none;'>{medal}</td>
+                                <td style='width: 70%; padding-left: 15px; border: none;'>
+                                    <div style='font-weight: bold; font-size: 18px; color: {"#8B0000" if "Computer" in str(row["name"]) else "#31333F"};'>{row['name']}</div>
+                                    <div style='font-size: 0.9rem; color: gray;'>Saison {row['saison']}</div>
+                                </td>
+                                <td style='width: 20%; text-align: right; border: none;'>
+                                    <div style='font-weight: bold; font-size: 20px; color: #8B0000;'>{int(row['punkte'])}</div>
+                                    <div style='font-size: 0.8rem; color: gray;'>Punkte</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                """, unsafe_allow_html=True)
 
 # ==========================================
 # 6. MAIN APP

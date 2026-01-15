@@ -372,23 +372,35 @@ def show_mobile_tippspiel(df):
         with st.form("mobile_tipp_form"):
             tipps_data = {} 
             for idx, row in current_st_df.iterrows():
+                # Struktur exakt wie in show_mobile_spieltage übernommen
                 with st.container(border=True):
-                    st.markdown(f"<div style='text-align: center; font-weight: bold; margin-bottom: 5px;'>{row['heim']} - {row['gast']}</div>", unsafe_allow_html=True)
+                    col_heim, col_input, col_gast = st.columns([4, 3, 4])
                     
-                    c1, c2, c3 = st.columns([2, 1, 2])
-                    with c1:
-                        th = st.number_input("Heim", 0, 20, 0, 1, key=f"mh_{idx}", label_visibility="collapsed")
-                    with c2:
-                        # Doppelpunkt in Dunkelrot angepasst
-                        st.markdown("<h3 style='text-align: center; margin: 0; color: #8B0000;'>:</h3>", unsafe_allow_html=True)
-                    with c3:
-                        tg = st.number_input("Gast", 0, 20, 0, 1, key=f"mg_{idx}", label_visibility="collapsed")
+                    with col_heim:
+                        st.write(f"**{row['heim']}**")
+                    
+                    with col_input:
+                        # Zentrales Eingabefeld im Stil des Ergebnis-Badges
+                        st.markdown("""
+                            <div style='background-color: #8B0000; color: white; text-align: center; 
+                            border-radius: 5px; font-weight: bold; padding: 2px; margin-bottom: 5px; font-size: 0.8rem;'>
+                                DEIN TIPP
+                            </div>
+                        """, unsafe_allow_html=True)
+                        
+                        tipp_col1, tipp_col2 = st.columns(2)
+                        with tipp_col1:
+                            th = st.number_input("H", 0, 20, 0, 1, key=f"mh_{idx}", label_visibility="collapsed")
+                        with tipp_col2:
+                            tg = st.number_input("G", 0, 20, 0, 1, key=f"mg_{idx}", label_visibility="collapsed")
+                    
+                    with col_gast:
+                        st.markdown(f"<div style='text-align: right;'><b>{row['gast']}</b></div>", unsafe_allow_html=True)
+                    
                     tipps_data[idx] = (th, tg)
 
             st.markdown("---")
             user_name = st.text_input("Dein Name:", placeholder="Pflichtfeld", key="mob_user_name")
-            # Button-Styling wird durch Streamlit primär über das Theme gesteuert, 
-            # aber die Konsistenz bleibt durch die Verwendung in der Form gewahrt.
             submit = st.form_submit_button("Tipps speichern", use_container_width=True)
 
             if submit:
@@ -408,7 +420,7 @@ def show_mobile_tippspiel(df):
     else:
         st.info("Keine offenen Spiele zum Tippen verfügbar.")
 
-    # --- AUSWERTUNG ---
+    # --- AUSWERTUNG (Bleibt konsistent) ---
     st.markdown("<br><h3 style='text-align: center; color: #8B0000;'>📊 Deine Auswertung</h3>", unsafe_allow_html=True)
     check_user = st.text_input("Name eingeben für Punkte-Check:", key="mob_check_user")
     
@@ -425,13 +437,11 @@ def show_mobile_tippspiel(df):
         user_tipps = conn.query(query, params={"u": str(check_user), "s": str(aktuelle_saison)}, ttl=0)
         
         if not user_tipps.empty:
-            # Metrik-Farbe wird von Streamlit automatisch gesteuert, Text ist nun konsistent
             st.metric("Gesamtpunkte", f"{int(user_tipps['punkte'].sum())} Pkt.")
             for _, row in user_tipps.iterrows():
                 with st.container(border=True):
                     c_h1, c_h2 = st.columns([1, 1])
                     c_h1.write(f"**ST {row['spieltag']}**")
-                    # Punkte-Badge Farbe: Grün bei Erfolg, Grau bei 0 Punkten
                     p_farbe = "#28a745" if row['punkte'] > 0 else "#6c757d"
                     c_h2.markdown(f"<div style='text-align:right;'><span style='background-color:{p_farbe}; color:white; padding:2px 8px; border-radius:5px; font-size: 12px;'>{int(row['punkte'])} Pkt</span></div>", unsafe_allow_html=True)
                     
@@ -440,50 +450,30 @@ def show_mobile_tippspiel(df):
                     r_erg = f"{int(row['tore_heim'])}:{int(row['tore_gast'])}" if pd.notna(row['tore_heim']) else "-"
                     st.caption(f"Tipp: {t_erg} | Real: {r_erg}")
         else:
-            st.info("Keine Tipps gefunden. Prüfe die Schreibweise!")
+            st.info("Keine Tipps gefunden.")
 
 def show_mobile_highscore(df):
     st.markdown("<h2 style='text-align: center; color: #8B0000;'>🏆 Hall of Fame</h2>", unsafe_allow_html=True)
-
     from main import get_conn
     conn = get_conn()
 
-    # DB-Init
-    res = conn.query("SELECT COUNT(*) as count FROM hall_of_fame", ttl=0)
-    if res.iloc[0]['count'] == 0:
-        try:
-            with conn.session as session:
-                dummies = [('Computer 1', 'Historisch', 20), ('Computer 2', 'Historisch', 17), ('Computer 3', 'Historisch', 14)]
-                for n, s, p in dummies:
-                    session.execute(text('INSERT INTO hall_of_fame (name, saison, punkte) VALUES (:n, :s, :p)'), {"n": n, "s": s, "p": p})
-                session.commit()
-            st.rerun() # Seite neu laden, um Daten anzuzeigen
-        except Exception: pass
-
-    hof_df = conn.query('SELECT name, saison, punkte FROM hall_of_fame ORDER BY punkte DESC', ttl=0)
+    # Begrenzung auf Top 10
+    hof_df = conn.query('SELECT name, saison, punkte FROM hall_of_fame ORDER BY punkte DESC LIMIT 10', ttl=0)
 
     if not hof_df.empty:
         for i, row in hof_df.iterrows():
             rank = i + 1
-            border_style = "border: 1px solid #eee;"
-            medal = f"{rank}."
+            medal = "🥇" if rank == 1 else "🥈" if rank == 2 else "🥉" if rank == 3 else f"{rank}."
+            # Styling analog zum Rest der App
+            border_style = "border: 2px solid #FFD700;" if rank == 1 else "border: 1px solid #eee;"
             
-            if rank == 1:
-                medal, border_style = "🥇", "border: 2px solid #FFD700; box-shadow: 0px 0px 8px #FFD700;"
-            elif rank == 2:
-                medal, border_style = "🥈", "border: 2px solid #C0C0C0;"
-            elif rank == 3:
-                medal, border_style = "🥉", "border: 2px solid #CD7F32;"
-
             st.markdown(f"""
                 <div style='{border_style} border-radius: 10px; padding: 12px; margin-bottom: 10px; background-color: white;'>
-                    <table style='width: 100%; border-collapse: collapse; border: none;'>
+                    <table style='width: 100%; border: none;'>
                         <tr style='border: none;'>
                             <td style='width: 15%; font-size: 22px; text-align: center; border: none;'>{medal}</td>
                             <td style='width: 65%; padding-left: 10px; border: none;'>
-                                <div style='font-weight: bold; color: {"#8B0000" if "Computer" in str(row["name"]) else "#31333F"};'>
-                                    {row['name']}
-                                </div>
+                                <div style='font-weight: bold; color: {"#8B0000" if "Computer" in str(row["name"]) else "#31333F"};'>{row['name']}</div>
                                 <div style='font-size: 0.8rem; color: gray;'>Saison {row['saison']}</div>
                             </td>
                             <td style='width: 20%; text-align: right; border: none;'>
@@ -495,7 +485,7 @@ def show_mobile_highscore(df):
                 </div>
             """, unsafe_allow_html=True)
     else:
-        st.info("Die Hall of Fame wird geladen...")    
+        st.info("Die Hall of Fame wird geladen...")   
 
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
