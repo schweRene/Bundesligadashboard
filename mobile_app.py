@@ -354,9 +354,8 @@ import pandas as pd
 import streamlit as st
 
 def show_mobile_tippspiel(df):
-    st.markdown("<h2 style='text-align: center; color: #8B0000;'>⚽ Tippspiel</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #8B0000;'>📝 Tippspiel</h2>", unsafe_allow_html=True)
     
-    # 1. LOGIK (Bleibt identisch zu deiner Desktop-Version)
     aktuelle_saison = str(df["saison"].max())
     offene_spieltage = sorted(df[(df["saison"] == aktuelle_saison) & (df["tore_heim"].isna())]["spieltag"].unique())
 
@@ -368,32 +367,23 @@ def show_mobile_tippspiel(df):
 
         st.subheader(f"Tipps für den {selected_st}. Spieltag")
 
-        # FORMULAR START
         with st.form("mobile_tipp_form"):
             tipps_data = {} 
-            
             for idx, row in current_st_df.iterrows():
-                # Karte für jedes Spiel
                 with st.container(border=True):
-                    # Teams zentriert anzeigen
-                    st.markdown(f"<div style='text-align: center; font-weight: bold;'>{row['heim']} - {row['gast']}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align: center; font-weight: bold; margin-bottom: 5px;'>{row['heim']} - {row['gast']}</div>", unsafe_allow_html=True)
                     
-                    # Eingabe-Layout: [Heim-Zahl, Trenner, Gast-Zahl]
-                    # Nur 3 Spalten sind mobil stabil
                     c1, c2, c3 = st.columns([2, 1, 2])
                     with c1:
                         th = st.number_input("Heim", 0, 20, 0, 1, key=f"mh_{idx}", label_visibility="collapsed")
                     with c2:
-                        st.markdown("<h3 style='text-align: center; margin: 0;'>:</h3>", unsafe_allow_html=True)
+                        st.markdown("<h3 style='text-align: center; margin: 0; color: #8B0000;'>:</h3>", unsafe_allow_html=True)
                     with c3:
                         tg = st.number_input("Gast", 0, 20, 0, 1, key=f"mg_{idx}", label_visibility="collapsed")
-                    
                     tipps_data[idx] = (th, tg)
 
             st.markdown("---")
             user_name = st.text_input("Dein Name:", placeholder="Pflichtfeld", key="mob_user_name")
-            
-            # Button nutzt volle Breite auf Mobile
             submit = st.form_submit_button("Tipps speichern", use_container_width=True)
 
             if submit:
@@ -408,20 +398,18 @@ def show_mobile_tippspiel(df):
                         if not status: erfolgreich = False
                     
                     if erfolgreich:
-                        st.success("Gespeichert!")
+                        st.success("Tipps erfolgreich gespeichert!")
                         st.rerun()
     else:
-        st.info("Keine Spiele verfügbar.")
+        st.info("Keine offenen Spiele zum Tippen verfügbar.")
 
-    # 2. AUSWERTUNG (Karten statt Tabelle für Mobile)
-    st.markdown("---")
-    st.subheader("📊 Deine Auswertung")
-    check_user = st.text_input("Name für Check:", key="mob_check_user")
+    # --- AUSWERTUNG ---
+    st.markdown("<br><h3 style='text-align: center; color: #8B0000;'>📊 Deine Auswertung</h3>", unsafe_allow_html=True)
+    check_user = st.text_input("Name eingeben für Punkte-Check:", key="mob_check_user")
     
     if check_user:
         from main import get_conn
         conn = get_conn()
-        # SQL Logik bleibt gleich, aber wir nutzen LOWER/TRIM für Handy-Tastaturen (Autokorrektur-Leerzeichen)
         query = """
             SELECT t.spieltag, t.heim, t.gast, t.tipp_heim, t.tipp_gast, t.punkte, s.tore_heim, s.tore_gast
             FROM tipps t
@@ -433,23 +421,19 @@ def show_mobile_tippspiel(df):
         
         if not user_tipps.empty:
             st.metric("Gesamtpunkte", f"{int(user_tipps['punkte'].sum())} Pkt.")
-            
             for _, row in user_tipps.iterrows():
                 with st.container(border=True):
-                    # Kopfzeile Karte
-                    c_header_1, c_header_2 = st.columns([1, 1])
-                    c_header_1.write(f"**ST {row['spieltag']}**")
-                    p_color = "#28a745" if row['punkte'] > 0 else "#6c757d"
-                    c_header_2.markdown(f"<div style='text-align:right;'><span style='background-color:{p_color}; color:white; padding:2px 8px; border-radius:5px;'>{int(row['punkte'])} Pkt</span></div>", unsafe_allow_html=True)
+                    c_h1, c_h2 = st.columns([1, 1])
+                    c_h1.write(f"**ST {row['spieltag']}**")
+                    p_farbe = "#28a745" if row['punkte'] > 0 else "#6c757d"
+                    c_h2.markdown(f"<div style='text-align:right;'><span style='background-color:{p_farbe}; color:white; padding:2px 8px; border-radius:5px; font-size: 12px;'>{int(row['punkte'])} Pkt</span></div>", unsafe_allow_html=True)
                     
-                    # Spiel & Ergebnis
-                    st.write(f"{row['heim']} vs. {row['gast']}")
-                    tipp_erg = f"{int(row['tipp_heim'])}:{int(row['tipp_gast'])}"
-                    real_erg = f"{int(row['tore_heim'])}:{int(row['tore_gast'])}" if pd.notna(row['tore_heim']) else "-"
-                    
-                    st.caption(f"Dein Tipp: {tipp_erg} | Real: {real_erg}")
+                    st.write(f"{row['heim']} - {row['gast']}")
+                    t_erg = f"{int(row['tipp_heim'])}:{int(row['tipp_gast'])}"
+                    r_erg = f"{int(row['tore_heim'])}:{int(row['tore_gast'])}" if pd.notna(row['tore_heim']) else "-"
+                    st.caption(f"Tipp: {t_erg} | Real: {r_erg}")
         else:
-            st.info("Keine Tipps gefunden. Prüfe die Schreibweise.")
+            st.info("Keine Tipps gefunden. Prüfe die Schreibweise!")
 
 def show_mobile_highscore(df):
     st.markdown("<h2 style='text-align: center; color: #8B0000;'>🏆 Hall of Fame</h2>", unsafe_allow_html=True)
