@@ -457,63 +457,46 @@ def show_mobile_highscore(df):
     from main import get_conn
     conn = get_conn()
 
-    # 1. DB-Init Logik (wie bisher)
+    # DB-Init
     res = conn.query("SELECT COUNT(*) as count FROM hall_of_fame", ttl=0)
     if res.iloc[0]['count'] == 0:
         try:
             with conn.session as session:
-                dummies = [
-                    ('Computer 1', 'Historisch', 20),
-                    ('Computer 2', 'Historisch', 17),
-                    ('Computer 3', 'Historisch', 14)
-                ]
-                for name, saison, punkte in dummies:
-                    session.execute(
-                        text('INSERT INTO hall_of_fame (name, saison, punkte) VALUES (:n, :s, :p)'),
-                        {"n": name, "s": saison, "p": punkte}
-                    )
+                dummies = [('Computer 1', 'Historisch', 20), ('Computer 2', 'Historisch', 17), ('Computer 3', 'Historisch', 14)]
+                for n, s, p in dummies:
+                    session.execute(text('INSERT INTO hall_of_fame (name, saison, punkte) VALUES (:n, :s, :p)'), {"n": n, "s": s, "p": p})
                 session.commit()
-            st.cache_data.clear()
-        except Exception:
-            pass
+            st.rerun() # Seite neu laden, um Daten anzuzeigen
+        except Exception: pass
 
-    # 2. Daten laden
     hof_df = conn.query('SELECT name, saison, punkte FROM hall_of_fame ORDER BY punkte DESC', ttl=0)
 
-    # 3. Anzeige mit speziellem Rahmen-Styling
-    if hof_df is not None and not hof_df.empty:
+    if not hof_df.empty:
         for i, row in hof_df.iterrows():
             rank = i + 1
-            
-            # Standard-Werte
-            border_style = "border: 1px solid #ddd;" # Standard grau
+            border_style = "border: 1px solid #eee;"
             medal = f"{rank}."
             
-            # Top 3 Highlighting
             if rank == 1:
-                medal = "🥇"
-                border_style = "border: 2px solid #FFD700; box-shadow: 0px 0px 10px #FFD700;" # Gold-Glow
+                medal, border_style = "🥇", "border: 2px solid #FFD700; box-shadow: 0px 0px 8px #FFD700;"
             elif rank == 2:
-                medal = "🥈"
-                border_style = "border: 2px solid #C0C0C0; box-shadow: 0px 0px 8px #C0C0C0;" # Silber-Glow
+                medal, border_style = "🥈", "border: 2px solid #C0C0C0;"
             elif rank == 3:
-                medal = "🥉"
-                border_style = "border: 2px solid #CD7F32; box-shadow: 0px 0px 5px #CD7F32;" # Bronze-Glow
+                medal, border_style = "🥉", "border: 2px solid #CD7F32;"
 
-            # Wir nutzen HTML innerhalb eines st.container, um den individuellen Border zu setzen
             st.markdown(f"""
-                <div style='{border_style} border-radius: 10px; padding: 10px; margin-bottom: 10px; background-color: white;'>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr>
-                            <td style='width: 15%; font-size: 24px; text-align: center;'>{medal}</td>
-                            <td style='width: 65%; padding-left: 10px;'>
+                <div style='{border_style} border-radius: 10px; padding: 12px; margin-bottom: 10px; background-color: white;'>
+                    <table style='width: 100%; border-collapse: collapse; border: none;'>
+                        <tr style='border: none;'>
+                            <td style='width: 15%; font-size: 22px; text-align: center; border: none;'>{medal}</td>
+                            <td style='width: 65%; padding-left: 10px; border: none;'>
                                 <div style='font-weight: bold; color: {"#8B0000" if "Computer" in str(row["name"]) else "#31333F"};'>
                                     {row['name']}
                                 </div>
                                 <div style='font-size: 0.8rem; color: gray;'>Saison {row['saison']}</div>
                             </td>
-                            <td style='width: 20%; text-align: right;'>
-                                <div style='font-weight: bold; font-size: 1.1rem;'>{int(row['punkte'])}</div>
+                            <td style='width: 20%; text-align: right; border: none;'>
+                                <div style='font-weight: bold; font-size: 1.1rem; color: #8B0000;'>{int(row['punkte'])}</div>
                                 <div style='font-size: 0.7rem; color: gray;'>Pkt.</div>
                             </td>
                         </tr>
@@ -521,7 +504,7 @@ def show_mobile_highscore(df):
                 </div>
             """, unsafe_allow_html=True)
     else:
-        st.info("Noch keine Einträge vorhanden.")    
+        st.info("Die Hall of Fame wird geladen...")    
 
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
