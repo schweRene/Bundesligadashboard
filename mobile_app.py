@@ -276,6 +276,69 @@ def show_mobile_meisterschaften(df):
     table_html += "</table>"
     st.markdown(table_html, unsafe_allow_html=True)
 
+def show_mobile_vereinsanalyse(df):
+    st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🔍 Vereinsanalyse</h2>", unsafe_allow_html=True)
+
+    # Auswahl des Vereins
+    alle_teams = sorted(pd.concat([df["heim"], df["gast"]]).unique())
+    selected_team = st.selectbox("Verein auswählen:", alle_teams)
+
+    #Logik für die Berechnung der Statistik gegen jeden Gegner
+    gegner_stats = []
+    andere_teams = [t for t in alle_teams if t != selected_team]
+
+    for gegner in andere_teams:
+        #Alle Duelle zwischen selected_teams und diesem Gegner
+        m1 = (df["heim"] == selected_team) & (df["gast"] == gegner)
+        m2 = (df["heim"] == gegner) & (df["gast"] == selected_team)
+        duelle = df[(m1 | m2)].dropna(subset=["tore_heim", "tore_gast"])
+
+        sp = len(duelle)
+        if sp == 0: continue  #Nur Gegner anzeigen, gegen die der Verein wirklich gespielt hat
+
+        s = 0
+        u = 0
+        n = 0
+
+        for _, row in duelle.iterrows():
+            if row["tore_heim"] == row["tore_gast"]: u += 1
+            elif (row["heim"] == selected_team and row["tore_heim"] > row["tore_gast"]) or \
+                 (row["gast"] == selected_team and row["tore_gast"] > row["tore_heim"]): s += 1
+            else: n += 1
+
+        gegner_stats.append({"Gegner": gegner, "Sp": sp, "S": s, "U": u, "N": n})
+
+    #DataFrame erstellen und sortieren
+    analysis_df = pd.DataFrame(gegner_stats).sort_values(by="Sp", ascending=False) 
+
+    table_style = (
+        "<style>"
+        ".v-tab { width: 100%; border-collapse: collapse; font-size: 12px; }"
+        ".v-tab th { background-color: #8B0000; color: white; padding: 5px; text-align: center; }"
+        ".v-tab td { padding: 8px 4px; border-bottom: 1px solid #eee; color: black !important; background-color: white; text-align: center; }"
+        ".v-tab td:first-child { text-align: left; font-weight: bold; }"
+        "</style>"
+    )
+
+    table_html = table_style + (
+        "<table class='v-tab'>"
+        "<tr><th>Gegner</th><th>Sp</th><th>S</th><th>U</th><th>N</th></tr>"
+    ) 
+
+    for _, row in analysis_df.iterrows():
+        table_html += (
+            f"<tr>"
+            f"<td>{row['Gegner']}</td>"
+            f"<td>{row['Sp']}</td>"
+            f"<td style='color: green;'>{row['S']}</td>"
+            f"<td>{row['U']}</td>"
+            f"<td style='color: red;'>{row['N']}</td>"
+            f"</tr>"
+        )  
+    
+    table_html += "</table>"
+    st.markdown(table_html, unsafe_allow_html=True)
+
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
     st.set_page_config(page_title="Bundesliga Dashboard", layout="centered")
@@ -302,7 +365,7 @@ def run_mobile_main():
     elif menu == "Meisterschaften":
         show_mobile_meisterschaften(df)
     elif menu == "Vereinsanalyse":
-        st.subheader("Vereinsanalyse")
+        show_mobile_vereinsanalyse(df)
     elif menu == "Tippspiel":
         st.subheader("Tippspiel")
     elif menu == "Highscore":
