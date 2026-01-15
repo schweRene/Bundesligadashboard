@@ -437,19 +437,35 @@ def show_highscore():
 # ==========================================
 
 def main():
-    query_params = st.query_params
+    # --- NEU: Automatische Erkennung der Bildschirmbreite ---
+    import streamlit.components.v1 as components
+    if "device_width" not in st.session_state:
+        st.session_state.device_width = 1200  # Standardwert
 
-    if query_params.get("view") == "mobile":
+    components.html(
+        """
+        <script>
+        var width = window.parent.innerWidth;
+        window.parent.postMessage({type: 'streamlit:setComponentValue', value: width}, '*');
+        </script>
+        """,
+        height=0,
+    )
+
+    # Prüfung: URL-Parameter ODER schmaler Bildschirm (unter 800px)
+    query_params = st.query_params
+    if query_params.get("view") == "mobile" or st.session_state.get("device_width", 1200) < 800:
         from mobile_app import run_mobile_main
         run_mobile_main()
         st.stop()
+    # -------------------------------------------------------
     
     st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
     init_db() 
     df = load_data_from_db()
     if df.empty: return
 
-    # Korrekter Aufruf deiner Funktion aus Zeile 70 (ohne Import!)
+    # Korrekter Aufruf deiner Funktion aus Zeile 70
     evaluate_tipps(df)
 
     seasons = sorted(df["saison"].unique(), reverse=True)
@@ -463,20 +479,11 @@ def main():
     elif page == "Saisontabelle":
         s_sel = st.sidebar.selectbox("Saison wählen", seasons)
         st.title(f"Saison {s_sel}") 
-        # KEIN "from main import..." mehr! 
-        # Wir rufen deine Funktion aus Zeile 98 direkt auf:
         display_styled_table(calculate_table(df, s_sel))
     elif page == "Ewige Tabelle":
         st.title("📚 Ewige Tabelle")
-        
-        # Daten berechnen
         ewige_df = compute_ewige_tabelle(df)
-        
-        # --- TEIL A: Das Balkendiagramm für die Top 10 ---
         top_10 = ewige_df.head(10)
-        
-        # Wir berechnen einen Puffer für die Y-Achse (10% mehr als der Höchstwert),
-        # damit der Text oben nicht abgeschnitten wird.
         max_punkte = top_10['Punkte'].max()
         y_obergrenze = max_punkte * 1.15 
 
@@ -490,21 +497,17 @@ def main():
             color_continuous_scale='Viridis'
         )
         
-        # Hier fixen wir das Abschneiden:
-        fig.update_traces(textposition='outside') # Text über den Balken
+        fig.update_traces(textposition='outside')
         fig.update_layout(
             xaxis_title="Verein", 
             yaxis_title="Gesamtpunkte", 
             showlegend=False,
-            yaxis_range=[0, y_obergrenze] # Hier setzen wir das Limit manuell höher
+            yaxis_range=[0, y_obergrenze]
         )
         
         st.plotly_chart(fig, use_container_width=True)
-
-        # --- TEIL B: Die Tabelle ab Platz 11 ---
         st.subheader("Rangliste ab Platz 11")
         ab_platz_11 = ewige_df.iloc[10:] 
-        
         display_styled_table(ab_platz_11)
     elif page == "Meisterschaften": 
         show_meisterstatistik(df, seasons)
