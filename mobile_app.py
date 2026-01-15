@@ -138,44 +138,47 @@ def show_mobile_ewige_tabelle(df):
         sp = len(h_played) + len(g_played)
         if sp == 0: continue
 
+        # KORREKTUR: Anführungszeichen bei Spaltennamen hinzugefügt
         s = (len(h_played[h_played["tore_heim"] > h_played["tore_gast"]]) +
-             len(g_played[g_played["tore_gast"] > g_played[tore_heim]]))
-        u = (len(h_played[h_played["tore_heim"] == h_played[tore_gast]]) +
+             len(g_played[g_played["tore_gast"] > g_played["tore_heim"]]))
+        
+        u = (len(h_played[h_played["tore_heim"] == h_played["tore_gast"]]) +
              len(g_played[g_played["tore_gast"] == g_played["tore_heim"]]))
         
         pkt = int(s * 3 + u)
         stats.append({"Team": team, "Sp": sp, "Pkt": pkt})
 
-    #Sortieren nach Punkten
+    # Sortieren nach Punkten
     ewige_df = pd.DataFrame(stats).sort_values(by="Pkt", ascending=False).reset_index(drop=True)
 
-    #Suchfunktion für Mobile
+    # Suchfunktion für Mobile
     search_term = st.text_input("Verein suchen...", "").lower()
     if search_term:
-        ewige_df = ewige_df[ewige_df["Team"].str.lower().contains(search_term)]
+        # KORREKTUR: .contains() zu .str.contains() geändert für Pandas
+        ewige_df = ewige_df[ewige_df["Team"].str.lower().str.contains(search_term)]
 
-    # HTML-Tabelle (Robutes Mobile-Design)
+    # HTML-Tabelle (Robustes Mobile-Design)
     table_style = (
         "<style>"
         ".e-tab { width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px; }"
         ".e-tab th { background-color: #8B0000; color: white !important; padding: 10px 5px; text-align: left; }"
         ".e-tab td { padding: 12px 5px; border-bottom: 1px solid #eee; color: black !important; background-color: white; }"
-        ".top3 { background-color: #fff7e6 !important; font-weight: bold; }" # Gold-Touch für Top 3
+        ".top3 { background-color: #fff7e6 !important; font-weight: bold; }"
         "</style>"
     )
 
+    # KORREKTUR: Breite der Spalten angepasst, damit 'Verein' mehr Platz hat (55% statt 15%)
     table_html = table_style + (
         "<table class='e-tab'>"
         "<tr>"
         "<th style='width: 15%;'>Platz</th>"
-        "<th style='width: 15%;'>Verein</th>"
+        "<th style='width: 55%;'>Verein</th>"
         "<th style='width: 15%; text-align: center;'>Sp</th>"
         "<th style='width: 15%; text-align: center;'>Pkt</th>"
         "</tr>"
     )
 
     for i, row in ewige_df.iterrows():
-        #Rang ermitteln (Index + 1)
         rank = i + 1
         special_class = "class='top3'" if rank <= 3 else ""
 
@@ -189,10 +192,7 @@ def show_mobile_ewige_tabelle(df):
         )
 
     table_html += "</table>"
-
     st.markdown(table_html, unsafe_allow_html=True)
-
-
 
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
