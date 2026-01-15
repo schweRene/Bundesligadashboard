@@ -451,6 +451,67 @@ def show_mobile_tippspiel(df):
         else:
             st.info("Keine Tipps gefunden. Prüfe die Schreibweise.")
 
+def show_mobile_highscore(df):
+    st.markdown("<h2 style='text-align: center; color: #8B0000;'> 🏆 Hall of Fame</h2>", unsafe_allow_html=True)
+
+    from main import get_conn
+    conn = get_conn()
+
+    res = conn.query("SELECT COUNT(*) as count FROM hall_of_fame", ttl=0)
+    if res.iloc[0]['count'] == 0:
+        try:
+            with conn.session as session:
+                dummies = [
+                    ('Computer 1', 'Historisch', 20),
+                    ('Computer 2', 'Historisch', 17),
+                    ('Computer 3', 'Historisch', 14)
+                ]
+                for name, saison, punkte in dummies:
+                    session.execute(
+                        text('INSERT INTO hall_of_fame (name, saison, punkte) VALUES (:n, :s, :p)'),
+                        {"n": name, "s": saison, "p": punkte}
+                    )
+                session.commit()
+        except Exception:
+            pass
+
+    hof_df = conn.query('SELECT name, saison, punkte FROM hall_of_fame ORDER BY punkte DESC', ttl=0)
+
+    if not hof_df.empty:
+        #Wir loopen durch die Bestenlist
+        for i, row in hof_df.iterrows():
+            #Platzierung bestimmen
+            rank = i + 1
+            # Medaillen-Styling
+            if rank == 1:
+                medal, color = "🥇", "#FFD700"  # Gold
+            elif rank == 2:
+                medal, color = "🥈", "#C0C0C0"  # Silber
+            elif rank == 3:
+                medal, color = "🥉", "#CD7F32"  # Bronze
+            else:
+                medal, color = f"**{rank}.**", "#6c757d" # Normaler Rang  
+
+            # Jede Platzierung als schmale Kachel
+            with st.container(border=True):
+                col_rank, col_main, col_pts = st.columns([1, 3, 1])
+                
+                with col_rank:
+                    # Rang/Medaille groß anzeigen
+                    st.markdown(f"<div style='font-size: 22px; text-align: center;'>{medal}</div>", unsafe_allow_html=True)
+                
+                with col_main:
+                    # Name fett und Saison klein darunter
+                    name_style = "color: #8B0000; font-weight: bold;" if "Computer" in row['name'] else "font-weight: bold;"
+                    st.markdown(f"<div style='{name_style}'>{row['name']}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='font-size: 0.8rem; color: gray;'>Saison: {row['saison']}</div>", unsafe_allow_html=True)
+                
+                with col_pts:
+                    # Punkte rechtsbündig
+                    st.markdown(f"<div style='text-align: right; font-weight: bold; margin-top: 5px;'>{int(row['punkte'])}</div><div style='text-align: right; font-size: 0.7rem;'>Pkt.</div>", unsafe_allow_html=True)
+    else:
+        st.info("Noch keine Einträge in der Hall of Fame.")      
+
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
     st.set_page_config(page_title="Bundesliga Dashboard", layout="centered")
