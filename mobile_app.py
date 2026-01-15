@@ -279,16 +279,16 @@ def show_mobile_meisterschaften(df):
 def show_mobile_vereinsanalyse(df):
     st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🔍 Vereinsanalyse</h2>", unsafe_allow_html=True)
 
-    # VEREINS-AUSWAHL: Wir setzen einen Platzhalter an Index 0
+    # VEREINS-AUSWAHL: Wir starten mit einer leeren Auswahl (""), 
+    # damit du beim Tippen nichts löschen musst.
     alle_teams = sorted(pd.concat([df["heim"], df["gast"]]).unique().tolist())
-    # Mit einer leeren Auswahl starten 
     options = [""] + alle_teams
     
-    selected_team = st.selectbox("Verein wählen:", options, index=0, key="va_select")
+    # Kein Textfeld mehr, keine Aufforderung "Bitte wählen" in der Liste
+    selected_team = st.selectbox("Verein suchen:", options, index=0, key="va_select")
 
-    # Falls noch kein Verein gewählt wurde, zeigen wir nichts an
     if selected_team == "":
-        st.stop()     #Beendet die Ausführung hier, bis ein Verein gewählt wird
+        st.stop() # Beendet die Ausführung hier, bis ein Verein gewählt wird
 
     # Logik für Gegner-Statistik
     gegner_stats = []
@@ -309,7 +309,6 @@ def show_mobile_vereinsanalyse(df):
 
     analysis_df = pd.DataFrame(gegner_stats).sort_values(by="Sp", ascending=False)
 
-    # HTML Tabelle (S-U-N Design)
     table_style = (
         "<style>"
         ".v-tab { width: 100%; border-collapse: collapse; font-size: 12px; }"
@@ -320,14 +319,12 @@ def show_mobile_vereinsanalyse(df):
     )
 
     table_html = table_style + "<table class='v-tab'><tr><th>Gegner</th><th>Sp</th><th>S</th><th>U</th><th>N</th></tr>"
-
     for _, row in analysis_df.iterrows():
         table_html += (
             f"<tr><td>{row['Gegner']}</td><td>{row['Sp']}</td>"
             f"<td style='color: green;'>{row['S']}</td><td>{row['U']}</td>"
             f"<td style='color: red;'>{row['N']}</td></tr>"
         )
-    
     table_html += "</table>"
     st.markdown(table_html, unsafe_allow_html=True)
 
