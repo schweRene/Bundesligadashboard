@@ -239,8 +239,8 @@ def show_mobile_meisterschaften(df):
     st.markdown("""
         <div style='text-align: center; margin-bottom: 10px;'>
             <div style='
-                width: 60px; 
-                height: 60px; 
+                width: 10px; 
+                height: 10px; 
                 border: 4px double #C0C0C0; 
                 border-radius: 50%; 
                 background: radial-gradient(circle, #E0E0E0 0%, #B0B0B0 100%);
