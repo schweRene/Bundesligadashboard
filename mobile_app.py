@@ -282,18 +282,21 @@ def show_mobile_vereinsanalyse(df):
     # 1. Auswahl des Haupt-Vereins
     # Wir fügen einen leeren String am Anfang ein, damit die Box leer startet
     alle_teams = [""] + sorted(pd.concat([df["heim"], df["gast"]]).unique().tolist())
+
+    # Leerzeichen oder ein Platzhalter sorgt dafür, dass nichts vorselektiert ist
+    options = ["Verein wählen..."] + alle_teams
     
     # placeholder hilft dem User zu wissen, was er tun soll
-    selected_team = st.selectbox("Verein suchen oder wählen:", alle_teams, index=0)
+    selected_team = st.selectbox("Verein wählen:", options, index=0)
 
     # Wenn noch nichts ausgewählt wurde, brechen wir hier ab
     if selected_team == "":
-        st.info("Bitte gib einen Vereinsnamen ein oder wähle einen aus der Liste.")
+        st.info("Verein auswählen.")
         return
 
-    # 2. Logik: Statistik gegen jeden Gegner berechnen (identisch wie zuvor)
+    # Logik für die Berechnung der Statistik 
     gegner_stats = []
-    andere_teams = [t for t in alle_teams if t != selected_team and t != ""]
+    andere_teams = [t for t in alle_teams if t != selected_team]
 
     for gegner in andere_teams:
         duelle = df[((df["heim"] == selected_team) & (df["gast"] == gegner)) | 
@@ -330,13 +333,9 @@ def show_mobile_vereinsanalyse(df):
 
     for _, row in analysis_df.iterrows():
         table_html += (
-            f"<tr>"
-            f"<td>{row['Gegner']}</td>"
-            f"<td>{row['Sp']}</td>"
-            f"<td style='color: green;'>{row['S']}</td>"
-            f"<td>{row['U']}</td>"
-            f"<td style='color: red;'>{row['N']}</td>"
-            f"</tr>"
+            f"<tr><td>{row['Gegner']}</td><td>{row['Sp']}</td>"
+            f"<td style='color: green;'>{row['S']}</td><td>{row['U']}</td>"
+            f"<td style='color: red;'>{row['N']}</td></tr>"
         )
     
     table_html += "</table>"
