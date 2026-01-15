@@ -6,9 +6,9 @@ from sqlalchemy import text
 def show_mobile_startseite():
     # Überschrift zentriert mit Abstand nach unten
     st.markdown("""
-        <h2 style='text-align: center; color: #8B0000; margin-bottom: 30px;'>
+        <h3 style='text-align: center; color: #8B0000; margin-bottom: 30px;'>
             ⚽ Bundesliga-Dashboard
-        </h2>
+        </h3>
     """, unsafe_allow_html=True)
     
     if os.path.exists("bundesliga.jpg"):
