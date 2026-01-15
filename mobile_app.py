@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def show_mobile_startseite():
-    st.markdown("<h3 style='text-align: center; color: darkred;'>⚽Bundesliga-Dashboard</h1>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: darkred;'>⚽Bundesliga-Dashboard</h1>", unsafe_allow_html=True)
     if os.path.exists("bundesliga.jpg"):
         st.image("bundesliga.jpg", use_container_width=True)
         st.caption("Bildquelle: Pixabay")
@@ -17,43 +17,55 @@ def show_mobile_spieltage(df):
     # Filter für die gewählte Saison
     saison_df = df[df["saison"] == selected_saison]
     
-    # --- LOGIK AUS DER main.py ÜBERNOMMEN ---
-    # Wir filtern alle Spiele der Saison, die bereits Tore haben (wie in main.py Zeile 184)
+    # --- LOGIK AUS DER main.py (Desktop-Version) ---
+    # Wir suchen den letzten Spieltag mit Ergebnissen (dropna wie in main.py)
     played_matches = saison_df.dropna(subset=["tore_heim", "tore_gast"])
     
     if not played_matches.empty:
-        # Ermittlung des aktuellsten Spieltags (analog zu main.py Zeile 187)
+        # Höchster Spieltag mit Toren
         current_st = int(played_matches["spieltag"].max())
     else:
-        # Falls noch keine Spiele stattgefunden haben, starten wir bei 1
+        # Falls noch keine Tore gefallen sind (Saisonstart)
         current_st = 1
 
-    # Alle verfügbaren Spieltage für die Auswahl
     spieltage = sorted(saison_df["spieltag"].unique())
     
-    # Berechne den Index, damit die Selectbox automatisch auf den aktuellen Tag springt
+    # Index berechnen
     try:
         default_index = spieltage.index(current_st)
     except ValueError:
         default_index = 0
 
-    selected_st = st.selectbox("Spieltag wählen:", spieltage, index=default_index)
-    # ---------------------------------------
+    # FIX: Dynamischer Key (st_sb_{selected_saison}) verhindert das Cache-Problem
+    # beim Wechsel zwischen den Saisons.
+    selected_st = st.selectbox(
+        "Spieltag wählen:", 
+        spieltage, 
+        index=default_index, 
+        key=f"st_sb_mobile_{selected_saison}"
+    )
 
-    # Überschrift und Anzeige der Spiele (Rest bleibt wie in deiner Datei)
+    # 2. Überschrift
     st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>⚽ {selected_st}. Spieltag</h2>", unsafe_allow_html=True)
 
+    # 3. Spiele für den gewählten Spieltag filtern
     mask = (df["saison"] == selected_saison) & (df["spieltag"] == selected_st)
     current_df = df[mask].copy()
 
+    # Sicherheitsscheck: Falls der Sync kurzzeitig hakt
+    if current_df.empty:
+        st.info("Lade Daten für den gewählten Spieltag...")
+        return
+
     for _, row in current_df.iterrows():
+        # Tore formatieren (Desktop-Logik: int wenn vorhanden, sonst "-")
         tore_h = int(row['tore_heim']) if pd.notna(row['tore_heim']) else "-"
         tore_g = int(row['tore_gast']) if pd.notna(row['tore_gast']) else "-"
         
         with st.container(border=True):
             col_heim, col_score, col_gast = st.columns([4, 2, 4])
             with col_heim:
-                st.markdown(f"**{row['heim']}**")
+                st.write(f"**{row['heim']}**")
             with col_score:
                 st.markdown(f"""
                     <div style='background-color: #8B0000; color: white; text-align: center; 
