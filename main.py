@@ -222,7 +222,25 @@ def show_spieltag_ansicht(df):
         display_styled_table(display_df)
 
 def show_meisterstatistik(df, seasons):
-    st.title("🏆 Deutsche Meisterschaften")
+    st.title("""
+        <div style='text-align: center; margin-bottom: 10px;'>
+            <div style='
+                width: 60px; 
+                height: 60px; 
+                border: 4px double #C0C0C0; 
+                border-radius: 50%; 
+                background: radial-gradient(circle, #E0E0E0 0%, #B0B0B0 100%);
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                margin-bottom: 10px;
+            '>
+                <div style='width: 35px; height: 35px; border: 1px solid #888; border-radius: 50%;'></div>
+            </div>
+            <h2 style='color: #8B0000; margin-top: 0;'>Anzahl Meisterschaften</h2>
+        </div>
+    """, unsafe_allow_html=True)
     meister_data = []
     for s in seasons:
         t = calculate_table(df, s)
