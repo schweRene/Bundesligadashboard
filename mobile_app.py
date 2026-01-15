@@ -6,9 +6,8 @@ from sqlalchemy import text
 def show_mobile_startseite():
     # Überschrift: Zentriert, kein Umbruch (nowrap), optimierte Größe
     st.markdown("""
-
         <div style='text-align: center; margin-bottom: 40px;'>
-            <h3 style='
+            <h4 style='
                 color: #8B0000; 
                 white-space: nowrap; 
                 display: inline-block;
@@ -16,8 +15,8 @@ def show_mobile_startseite():
                 margin: 0 auto;
             '>
                 ⚽ Bundesliga-Dashboard
-            </h3>
-        </div>        
+            </h4>
+        </div>
     """, unsafe_allow_html=True)
     
     if os.path.exists("bundesliga.jpg"):
@@ -236,24 +235,9 @@ def show_mobile_ewige_tabelle(df):
     st.markdown(table_html, unsafe_allow_html=True)
 
 def show_mobile_meisterschaften(df):
-    def show_mobile_meisterschaften(df):
-    # Mobile-Version: Kleinere Schale, kompakte Zeile
-        st.markdown("""
-            <div style='display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px;'>
-                <div style='
-                    width: 35px; height: 35px; 
-                    border: 2px double #C0C0C0; border-radius: 50%; 
-                    background: radial-gradient(circle, #E0E0E0 0%, #B0B0B0 100%);
-                    display: flex; align-items: center; justify-content: center;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.2); flex-shrink: 0;
-                '>
-                    <div style='width: 20px; height: 20px; border: 1px solid #888; border-radius: 50%;'></div>
-                </div>
-                <h4 style='color: #8B0000; margin: 0; white-space: nowrap; font-size: 1.3rem;'>
-                    Meisterschaften
-                </h4>
-            </div>
-        """, unsafe_allow_html=True)
+    st.markdown(f"<h4 style='text-align: center; color: #8B0000;'>🏆 Meisterschaften</h4>", unsafe_allow_html=True)
+
+
 
     # 1. Titelträger pro Saison ermitteln
     titel_liste = []
