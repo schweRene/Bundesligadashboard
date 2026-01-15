@@ -195,44 +195,59 @@ def show_mobile_ewige_tabelle(df):
     st.markdown(table_html, unsafe_allow_html=True)
 
 def show_mobile_meisterschaften(df):
-    st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🏆Meisterschaften</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🏆 Meisterschaften</h2>", unsafe_allow_html=True)
 
-    # Meister pro Saison ermitteln
+    # 1. Titelträger pro Saison ermitteln
     titel_liste = []
-    saisons = df["saison"].unique()
+    # Wichtig: Saisons sortieren, damit die Berechnung sauber durchläuft
+    saisons = sorted(df["saison"].unique())
 
     for saison in saisons:
-        saison_df = df[df["saison"] == saison]
+        saison_df = df[df["saison"] == saison].copy()
+        
+        # Nur Spiele berücksichtigen, die ein Ergebnis haben
+        saison_df = saison_df.dropna(subset=["tore_heim", "tore_gast"])
+        
+        if saison_df.empty:
+            continue
+
         stats = []
         teams = pd.concat([saison_df["heim"], saison_df["gast"]]).unique()
 
         for team in teams:
-            h_played = saison_df[(saison_df["heim"] == team) & (saison_df["tore_heim"].notna())]
-            g_played = saison_df[(saison_df["gast"] == team) & (saison_df["tore_gast"].notna())]
-
-            s = (len(h_played[h_played["tore_heim"] > h_played["tore_gast"]]) +
-                 len(g_played[g_played["tore_gast"] > g_played["tore_heim"]]))
-            u = (len(h_played[h_played["tore_heim"] == h_played["tore_gast"]]) +
-                 len(g_played[g_played["tore_gast"] == g_played["tore_heim"]]))
+            # Heim- und Gastspiele filtern
+            h_games = saison_df[saison_df["heim"] == team]
+            g_games = saison_df[saison_df["gast"] == team]
             
-            diff = (h_played["tore_heim"].sum() + g_played["tore_gast"].sum()) -\
-                   (h_played["tore_gast"].sum() + g_played["tore_heim"].sum())
+            # Siege, Unentschieden, Tore berechnen
+            s = (len(h_games[h_games["tore_heim"] > h_games["tore_gast"]]) + 
+                 len(g_games[g_games["tore_gast"] > g_games["tore_heim"]]))
+            u = (len(h_games[h_games["tore_heim"] == h_games["tore_gast"]]) + 
+                 len(g_games[g_games["tore_gast"] == g_games["tore_heim"]]))
             
+            t_erz = h_games["tore_heim"].sum() + g_games["tore_gast"].sum()
+            t_erh = h_games["tore_gast"].sum() + g_games["tore_heim"].sum()
+            diff = t_erz - t_erh
             pkt = s * 3 + u
-            stats.append({"Team": team, "Pkt": pkt, "Diff": diff})
+            
+            stats.append({"Team": team, "Pkt": pkt, "Diff": diff, "Tore": t_erz})
         
-        # Tabellenerster diese Saison
-        temp_table = pd.DataFrame(stats).sort_values(by=["Pkt", "Diff"], ascending=False)
+        # Sortierung wie in der Bundesliga: Punkte, dann Differenz, dann erzielte Tore
+        temp_table = pd.DataFrame(stats).sort_values(by=["Pkt", "Diff", "Tore"], ascending=False)
+        
         if not temp_table.empty:
             meister = temp_table.iloc[0]["Team"]
             titel_liste.append(meister)
 
-    #Zählen und Sortieren
+    if not titel_liste:
+        st.warning("Keine abgeschlossenen Saisons zur Berechnung gefunden.")
+        return
+
+    # 2. Zählen und Sortieren
     meister_counts = pd.Series(titel_liste).value_counts().reset_index()
     meister_counts.columns = ["Verein", "Titel"]
 
-
-    #HTML-Tabelle für Mobile
+    # 3. HTML-Tabelle für Mobile
     table_style = (
         "<style>"
         ".m-tab { width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 16px; }"
@@ -257,8 +272,8 @@ def show_mobile_meisterschaften(df):
             f"<td style='text-align: center;'><span class='count-badge'>{row['Titel']}</span></td>"
             f"</tr>"
         )
+    
     table_html += "</table>"
-
     st.markdown(table_html, unsafe_allow_html=True)
 
 def run_mobile_main():
