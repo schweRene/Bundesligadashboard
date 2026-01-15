@@ -279,51 +279,47 @@ def show_mobile_meisterschaften(df):
 def show_mobile_vereinsanalyse(df):
     st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🔍 Vereinsanalyse</h2>", unsafe_allow_html=True)
 
-    # Auswahl des Vereins
     alle_teams = sorted(pd.concat([df["heim"], df["gast"]]).unique())
     selected_team = st.selectbox("Verein auswählen:", alle_teams)
 
-    #Logik für die Berechnung der Statistik gegen jeden Gegner
     gegner_stats = []
     andere_teams = [t for t in alle_teams if t != selected_team]
 
     for gegner in andere_teams:
-        #Alle Duelle zwischen selected_teams und diesem Gegner
-        m1 = (df["heim"] == selected_team) & (df["gast"] == gegner)
-        m2 = (df["heim"] == gegner) & (df["gast"] == selected_team)
-        duelle = df[(m1 | m2)].dropna(subset=["tore_heim", "tore_gast"])
-
+        duelle = df[((df["heim"] == selected_team) & (df["gast"] == gegner)) | 
+                    ((df["heim"] == gegner) & (df["gast"] == selected_team))].dropna(subset=["tore_heim", "tore_gast"])
+        
         sp = len(duelle)
-        if sp == 0: continue  #Nur Gegner anzeigen, gegen die der Verein wirklich gespielt hat
+        if sp == 0: continue
 
-        s = 0
-        u = 0
-        n = 0
-
+        s, u, n = 0, 0, 0
         for _, row in duelle.iterrows():
-            if row["tore_heim"] == row["tore_gast"]: u += 1
+            if row["tore_heim"] == row["tore_gast"]:
+                u += 1
             elif (row["heim"] == selected_team and row["tore_heim"] > row["tore_gast"]) or \
-                 (row["gast"] == selected_team and row["tore_gast"] > row["tore_heim"]): s += 1
-            else: n += 1
-
+                 (row["gast"] == selected_team and row["tore_gast"] > row["tore_heim"]):
+                s += 1
+            else:
+                n += 1
+        
         gegner_stats.append({"Gegner": gegner, "Sp": sp, "S": s, "U": u, "N": n})
 
-    #DataFrame erstellen und sortieren
-    analysis_df = pd.DataFrame(gegner_stats).sort_values(by="Sp", ascending=False) 
+    analysis_df = pd.DataFrame(gegner_stats).sort_values(by="Sp", ascending=False)
 
+    # Kompaktes Design für 5 Spalten
     table_style = (
         "<style>"
-        ".v-tab { width: 100%; border-collapse: collapse; font-size: 12px; }"
-        ".v-tab th { background-color: #8B0000; color: white; padding: 5px; text-align: center; }"
-        ".v-tab td { padding: 8px 4px; border-bottom: 1px solid #eee; color: black !important; background-color: white; text-align: center; }"
-        ".v-tab td:first-child { text-align: left; font-weight: bold; }"
+        ".v-tab { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }"
+        ".v-tab th { background-color: #8B0000; color: white !important; padding: 5px 2px; text-align: center; }"
+        ".v-tab td { padding: 8px 2px; border-bottom: 1px solid #eee; color: black !important; background-color: white; text-align: center; overflow: hidden; }"
+        ".v-tab td:first-child { text-align: left; font-weight: bold; width: 40%; }"
         "</style>"
     )
 
     table_html = table_style + (
         "<table class='v-tab'>"
-        "<tr><th>Gegner</th><th>Sp</th><th>S</th><th>U</th><th>N</th></tr>"
-    ) 
+        "<tr><th style='width: 40%;'>Gegner</th><th>Sp</th><th>S</th><th>U</th><th>N</th></tr>"
+    )
 
     for _, row in analysis_df.iterrows():
         table_html += (
@@ -334,7 +330,7 @@ def show_mobile_vereinsanalyse(df):
             f"<td>{row['U']}</td>"
             f"<td style='color: red;'>{row['N']}</td>"
             f"</tr>"
-        )  
+        )
     
     table_html += "</table>"
     st.markdown(table_html, unsafe_allow_html=True)
