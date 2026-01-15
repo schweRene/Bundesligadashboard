@@ -149,18 +149,23 @@ def show_mobile_saisontabelle(df):
 def show_mobile_ewige_tabelle(df):
     st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🏆 Ewige Tabelle</h2>", unsafe_allow_html=True)
 
-    # Daten berechnen (Logik für alle Saisons)
+    # --- LOGIK AUS main.py ÜBERNOMMEN: Namen vereinheitlichen ---
+    df_clean = df.dropna(subset=["tore_heim", "tore_gast"]).copy()
+    df_clean["heim"] = df_clean["heim"].replace(["Meidericher SV", "Meiderich"], "MSV Duisburg")
+    df_clean["gast"] = df_clean["gast"].replace(["Meidericher SV", "Meiderich"], "MSV Duisburg")
+
+    # Daten berechnen
     stats = []
-    teams = pd.concat([df["heim"], df["gast"]]).unique()
+    teams = pd.concat([df_clean["heim"], df_clean["gast"]]).unique()
 
     for team in teams:
-        h_played = df[(df["heim"] == team) & (df["tore_heim"].notna())]
-        g_played = df[(df["gast"] == team) & (df["tore_gast"].notna())]
+        h_played = df_clean[(df_clean["heim"] == team)]
+        g_played = df_clean[(df_clean["gast"] == team)]
 
         sp = len(h_played) + len(g_played)
         if sp == 0: continue
 
-        # KORREKTUR: Anführungszeichen bei Spaltennamen hinzugefügt
+        # Siege, Unentschieden und Punkte berechnen
         s = (len(h_played[h_played["tore_heim"] > h_played["tore_gast"]]) +
              len(g_played[g_played["tore_gast"] > g_played["tore_heim"]]))
         
@@ -173,13 +178,12 @@ def show_mobile_ewige_tabelle(df):
     # Sortieren nach Punkten
     ewige_df = pd.DataFrame(stats).sort_values(by="Pkt", ascending=False).reset_index(drop=True)
 
-    # Suchfunktion für Mobile
+    # Suchfunktion
     search_term = st.text_input("Verein suchen...", "").lower()
     if search_term:
-        # KORREKTUR: .contains() zu .str.contains() geändert für Pandas
         ewige_df = ewige_df[ewige_df["Team"].str.lower().str.contains(search_term)]
 
-    # HTML-Tabelle (Robustes Mobile-Design)
+    # HTML-Tabelle (Design beibehalten)
     table_style = (
         "<style>"
         ".e-tab { width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px; }"
@@ -189,7 +193,6 @@ def show_mobile_ewige_tabelle(df):
         "</style>"
     )
 
-    # KORREKTUR: Breite der Spalten angepasst, damit 'Verein' mehr Platz hat (55% statt 15%)
     table_html = table_style + (
         "<table class='e-tab'>"
         "<tr>"
@@ -203,7 +206,6 @@ def show_mobile_ewige_tabelle(df):
     for i, row in ewige_df.iterrows():
         rank = i + 1
         special_class = "class='top3'" if rank <= 3 else ""
-
         table_html += (
             f"<tr {special_class}>"
             f"<td>{rank}.</td>"
@@ -377,6 +379,7 @@ def show_mobile_tippspiel(df):
                     with c1:
                         th = st.number_input("Heim", 0, 20, 0, 1, key=f"mh_{idx}", label_visibility="collapsed")
                     with c2:
+                        # Doppelpunkt in Dunkelrot angepasst
                         st.markdown("<h3 style='text-align: center; margin: 0; color: #8B0000;'>:</h3>", unsafe_allow_html=True)
                     with c3:
                         tg = st.number_input("Gast", 0, 20, 0, 1, key=f"mg_{idx}", label_visibility="collapsed")
@@ -384,6 +387,8 @@ def show_mobile_tippspiel(df):
 
             st.markdown("---")
             user_name = st.text_input("Dein Name:", placeholder="Pflichtfeld", key="mob_user_name")
+            # Button-Styling wird durch Streamlit primär über das Theme gesteuert, 
+            # aber die Konsistenz bleibt durch die Verwendung in der Form gewahrt.
             submit = st.form_submit_button("Tipps speichern", use_container_width=True)
 
             if submit:
@@ -420,11 +425,13 @@ def show_mobile_tippspiel(df):
         user_tipps = conn.query(query, params={"u": str(check_user), "s": str(aktuelle_saison)}, ttl=0)
         
         if not user_tipps.empty:
+            # Metrik-Farbe wird von Streamlit automatisch gesteuert, Text ist nun konsistent
             st.metric("Gesamtpunkte", f"{int(user_tipps['punkte'].sum())} Pkt.")
             for _, row in user_tipps.iterrows():
                 with st.container(border=True):
                     c_h1, c_h2 = st.columns([1, 1])
                     c_h1.write(f"**ST {row['spieltag']}**")
+                    # Punkte-Badge Farbe: Grün bei Erfolg, Grau bei 0 Punkten
                     p_farbe = "#28a745" if row['punkte'] > 0 else "#6c757d"
                     c_h2.markdown(f"<div style='text-align:right;'><span style='background-color:{p_farbe}; color:white; padding:2px 8px; border-radius:5px; font-size: 12px;'>{int(row['punkte'])} Pkt</span></div>", unsafe_allow_html=True)
                     
