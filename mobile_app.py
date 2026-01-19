@@ -528,11 +528,15 @@ def show_mobile_highscore(df):
         st.info("Die Hall of Fame wird geladen...")   
 
 def run_mobile_main():
-    
-    from main import load_data_from_db
+    import pandas as pd
 
-    #Laden der Daten aus der Hauptdatei
-    df = load_data_from_db()
+    try:
+        df = pd.read_csv("bundesliga_data.csv")
+    except Exception:
+        # Falls die CSV nicht da ist, nutzen wir die DB-Verbindung (wie in main)
+        conn = st.connection("postgresql", type="sql")
+        df = conn.query("SELECT * FROM spiele", ttl="1h")
+
     if df.empty:
         st.error("Daten konnten nicht geladen werden.")
         return
