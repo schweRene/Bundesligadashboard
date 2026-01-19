@@ -304,6 +304,28 @@ def show_vereinsanalyse(df, seasons):
             res_df = res_df[["Gegner", "Spiele", "S", "U", "N", "T", "G"]].sort_values("Spiele", ascending=False)
             display_styled_table(res_df)
 
+def show_torschuetzen():
+    st.title("⚽ Ewige Torschützenliste")
+    st.markdown("----")
+
+    with st.spinner("Lade Daten aus der DB..."):
+        df_tore = get_torschuetzen()
+
+        if not df_tore.empty:
+            st.dataframe(
+                df_tore,
+                column_config={
+                    "platz": "Rang",
+                    "spieler": "Spieler",
+                    "spiele": "Einsätze",
+                    "tore": "Tore"
+                },
+                hide_index=True,
+                use_container_width=True
+            )
+        else:
+            st.warning("Keine Torschützen gefunden.")
+
 def show_tippspiel(df):
     st.title("⚽ Tippspiel")
     # Dynamische Saison
@@ -537,27 +559,7 @@ def main():
         display_styled_table(ab_platz_11)
 
     elif page == "Ewige Torschützen":
-        st.title("⚽ Ewige Torschützenliste")
-        st.markdown("----")
-
-        with st.spinner("Lade Daten aus der DB..."):
-            df_tore = get_torschuetzen()
-
-        if not df_tore.empty:
-            # Wir konfigurieren die Spaltennamen für eine schöne Anzeige
-            st.dataframe(
-                df_tore,
-                column_config={
-                    "platz": "Rang",
-                    "spieler": "Spieler",
-                    "spiele": "Einsätze",
-                    "tore": "Tore"
-                },
-                hide_index=True,
-                use_container_width=True
-            )
-        else:
-            st.warning("Keine Torschützendaten gefunden.")
+        show_torschuetzen()
     elif page == "Meisterschaften": 
         show_meisterstatistik(df, seasons)
     elif page == "Vereinsanalyse": 

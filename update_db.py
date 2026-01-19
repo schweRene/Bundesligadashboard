@@ -1,83 +1,88 @@
-import pandas as pd
-import requests
-from bs4 import BeautifulSoup
 import os
-import io
+import time
+import sqlite3
+import datetime
 from sqlalchemy import create_engine, text
 
-# Konfiguration
-DB_URL = "postgresql://postgres.scspxyixfumfhfkodsit:zz2r9OSjV8L@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require"
-engine = create_engine(DB_URL)
 
-def update_torschuetzen_db():
-    print("--- Starte Torschützen-Update in die DB ---")
-    url = "https://www.fussballdaten.de/bundesliga/historie/"
-    # Header exakt wie in deinem Test-Code
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"}
+from update_scrapper import run_scrapper, update_csv_from_db
+from Bundesligadashboard.check_table import show_table, save_table_to_txt
+from validate_bundesliga_csv import validate_csv
 
+# --- KONFIGURATION ---
+DB_NAME = "bundesliga.db"
+SAISON = "2025/26"
+LOG_FILE = "pipeline_log.txt"
+
+
+def log_pipeline_run(status, message):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(f"[{timestamp}] {status}: {message}\n")
+
+def get_current_update_range():
     try:
-        # 1. Webseite laden
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        print("Erfolgreich: Webseite geladen")
-
-        # 2. HTML parsen
-        soup = BeautifulSoup(response.text, 'html.parser')
-        table = soup.find('table') 
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
         
-        if table is None:
-            print("Fehler: Tabelle nicht gefunden!")
-            return False
-
-        # 3. Tabelle einlesen mit StringIO
-        table_html = io.StringIO(str(table))
-        df_list = pd.read_html(table_html)
-        df = df_list[0]
+        # 1. Finde alle Spieltage der Saison, die noch NULL-Werte bei den Toren haben
+        cursor.execute("""
+            SELECT DISTINCT spieltag FROM spiele 
+            WHERE saison = ? AND (tore_heim IS NULL OR tore_gast IS NULL)
+            ORDER BY spieltag ASC
+        """, (SAISON,))
         
-        # 4. Spalten wählen & reinigen (Top 20)
-        df = df.iloc[:20, :4] 
-        df.columns = ["platz", "spieler", "spiele", "tore"]
+        missing_days = [row[0] for row in cursor.fetchall()]
+        conn.close()
+
+        if not missing_days:
+            return None # Alles aktuell
         
-        # Filtert Zeilen, die im Feld 'platz' keine Ziffern haben
-        df = df[df['platz'].astype(str).str.contains(r'^\d+$', na=False)].copy()
+        # Wir nehmen den kleinsten fehlenden Spieltag (z.B. 16 für Nachholspiele)
+        start_st = missing_days[0]
         
-        # Typen konvertieren
-        df['platz'] = df['platz'].astype(int)
-        df['spiele'] = df['spiele'].astype(int)
-        df['tore'] = df['tore'].astype(int)
+        # Wir nehmen den höchsten Spieltag, der gerade aktuell sein könnte (heute 18)
+        # Um sicherzugehen, nehmen wir den höchsten fehlenden Tag aus der Liste, 
+        # aber deckeln ihn sinnvoll (z.B. nicht Spieltag 34 im Januar)
+        # Wir nehmen einfach den höchsten 'missing', aber maximal +1 auf den aktuellsten
+        end_st = min(34, max(missing_days))
+        
+        return start_st, end_st
+    except Exception:
+        return 1, 34
 
-        print(f"Versuche {len(df)} Einträge in die DB zu schreiben")
+def run_pipeline():
+    log_pipeline_run("START", "Intelligentes Update gestartet.")
+    print(f"{'='*50}\nBUNDESLIGA SMART UPDATE\n{'='*50}")
 
-        # 5. Datenbank-Transaktion
-        with engine.begin() as conn:
-            # Tabelle erstellen falls sie fehlt
-            conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS torschuetzen (
-                    platz INT PRIMARY KEY,
-                    spieler TEXT,
-                    spiele INT,
-                    tore INT
-                );
-            """))
+    # 1. Automatischer Start- und Endpunkt
+    start_st, max_st = get_current_update_range()
+    
+    print(f"🚀 Analyse abgeschlossen.")
+    print(f"🔄 Update-Fokus: Spieltag {start_st} bis {max_st}")
 
-            # Tabelle leeren (Korrektur von TRUMICATE auf TRUNCATE)
-            conn.execute(text("TRUNCATE TABLE torschuetzen;"))
+    for st in range(start_st, max_st + 1):
+        print(f"Verarbeite Spieltag {st}...", end=" ", flush=True)
+        try:
+            count = run_scrapper(st)
+            print(f"({count} Spiele synchronisiert)")
+            time.sleep(1) 
+        except Exception as e:
+            print(f"\n❌ Fehler an Spieltag {st}: {e}")
+            break
 
-            # Daten einfügen (Tabellenname auf 'torschuetzen' vereinheitlicht)
-            for _, row in df.iterrows():
-                conn.execute(
-                    text("INSERT INTO torschuetzen (platz, spieler, spiele, tore) VALUES (:p, :s, :sp, :t)"),
-                    {"p": row['platz'], "s": row['spieler'], "sp": row['spiele'], "t": row['tore']}
-                )
+    # 2. Abschlussarbeiten
+    print(f"\n{'*'*20} FINISH {'*'*20}")
+    update_csv_from_db()    # CSV aktualisieren
+    validate_csv()          # Logik-Check
+    save_table_to_txt()     # Tabelle berechnen & exportieren
+   
+    log_pipeline_run("ENDE", f"Update Spieltag {start_st}-{max_st} erfolgreich.")
+    print(f"{'='*50}\nALLE DATEN AKTUALISIERT!\n{'='*50}")
 
-        print("✅ Datenbank erfolgreich aktualisiert.")
-        # Zur Sicherheit trotzdem noch die CSV schreiben
-        df.to_csv("torschuetzen.csv", index=False, encoding="utf-8")
-        return True
-
-    except Exception as e:
-        print(f"❌ Fehler: {e}")
-        return False
+    from torschuetzenscrapper import update_torschuetzen_db
+    print("Aktualisiere Torschützenliste")
+    update_torschuetzen_db()
 
 if __name__ == "__main__":
-    update_torschuetzen_db()
+    run_pipeline()

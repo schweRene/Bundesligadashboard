@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+import io
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -8,12 +9,15 @@ import os
 from sqlalchemy import text
 from datetime import datetime
 
+
 # ==========================================
 # 1. DATENBANK & SETUP (Cloud Version)
 # ==========================================
 
 def get_conn():
     return st.connection("postgresql", type="sql")
+
+
 
 def init_db():
     """Fügt die Computer-Dummies mit den korrekten Werten (20, 17, 14) ein, falls leer."""
@@ -126,19 +130,37 @@ def calculate_table(df, saison):
 
 @st.cache_data
 def compute_ewige_tabelle(df):
-    df_l = df.dropna(subset=["tore_heim", "tore_gast"]).copy()
-    h = df_l.rename(columns={"heim": "Team", "tore_heim": "GF", "tore_gast": "GA"})[["Team", "GF", "GA"]]
-    a = df_l.rename(columns={"gast": "Team", "tore_gast": "GF", "tore_heim": "GA"})[["Team", "GF", "GA"]]
+    # 1. Namen vereinheitlichen (MSV Duisburg Fix)
+    df_clean = df.dropna(subset=["tore_heim", "tore_gast"]).copy()
+    df_clean["heim"] = df_clean["heim"].replace(["Meidericher SV", "Meiderich"], "MSV Duisburg")
+    df_clean["gast"] = df_clean["gast"].replace(["Meidericher SV", "Meiderich"], "MSV Duisburg")
+
+    # 2. Berechnung der Statistiken
+    h = df_clean.rename(columns={"heim": "Team", "tore_heim": "GF", "tore_gast": "GA"})[["Team", "GF", "GA"]]
+    a = df_clean.rename(columns={"gast": "Team", "tore_gast": "GF", "tore_heim": "GA"})[["Team", "GF", "GA"]]
     all_m = pd.concat([h, a])
     all_m['P']=0; all_m['S']=0; all_m['U']=0; all_m['N']=0
     all_m.loc[all_m['GF'] > all_m['GA'], ['P', 'S']] = [3, 1]
     all_m.loc[all_m['GF'] == all_m['GA'], ['P', 'U']] = [1, 1]
     all_m.loc[all_m['GF'] < all_m['GA'], ['N']] = 1
-    ewige = all_m.groupby("Team").agg(Spiele=('Team','size'), S=('S','sum'), U=('U','sum'), N=('N','sum'), T=('GF','sum'), G=('GA','sum'), Punkte=('P','sum')).reset_index()
+    
+    ewige = all_m.groupby("Team").agg(
+        Spiele=('Team','size'), 
+        S=('S','sum'), 
+        U=('U','sum'), 
+        N=('N','sum'), 
+        T=('GF','sum'), 
+        G=('GA','sum'), 
+        Punkte=('P','sum')
+    ).reset_index()
+    
     cols = ['Spiele', 'S', 'U', 'N', 'T', 'G', 'Punkte']
     ewige[cols] = ewige[cols].fillna(0).astype(int)
+    
+    # Sortieren und Platzierung vergeben
     ewige = ewige.sort_values(by=["Punkte", "T"], ascending=False).reset_index(drop=True)
     ewige.insert(0, "Platz", range(1, len(ewige) + 1))
+    
     return ewige
 
 # ==========================================
@@ -220,51 +242,37 @@ def show_meisterstatistik(df, seasons):
 
 def show_vereinsanalyse(df, seasons):
     st.title("📈 Vereinsanalyse")
-    teams = sorted(df["heim"].unique())
+    
+    # Namen für die Analyse vereinheitlichen
+    df_clean = df.copy()
+    df_clean["heim"] = df_clean["heim"].replace(["Meidericher SV", "Meiderich"], "MSV Duisburg")
+    df_clean["gast"] = df_clean["gast"].replace(["Meidericher SV", "Meiderich"], "MSV Duisburg")
+    
+    # Teams aus den bereinigten Daten laden
+    teams = sorted(df_clean["heim"].unique())
     verein = st.selectbox("Verein auswählen", teams, index=None)
     
     if verein:
         erfolge = []
         for s in seasons:
-            # Tabelle für jede Saison berechnen, um den Platz zu finden
-            t = calculate_table(df, s)
+            # Wir nutzen df_clean, damit calculate_table die Punkte für den fusionierten Verein zählt
+            t = calculate_table(df_clean, s)
             if not t.empty and verein in t["Team"].values:
                 platz = t[t["Team"] == verein]["Platz"].values[0]
                 erfolge.append({"Saison": s, "Platz": int(platz)})
         
         if erfolge:
-            pdf = pd.DataFrame(erfolge)
+            pdf = pd.DataFrame(erfolge).sort_values("Saison")
+            fig = px.line(pdf, x="Saison", y="Platz", markers=True, text="Platz", 
+                         title=f"Platzierungen im Zeitverlauf: {verein}")
             
-            # WICHTIG: Chronologische Sortierung (von alt nach neu)
-            # Damit die Kurve von links nach rechts durch die Zeit läuft
-            pdf = pdf.sort_values("Saison")
-            
-            # Erstellung des Liniendiagramms
-            fig = px.line(
-                pdf, 
-                x="Saison", 
-                y="Platz", 
-                markers=True, 
-                text="Platz", 
-                title=f"Platzierungen im Zeitverlauf: {verein}"
-            )
-            
-            # WICHTIG: Skalierung fixieren (1 bis 18)
-            # autorange="reversed" sorgt dafür, dass Platz 1 oben ist
-            fig.update_yaxes(
-                autorange="reversed", 
-                tick0=1, 
-                dtick=1, 
-                range=[18.5, 0.5],  # Begrenzt die Anzeige exakt auf die 18 Plätze
-                gridcolor='rgba(128,128,128,0.2)'
-            )
-            
+            fig.update_yaxes(autorange="reversed", tick0=1, dtick=1, range=[18.5, 0.5], 
+                             gridcolor='rgba(128,128,128,0.2)')
             fig.update_traces(textposition="top center")
             st.plotly_chart(fig, use_container_width=True)
 
-        # Der restliche Code für den Direktvergleich (Tore/Gegentore)
         st.subheader("Direktvergleich")
-        v_spiele = df[((df["heim"] == verein) | (df["gast"] == verein))].dropna(subset=["tore_heim", "tore_gast"])
+        v_spiele = df_clean[((df_clean["heim"] == verein) | (df_clean["gast"] == verein))].dropna(subset=["tore_heim", "tore_gast"])
         bilanz_dict = {}
         for _, r in v_spiele.iterrows():
             is_h = r["heim"] == verein
@@ -282,96 +290,248 @@ def show_vereinsanalyse(df, seasons):
 
         if bilanz_dict:
             res_df = pd.DataFrame.from_dict(bilanz_dict, orient='index').reset_index().rename(columns={'index': 'Gegner'})
-            # Bilanz-Spalte ist weg, Tore (T) und Gegentore (G) sind da
             res_df = res_df[["Gegner", "Spiele", "S", "U", "N", "T", "G"]].sort_values("Spiele", ascending=False)
             display_styled_table(res_df)
 
 def show_tippspiel(df):
-    st.title("🎯 Tippspiel")
-    # Ermittlung der aktuellsten Saison aus den Daten
-    aktuelle_saison = sorted(df["saison"].unique(), reverse=True)[0]
-    st.subheader(f"Tipps abgeben für Saison: {aktuelle_saison}")
-    
-    # Filter für Spiele, die noch kein Ergebnis haben
-    future = df[(df['saison'] == aktuelle_saison) & (df['tore_heim'].isna())]
-    
-    if not future.empty:
-        st.info("Hinweis: Zum Speichern der Tipps muss unten zwingend ein Name eingetragen werden.")
-        spieltag = st.selectbox("Spieltag wählen", sorted(future['spieltag'].unique()))
-        tag_matches = future[future['spieltag'] == spieltag]
+    st.title("⚽ Tippspiel")
+    # Dynamische Saison
+    aktuelle_saison = str(df["saison"].max())
+
+    # 1. SPIELTAGS-AUSWAHL
+    offene_spieltage = sorted(df[(df["saison"] == aktuelle_saison) & (df["tore_heim"].isna())]["spieltag"].unique())
+
+    if offene_spieltage:
+        selected_st = st.selectbox("Spieltag auswählen:", offene_spieltage)
+        
+        mask = (df["saison"] == aktuelle_saison) & (df["spieltag"] == selected_st) & (df["tore_heim"].isna())
+        current_st_df = df[mask].sort_values("heim")
+
+        st.subheader(f"Gib deinen Tipp für den {selected_st}. Spieltag ein")
 
         with st.form("tipp_form"):
-            tipps = {}
-            for idx, row in tag_matches.iterrows():
-                c1, c2, c3 = st.columns([4, 1, 1])
-                c1.write(f"**{row['heim']}** - **{row['gast']}**")
-                tipps[idx] = (
-                    c2.number_input("H", min_value=0, step=1, key=f"h_{idx}"), 
-                    c3.number_input("G", min_value=0, step=1, key=f"g_{idx}")
-                )
+            tipps_data = {} # Hier speichern wir die Werte der Number-Inputs
             
-            user = st.text_input("Dein Name (Pflichtfeld zum Speichern):")
+            for idx, row in current_st_df.iterrows():
+                col_h, col_th, col_vs, col_tg, col_g = st.columns([3, 2, 1, 2, 3])
+                with col_h: 
+                    st.write(f"**{row['heim']}**")
+                with col_th: 
+                    th = st.number_input("Heim", min_value=0, max_value=20, value=0, step=1, key=f"h_{idx}", label_visibility="collapsed")
+                with col_vs: 
+                    st.write(":")
+                with col_tg: 
+                    tg = st.number_input("Gast", min_value=0, max_value=20, value=0, step=1, key=f"g_{idx}", label_visibility="collapsed")
+                with col_g: 
+                    st.write(f"**{row['gast']}**")
+                tipps_data[idx] = (th, tg)
+
+            st.markdown("---")
+            # Name als Pflichtfeld direkt über dem Button
+            user_name = st.text_input("Gib deinen Namen ein", placeholder="Pflichtfeld", key="tipp_user_name").strip()
             
-            if st.form_submit_button("Tipps jetzt speichern"):
-                if user.strip():
-                    try:
-                        conn = get_conn()
-                        with conn.session as session:
-                            for idx, val in tipps.items():
-                                row = tag_matches.loc[idx]
-                                # 1. Alten Tipp des Users für dieses Spiel löschen
-                                session.execute(
-                                    text('DELETE FROM tipps WHERE "user"=:u AND saison=:s AND spieltag=:st AND heim=:h AND gast=:g'),
-                                    {"u": user, "s": aktuelle_saison, "st": int(row['spieltag']), "h": row['heim'], "g": row['gast']}
-                                )
-                                # 2. Neuen Tipp einfügen
-                                session.execute(
-                                    text('INSERT INTO tipps ("user", saison, spieltag, heim, gast, tipp_heim, tipp_gast, punkte) VALUES (:u, :s, :st, :h, :g, :th, :tg, 0)'),
-                                    {"u": user, "s": aktuelle_saison, "st": int(row['spieltag']), "h": row['heim'], "g": row['gast'], "th": val[0], "tg": val[1]}
-                                )
-                            session.commit()
-                        st.success(f"Tipps für {user} wurden erfolgreich gespeichert!")
-                    except Exception as e:
-                        st.error(f"Datenbankfehler: {e}")
+            if st.form_submit_button("Tipp speichern"):
+                user_name = user_name.strip()
+                if not user_name:
+                    st.error("Bitte gib deinen Namen ein!")
                 else:
-                    st.error("Bitte gib einen Namen ein, bevor du speicherst!")
+                    erfolgreich = True
+                    fehler_meldung = ""
+                    
+                    # Da deine save_tipp jedes Spiel einzeln braucht, 
+                    # gehen wir hier in einer Schleife durch alle eingegebenen Tipps
+                    for idx, (th, tg) in tipps_data.items():
+                        row = current_st_df.loc[idx]
+                        heim_team = row["heim"]
+                        gast_team = row["gast"]
+                        
+                        # Aufruf deiner Funktion mit allen 7 Parametern
+                        status, msg = save_tipp(
+                            user_name, 
+                            aktuelle_saison, 
+                            selected_st, 
+                            heim_team, 
+                            gast_team, 
+                            th, 
+                            tg
+                        )
+                        
+                        if not status:
+                            erfolgreich = False
+                            fehler_meldung = msg
+                    
+                    if erfolgreich:
+                        st.success(f"Tipps für Spieltag {selected_st} erfolgreich gespeichert!")
+                        st.rerun() # Seite neu laden, um die Auswertung unten direkt zu aktualisieren
+                    else:
+                        st.error(f"Fehler beim Speichern: {fehler_meldung}")
     else:
-        st.write("Aktuell stehen keine Spiele zum Tippen bereit.")
+        st.info("Keine weiteren Spiele zum Tippen verfügbar.")
+
+    # 2. AUSWERTUNG 
+    st.markdown("---")
+    st.subheader("📊 Deine Tippspiel-Auswertung")
+    
+    check_user = st.text_input("Name eingeben, um deine Punktzahl zu sehen:", key="check_user_stats")
+    
+    if check_user:
+        with st.spinner('Lade deine Punkte...'):
+            conn = get_conn()
+            # Hier säubern wir die Eingabe für die Suche
+            clean_search = check_user.strip()
+            
+            # Wir nutzen ILIKE für Case-Insensitivity (Groß/Kleinschreibung egal)
+            query = ("""
+                SELECT t.spieltag, t.heim, t.gast, t.tipp_heim, t.tipp_gast, t.punkte, s.tore_heim, s.tore_gast
+                FROM tipps t
+                JOIN spiele s ON t.saison = s.saison AND t.spieltag = s.spieltag AND t.heim = s.heim
+                WHERE t."user" ILIKE :u AND t.saison = :s
+                ORDER BY t.spieltag DESC, t.heim ASC
+            """)
+            
+            # WICHTIG: Hier übergeben wir den gesäuberten Namen 'clean_search'
+            user_tipps = conn.query(query, params={"u": clean_search, "s": aktuelle_saison}, ttl=0)
+        
+        if not user_tipps.empty:
+            # Name aus der Metrik entfernt, wie gewünscht
+            gesamt_pkt = int(user_tipps['punkte'].sum())
+            st.metric("Deine aktuellen Gesamtpunkte", f"{gesamt_pkt} Pkt.")
+
+            user_tipps['Ergebnis'] = user_tipps.apply(
+                lambda r: f"{int(r['tore_heim'])}:{int(r['tore_gast'])}" if pd.notna(r['tore_heim']) else "-", axis=1
+            )
+            user_tipps['Tipp'] = user_tipps.apply(lambda r: f"{int(r['tipp_heim'])}:{int(r['tipp_gast'])}", axis=1)
+            
+            ausgabe = user_tipps[['spieltag', 'heim', 'gast', 'Tipp', 'Ergebnis', 'punkte']].copy()
+            ausgabe.columns = ['ST', 'Heim', 'Gast', 'Tipp', 'Real', 'Pkt']
+            display_styled_table(ausgabe)
+        else:
+            st.info("Keine Tipps gefunden.")
 
 def show_highscore():
-    st.title("🏆 Hall of Fame")
+    st.markdown("<h2 style='text-align: center; color: #8B0000;'>🏆 Hall of Fame</h2>", unsafe_allow_html=True)
     conn = get_conn()
-    hof_df = conn.query('SELECT name, saison, punkte FROM hall_of_fame ORDER BY punkte DESC', ttl=0)
+    # Begrenzung auf Top 10 via LIMIT 10
+    hof_df = conn.query('SELECT name, saison, punkte FROM hall_of_fame ORDER BY punkte DESC LIMIT 10', ttl=0)
+    
     if not hof_df.empty:
-        display_styled_table(hof_df)
+        # Spalten-Layout für Desktop-Karten (zentriert)
+        _, center_col, _ = st.columns([1, 2, 1])
+        with center_col:
+            for i, row in hof_df.iterrows():
+                rank = i + 1
+                medal = "🥇" if rank == 1 else "🥈" if rank == 2 else "🥉" if rank == 3 else f"{rank}."
+                border_style = "border: 2px solid #FFD700; box-shadow: 0px 0px 10px #FFD700;" if rank == 1 else "border: 1px solid #ddd;"
+                
+                st.markdown(f"""
+                    <div style='{border_style} border-radius: 10px; padding: 15px; margin-bottom: 15px; background-color: white;'>
+                        <table style='width: 100%; border: none;'>
+                            <tr style='border: none;'>
+                                <td style='width: 10%; font-size: 24px; text-align: center; border: none;'>{medal}</td>
+                                <td style='width: 70%; padding-left: 15px; border: none;'>
+                                    <div style='font-weight: bold; font-size: 18px; color: {"#8B0000" if "Computer" in str(row["name"]) else "#31333F"};'>{row['name']}</div>
+                                    <div style='font-size: 0.9rem; color: gray;'>Saison {row['saison']}</div>
+                                </td>
+                                <td style='width: 20%; text-align: right; border: none;'>
+                                    <div style='font-weight: bold; font-size: 20px; color: #8B0000;'>{int(row['punkte'])}</div>
+                                    <div style='font-size: 0.8rem; color: gray;'>Punkte</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                """, unsafe_allow_html=True)
 
 # ==========================================
 # 6. MAIN APP
 # ==========================================
 
 def main():
-    st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
+    # 1. JavaScript zur Breitenerkennung
+    import streamlit.components.v1 as components
+    
+    # Wir senden die Breite an Streamlit
+    components.html(
+        """
+        <script>
+        var width = window.parent.innerWidth;
+        window.parent.postMessage({type: 'streamlit:setComponentValue', value: width}, '*');
+        </script>
+        """,
+        height=0,
+    )
+
+    # 2. Breite aus Session State abrufen
+    # Falls noch nicht erkannt, nehmen wir 1200 (Desktop) als Fallback
+    detected_width = st.session_state.get("device_width", 1200)
+
+    # 3. Die Weiche (Logik)
+    query_params = st.query_params
+    
+    # Wir erhöhen den Schwellenwert auf 1100px, damit auch große Handys 
+    # im Querformat oder mit hoher Auflösung sicher als "Mobile" erkannt werden.
+    if query_params.get("view") == "mobile" or detected_width < 1100:
+        from mobile_app import run_mobile_main
+        run_mobile_main()
+        st.stop() # Verhindert das Laden der Desktop-Konfiguration
+    
+    #st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
+    
     init_db() 
     df = load_data_from_db()
     if df.empty: return
+
+    # Korrekter Aufruf deiner Funktion aus Zeile 70
+    evaluate_tipps(df)
+
     seasons = sorted(df["saison"].unique(), reverse=True)
     
     page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
 
-    if page == "Startseite": show_startseite()
-    elif page == "Spieltage": show_spieltag_ansicht(df)
+    if page == "Startseite": 
+        show_startseite()
+    elif page == "Spieltage": 
+        show_spieltag_ansicht(df)
     elif page == "Saisontabelle":
         s_sel = st.sidebar.selectbox("Saison wählen", seasons)
         st.title(f"Saison {s_sel}") 
-        from main import calculate_table
         display_styled_table(calculate_table(df, s_sel))
     elif page == "Ewige Tabelle":
         st.title("📚 Ewige Tabelle")
-        display_styled_table(compute_ewige_tabelle(df))
-    elif page == "Meisterschaften": show_meisterstatistik(df, seasons)
-    elif page == "Vereinsanalyse": show_vereinsanalyse(df, seasons)
-    elif page == "Tippspiel": show_tippspiel(df)
-    elif page == "Highscore": show_highscore()
+        ewige_df = compute_ewige_tabelle(df)
+        top_10 = ewige_df.head(10)
+        max_punkte = top_10['Punkte'].max()
+        y_obergrenze = max_punkte * 1.15 
+
+        fig = px.bar(
+            top_10, 
+            x='Team', 
+            y='Punkte', 
+            text='Punkte',
+            title="Top 10",
+            color='Punkte',
+            color_continuous_scale='Viridis'
+        )
+        
+        fig.update_traces(textposition='outside')
+        fig.update_layout(
+            xaxis_title="Verein", 
+            yaxis_title="Gesamtpunkte", 
+            showlegend=False,
+            yaxis_range=[0, y_obergrenze]
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        st.subheader("Rangliste ab Platz 11")
+        ab_platz_11 = ewige_df.iloc[10:] 
+        display_styled_table(ab_platz_11)
+    elif page == "Meisterschaften": 
+        show_meisterstatistik(df, seasons)
+    elif page == "Vereinsanalyse": 
+        show_vereinsanalyse(df, seasons)
+    elif page == "Tippspiel": 
+        show_tippspiel(df)
+    elif page == "Highscore": 
+        show_highscore()
 
 if __name__ == "__main__":
     main()

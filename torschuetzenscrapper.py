@@ -71,8 +71,6 @@ def update_torschuetzen_db():
             df.to_csv("torschuetzen.csv", index=False, encoding="utf-8")
             return True
         
-       
-        
     except Exception as e:
         print(f"❌ Fehler: {e}")
         return False
