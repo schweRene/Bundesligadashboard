@@ -3,25 +3,24 @@ from streamlit_javascript import st_javascript
 
 
 def start_router():
-    # Session State initialisieren
-    if "device_width" not in st.session_state:
+    # 1. URL-Parameter prüfen: Wenn ?view=mobile drin steht, erzwingt das oft die Ansicht
+    params = st.query_params
+    
+    if 'device_width' not in st.session_state:
         st.session_state.device_width = None
-    try:
-        curr_width = st_javascript("window.innerWidth")
-    except:
-        width = None
 
-    if curr_width is not None and curr_width > 0:
-        if st.session_state.device_width != curr_width:
-            st.session_state.device_width = curr_width
+    # 2. Breite messen
+    width = st_javascript("window.innerWidth")
+
+    if width is not None and width > 0:
+        st.session_state.device_width = width
+        
+        # 3. AUTO-KORREKTUR: Wenn Desktop-Breite, aber Mobile-URL -> Parameter löschen!
+        if width > 1000 and params.get("view") == "mobile":
+            st.query_params.clear()
             st.rerun()
 
-    # Breite nur abfragen, wenn wir sie noch nicht haben
-    if st.session_state.device_width is None:
-        import main
-        main.main()
-
-    # Jetzt entscheiden wir basierend auf dem gespeicherten Wert
+    # 4. Routing Entscheidung (Desktop-First)
     if st.session_state.device_width is not None and st.session_state.device_width < 768:
         import mobile_app
         mobile_app.run_mobile_main()
