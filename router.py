@@ -1,10 +1,8 @@
 import streamlit as st
-# Page Config MUSS die erste Streamlit-Zeile sein
-st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
-
 from streamlit_javascript import st_javascript
 
-
+# Page Config MUSS die erste Streamlit-Zeile sein
+st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
 
 def start_router():
     # Session State initialisieren
