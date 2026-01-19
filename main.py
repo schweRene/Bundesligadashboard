@@ -325,9 +325,10 @@ def show_tippspiel(df):
 
             st.markdown("---")
             # Name als Pflichtfeld direkt über dem Button
-            user_name = st.text_input("Gib deinen Namen ein", placeholder="Pflichtfeld", key="tipp_user_name")
+            user_name = st.text_input("Gib deinen Namen ein", placeholder="Pflichtfeld", key="tipp_user_name").strip()
             
             if st.form_submit_button("Tipp speichern"):
+                user_name = user_name.strip()
                 if not user_name:
                     st.error("Bitte gib deinen Namen ein!")
                 else:
@@ -371,17 +372,22 @@ def show_tippspiel(df):
     check_user = st.text_input("Name eingeben, um deine Punktzahl zu sehen:", key="check_user_stats")
     
     if check_user:
-        # Ladebalken anzeigen
         with st.spinner('Lade deine Punkte...'):
             conn = get_conn()
-            query = """
+            # Hier säubern wir die Eingabe für die Suche
+            clean_search = check_user.strip()
+            
+            # Wir nutzen ILIKE für Case-Insensitivity (Groß/Kleinschreibung egal)
+            query = text("""
                 SELECT t.spieltag, t.heim, t.gast, t.tipp_heim, t.tipp_gast, t.punkte, s.tore_heim, s.tore_gast
                 FROM tipps t
                 JOIN spiele s ON t.saison = s.saison AND t.spieltag = s.spieltag AND t.heim = s.heim
                 WHERE t."user" ILIKE :u AND t.saison = :s
                 ORDER BY t.spieltag DESC, t.heim ASC
-            """
-            user_tipps = conn.query(query, params={"u": str(check_user), "s": str(aktuelle_saison)}, ttl=0)
+            """)
+            
+            # WICHTIG: Hier übergeben wir den gesäuberten Namen 'clean_search'
+            user_tipps = conn.query(query, params={"u": clean_search, "s": aktuelle_saison}, ttl=0)
         
         if not user_tipps.empty:
             # Name aus der Metrik entfernt, wie gewünscht

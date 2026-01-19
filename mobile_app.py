@@ -418,10 +418,11 @@ def show_mobile_tippspiel(df):
                     tipps_data[idx] = (th, tg)
 
             st.markdown("---")
-            user_name = st.text_input("Dein Name:", placeholder="Pflichtfeld", key="mob_user_name")
+            user_name = st.text_input("Dein Name:", placeholder="Pflichtfeld", key="mob_user_name").strip()
             submit = st.form_submit_button("Tipps speichern", use_container_width=True)
 
             if submit:
+                user_name = user_name.strip()
                 if not user_name:
                     st.error("Bitte gib deinen Namen ein!")
                 else:
@@ -452,7 +453,7 @@ def show_mobile_tippspiel(df):
                 WHERE t."user" ILIKE :u AND t.saison = :s
                 ORDER BY t.spieltag DESC, t.heim ASC
         """
-        user_tipps = conn.query(query, params={"u": str(check_user), "s": str(aktuelle_saison)}, ttl=0)
+        user_tipps = conn.query(query, params={"u": str(check_user).strip(), "s": str(aktuelle_saison)}, ttl=0)
         
         if not user_tipps.empty:
             st.metric("Gesamtpunkte", f"{int(user_tipps['punkte'].sum())} Pkt.")
