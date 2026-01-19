@@ -478,6 +478,16 @@ def show_highscore():
 # ==========================================
 
 def main():
+    
+    st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
+    # Einheitliches Design für alle Überschriften erzwingen
+    st.markdown("""
+        <style>
+        h1, h2, h3, h4 { color: darkred !important; }
+        /* Fix für Tippspiel und andere Texte */
+        .stMarkdown p { color: inherit; } 
+        </style>
+        """, unsafe_allow_html=True)
     # 1. JavaScript zur Breitenerkennung
     import streamlit.components.v1 as components
     
@@ -563,18 +573,26 @@ def main():
 
         df_tore = get_torschuetzen()
         if not df_tore.empty:
-            # Top 3 für Diagramm
+            # 1. Top 3 für das Diagramm
             top_3 = df_tore.head(3)
             rest_tore = df_tore.iloc[3:]
 
-            fig_tore = px.bar(top_3, x='spieler', y='tore', text='tore', color='tore', color_continuous_scale='Reds')
-            fig_tore.update_layout(xaxis_title="Spieler", yaxis_title="Tore", showlegend=False, height=400)
+            fig_tore = px.bar(
+                top_3, x='spieler', y='tore', text='tore', 
+                color='tore', color_continuous_scale='Reds'
+            )
+            fig_tore.update_layout(
+                xaxis_title="Spieler", yaxis_title="Tore", 
+                showlegend=False, height=350
+            )
             st.plotly_chart(fig_tore, use_container_width=True)
 
             st.subheader("Weitere Platzierungen")
-            # Höhe berechnen: 35px pro Zeile + Header
-            table_height = (len(rest_tore) + 1) * 35 + 10
+            
+            # 2. Höhe berechnen (35px pro Zeile + Header), damit kein Scrollbalken erscheint
+            h = (len(rest_tore) + 1) * 35 + 10
 
+            # 3. Tabelle mit schmalen Spalten
             st.dataframe(
                 rest_tore,
                 column_config={
@@ -585,7 +603,7 @@ def main():
                 },
                 hide_index=True,
                 use_container_width=True,
-                height=table_height
+                height=h
             )
         else:
             st.warning("Keine Torschützendaten gefunden.")
