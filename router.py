@@ -12,12 +12,13 @@ def start_router():
     # Breite nur abfragen, wenn wir sie noch nicht haben
     if st.session_state.device_width is None:
         width = st_javascript("window.innerWidth")
+
         if width is not None and width > 0:
             st.session_state.device_width = width
             st.rerun()
         else:
-            # Während er wartet, zeigen wir kurz was an
-            st.info("Layout wird geladen")
+            import main
+            main.main()
             return
 
     # Jetzt entscheiden wir basierend auf dem gespeicherten Wert
