@@ -326,7 +326,7 @@ def show_torschuetzen():
             st.warning("Keine Torschützen gefunden.")
 
 def show_tippspiel(df):
-    st.title("⚽ Tippspiel")
+    
     # Dynamische Saison
     aktuelle_saison = str(df["saison"].max())
 
@@ -527,7 +527,7 @@ def main():
 
     seasons = sorted(df["saison"].unique(), reverse=True)
     
-    page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Ewige Torschützen", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
+    page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Torschützen", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
 
     if page == "Startseite": 
         show_startseite()
@@ -567,7 +567,7 @@ def main():
         ab_platz_11 = ewige_df.iloc[10:] 
         display_styled_table(ab_platz_11)
 
-    elif page == "Ewige Torschützen":
+    elif page == "Torschützen":
         st.markdown("<h1 style='color: darkred;'>⚽ Ewige Torschützenliste</h1>", unsafe_allow_html=True)
         st.markdown("----")
 
