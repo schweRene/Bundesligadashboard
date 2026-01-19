@@ -21,7 +21,7 @@ def start_router():
             return
 
     # Jetzt entscheiden wir basierend auf dem gespeicherten Wert
-    if st.session_state.device_width < 1000:
+    if st.session_state.device_width < 768:
         import mobile_app
         mobile_app.run_mobile_main()
     else:
