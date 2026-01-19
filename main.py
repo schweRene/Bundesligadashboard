@@ -572,8 +572,21 @@ def main():
         st.markdown("----")
 
         df_tore = get_torschuetzen()
+        
         if not df_tore.empty:
-            # 1. Top 3 für das Diagramm
+            # --- DATENBEREINIGUNG: Verein aus dem Namen entfernen ---
+            def clean_player_name(full_name):
+                # Liste von Begriffen, ab denen wir abschneiden
+                stops = [" FC ", " 1. ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " Bayer ", " Eintracht ", " Borussia ", " VfB ", " Schalke "]
+                name = full_name
+                for stop in stops:
+                    if stop in name:
+                        name = name.split(stop)[0]
+                return name.strip()
+
+            df_tore['spieler'] = df_tore['spieler'].apply(clean_player_name)
+
+            # Top 3 für das Diagramm
             top_3 = df_tore.head(3)
             rest_tore = df_tore.iloc[3:]
 
@@ -582,27 +595,42 @@ def main():
                 color='tore', color_continuous_scale='Reds'
             )
             fig_tore.update_layout(
-                xaxis_title="Spieler", yaxis_title="Tore", 
+                xaxis_title="", yaxis_title="Tore", 
                 showlegend=False, height=350
             )
             st.plotly_chart(fig_tore, use_container_width=True)
 
             st.subheader("Weitere Platzierungen")
             
-            # 2. Höhe berechnen (35px pro Zeile + Header), damit kein Scrollbalken erscheint
+            # --- TABELLE MIT FIXEN BREITEN ---
+            # Wir berechnen die Höhe (35px pro Zeile + Header)
             h = (len(rest_tore) + 1) * 35 + 10
 
-            # 3. Tabelle mit schmalen Spalten
             st.dataframe(
                 rest_tore,
                 column_config={
-                    "platz": st.column_config.NumberColumn("Platz", width="small", format="%d"),
-                    "spieler": st.column_config.TextColumn("Spieler", width="large"),
-                    "spiele": st.column_config.NumberColumn("Einsätze", width="small"),
-                    "tore": st.column_config.NumberColumn("Tore", width="small")
+                    "platz": st.column_config.NumberColumn(
+                        "Platz", 
+                        width=50, # Feste Pixelbreite statt "small"
+                        format="%d"
+                    ),
+                    "spieler": st.column_config.TextColumn(
+                        "Spieler", 
+                        width=250 # Mehr Platz für den Namen
+                    ),
+                    "spiele": st.column_config.NumberColumn(
+                        "Einsätze", 
+                        width=80, 
+                        format="%d"
+                    ),
+                    "tore": st.column_config.NumberColumn(
+                        "Tore", 
+                        width=80, 
+                        format="%d"
+                    )
                 },
                 hide_index=True,
-                use_container_width=True,
+                use_container_width=False, # WICHTIG: Auf False, damit feste Breiten greifen
                 height=h
             )
         else:
