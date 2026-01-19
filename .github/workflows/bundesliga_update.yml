@@ -39,3 +39,8 @@ jobs:
           # Nur committen, wenn es wirklich Änderungen gibt
           git commit -m "Auto-Update Spielstand $(date +'%Y-%m-%d %H:%M')" || echo "Keine Änderungen zum Committen"
           git push
+
+      - name: Show Validation Logs
+        run: |
+          cat validation_errors.txt  # Ersetze das durch deinen echten Dateinamen
+          cat pipeline_log.txt
