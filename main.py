@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+import io
+import requests
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -36,6 +38,18 @@ def init_db():
                 session.commit()
     except Exception:
         pass
+
+def get_torschuetzen():
+    """ Lädt die ewige Torschützenliste aus der Supabase DB"""
+    try:
+        conn = get_conn()
+        # sortieren nach Platz
+        df = conn.query("SELECT * FROM torschuetzen ORDER BY platz ASC", ttl="1h")
+        return df
+    except Exception as e:
+        # Falls die Tabelle noch nicht existiert oder ein Fehler auftritt
+        st.error(f"Fehler beim Laden der Torschützenliste: [e]")
+        return pd.DataFrame()
 
 def load_data_from_db():
     try:
@@ -482,7 +496,7 @@ def main():
 
     seasons = sorted(df["saison"].unique(), reverse=True)
     
-    page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
+    page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Ewige Torschützen", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
 
     if page == "Startseite": 
         show_startseite()
@@ -521,6 +535,29 @@ def main():
         st.subheader("Rangliste ab Platz 11")
         ab_platz_11 = ewige_df.iloc[10:] 
         display_styled_table(ab_platz_11)
+
+    elif page == "Ewige Torschützen":
+        st.title("⚽ Ewige Torschützenliste")
+        st.markdown("----")
+
+        with st.spinner("Lade Daten aus der DB..."):
+            df_tore = get_torschuetzen()
+
+        if not df_tore.empty:
+            # Wir konfigurieren die Spaltennamen für eine schöne Anzeige
+            st.dataframe(
+                df_tore,
+                column_config={
+                    "platz": "Rang",
+                    "spieler": "Spieler",
+                    "spiele": "Einsätze",
+                    "tore": "Tore"
+                },
+                hide_index=True,
+                use_container_width=True
+            )
+        else:
+            st.warning("Keine Torschützendaten gefunden.")
     elif page == "Meisterschaften": 
         show_meisterstatistik(df, seasons)
     elif page == "Vereinsanalyse": 

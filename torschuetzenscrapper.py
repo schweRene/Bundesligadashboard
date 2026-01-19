@@ -5,14 +5,13 @@ import os
 import io
 from sqlalchemy import create_engine, text
 
-# Konfiguration
+#Konfiguration
 DB_URL = "postgresql://postgres.scspxyixfumfhfkodsit:zz2r9OSjV8L@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require"
 engine = create_engine(DB_URL)
 
 def update_torschuetzen_db():
-    print("--- Starte Torschützen-Update in die DB ---")
+    print("---Starte Torschützen-Update in die DB")
     url = "https://www.fussballdaten.de/bundesliga/historie/"
-    # Header exakt wie in deinem Test-Code
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"}
 
     try:
@@ -31,14 +30,14 @@ def update_torschuetzen_db():
 
         # 3. Tabelle einlesen mit StringIO
         table_html = io.StringIO(str(table))
-        df_list = pd.read_html(table_html)
-        df = df_list[0]
-        
-        # 4. Spalten wählen & reinigen (Top 20)
+        df = pd.read_html(table_html)[0]
+                
+        # 4. Spalten präzise auswählen (#, Spieler, Spiele, Tore)
         df = df.iloc[:20, :4] 
         df.columns = ["platz", "spieler", "spiele", "tore"]
-        
-        # Filtert Zeilen, die im Feld 'platz' keine Ziffern haben
+
+        # 5. Datenreinigung
+        # Wir filtern Zeilen, die im Feld 'platz' keine Ziffern haben
         df = df[df['platz'].astype(str).str.contains(r'^\d+$', na=False)].copy()
         
         # Typen konvertieren
@@ -46,11 +45,10 @@ def update_torschuetzen_db():
         df['spiele'] = df['spiele'].astype(int)
         df['tore'] = df['tore'].astype(int)
 
+        #Print-Anweisung Bestätigung in DB geschrieben
         print(f"Versuche {len(df)} Einträge in die DB zu schreiben")
 
-        # 5. Datenbank-Transaktion
         with engine.begin() as conn:
-            # Tabelle erstellen falls sie fehlt
             conn.execute(text("""
                 CREATE TABLE IF NOT EXISTS torschuetzen (
                     platz INT PRIMARY KEY,
@@ -60,24 +58,27 @@ def update_torschuetzen_db():
                 );
             """))
 
-            # Tabelle leeren (Korrektur von TRUMICATE auf TRUNCATE)
             conn.execute(text("TRUNCATE TABLE torschuetzen;"))
 
-            # Daten einfügen (Tabellenname auf 'torschuetzen' vereinheitlicht)
+            #Daten einfügen
             for _, row in df.iterrows():
                 conn.execute(
                     text("INSERT INTO torschuetzen (platz, spieler, spiele, tore) VALUES (:p, :s, :sp, :t)"),
                     {"p": row['platz'], "s": row['spieler'], "sp": row['spiele'], "t": row['tore']}
                 )
 
-        print("✅ Datenbank erfolgreich aktualisiert.")
-        # Zur Sicherheit trotzdem noch die CSV schreiben
-        df.to_csv("torschuetzen.csv", index=False, encoding="utf-8")
-        return True
-
+            print("✅ Datenbank erfolgreich aktualisiert.")       
+            df.to_csv("torschuetzen.csv", index=False, encoding="utf-8")
+            return True
+        
+       
+        
     except Exception as e:
         print(f"❌ Fehler: {e}")
         return False
 
 if __name__ == "__main__":
     update_torschuetzen_db()
+
+
+
