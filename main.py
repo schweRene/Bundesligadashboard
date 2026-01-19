@@ -378,7 +378,7 @@ def show_tippspiel(df):
             clean_search = check_user.strip()
             
             # Wir nutzen ILIKE für Case-Insensitivity (Groß/Kleinschreibung egal)
-            query = text("""
+            query = ("""
                 SELECT t.spieltag, t.heim, t.gast, t.tipp_heim, t.tipp_gast, t.punkte, s.tore_heim, s.tore_gast
                 FROM tipps t
                 JOIN spiele s ON t.saison = s.saison AND t.spieltag = s.spieltag AND t.heim = s.heim
