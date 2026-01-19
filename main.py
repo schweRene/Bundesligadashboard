@@ -10,8 +10,6 @@ import os
 from sqlalchemy import text
 from datetime import datetime
 
-st.set_page_config(layout="wide", page_title="Bundesliga Dashboard")
-
 # ==========================================
 # 1. DATENBANK & SETUP (Cloud Version)
 # ==========================================
@@ -527,10 +525,10 @@ def main():
         show_spieltag_ansicht(df)
     elif page == "Saisontabelle":
         s_sel = st.sidebar.selectbox("Saison wählen", seasons)
-        st.title(f"Saison {s_sel}") 
+        st.markdown(f"<h1 style='color: darkred;'>Saison {s_sel}</h1>", unsafe_allow_html=True)
         display_styled_table(calculate_table(df, s_sel))
     elif page == "Ewige Tabelle":
-        st.title("📚 Ewige Tabelle")
+        st.markdown("<h1 style='color: darkred;'>📚 Ewige Tabelle</h1>", unsafe_allow_html=True)
         ewige_df = compute_ewige_tabelle(df)
         top_10 = ewige_df.head(10)
         max_punkte = top_10['Punkte'].max()
@@ -560,12 +558,43 @@ def main():
         display_styled_table(ab_platz_11)
 
     elif page == "Ewige Torschützen":
-        show_torschuetzen()
+        st.markdown("<h1 style='color: darkred;'>⚽ Ewige Torschützenliste</h1>", unsafe_allow_html=True)
+        st.markdown("----")
+
+        df_tore = get_torschuetzen()
+        if not df_tore.empty:
+            # Top 3 für Diagramm
+            top_3 = df_tore.head(3)
+            rest_tore = df_tore.iloc[3:]
+
+            fig_tore = px.bar(top_3, x='spieler', y='tore', text='tore', color='tore', color_continuous_scale='Reds')
+            fig_tore.update_layout(xaxis_title="Spieler", yaxis_title="Tore", showlegend=False, height=400)
+            st.plotly_chart(fig_tore, use_container_width=True)
+
+            st.subheader("Weitere Platzierungen")
+            # Höhe berechnen: 35px pro Zeile + Header
+            table_height = (len(rest_tore) + 1) * 35 + 10
+
+            st.dataframe(
+                rest_tore,
+                column_config={
+                    "platz": st.column_config.NumberColumn("Platz", width="small", format="%d"),
+                    "spieler": st.column_config.TextColumn("Spieler", width="large"),
+                    "spiele": st.column_config.NumberColumn("Einsätze", width="small"),
+                    "tore": st.column_config.NumberColumn("Tore", width="small")
+                },
+                hide_index=True,
+                use_container_width=True,
+                height=table_height
+            )
+        else:
+            st.warning("Keine Torschützendaten gefunden.")
     elif page == "Meisterschaften": 
         show_meisterstatistik(df, seasons)
     elif page == "Vereinsanalyse": 
         show_vereinsanalyse(df, seasons)
     elif page == "Tippspiel": 
+        st.markdown("<h1 style='color: darkred;'>🎮 Tippspiel</h1>", unsafe_allow_html=True)
         show_tippspiel(df)
     elif page == "Highscore": 
         show_highscore()
