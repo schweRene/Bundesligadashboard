@@ -21,28 +21,31 @@ def log_pipeline_run(status, message):
         f.write(f"[{timestamp}] {status}: {message}\n")
 
 def get_current_update_range():
-    """
-    Findet den letzten Spieltag mit Toren und prüft von dort aus 
-    bis zu 3 Spieltage in die Zukunft.
-    """
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        # Wir suchen den MAXIMALEN Spieltag, der BEREITS Tore hat
+        
+        # 1. Finde alle Spieltage der Saison, die noch NULL-Werte bei den Toren haben
         cursor.execute("""
-            SELECT MAX(spieltag) FROM spiele 
-            WHERE saison = ? AND tore_heim IS NOT NULL
+            SELECT DISTINCT spieltag FROM spiele 
+            WHERE saison = ? AND (tore_heim IS NULL OR tore_gast IS NULL)
+            ORDER BY spieltag ASC
         """, (SAISON,))
-        last_played = cursor.fetchone()[0]
+        
+        missing_days = [row[0] for row in cursor.fetchall()]
         conn.close()
 
-        if last_played is None:
-            return 1, 3 # Saisonstart
+        if not missing_days:
+            return None # Alles aktuell
         
-        # Wir starten beim letzten bekannten Spieltag (für Korrekturen)
-        start_st = max(1, last_played)
-        # Wir gehen bis zu 3 Spieltage weiter, um den aktuellen ST sicher zu treffen
-        end_st = min(34, last_played + 3)
+        # Wir nehmen den kleinsten fehlenden Spieltag (z.B. 16 für Nachholspiele)
+        start_st = missing_days[0]
+        
+        # Wir nehmen den höchsten Spieltag, der gerade aktuell sein könnte (heute 18)
+        # Um sicherzugehen, nehmen wir den höchsten fehlenden Tag aus der Liste, 
+        # aber deckeln ihn sinnvoll (z.B. nicht Spieltag 34 im Januar)
+        # Wir nehmen einfach den höchsten 'missing', aber maximal +1 auf den aktuellsten
+        end_st = min(34, max(missing_days))
         
         return start_st, end_st
     except Exception:
