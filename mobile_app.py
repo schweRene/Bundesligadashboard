@@ -447,10 +447,10 @@ def show_mobile_tippspiel(df):
         conn = get_conn()
         query = """
             SELECT t.spieltag, t.heim, t.gast, t.tipp_heim, t.tipp_gast, t.punkte, s.tore_heim, s.tore_gast
-            FROM tipps t
-            JOIN spiele s ON t.saison = s.saison AND t.spieltag = s.spieltag AND t.heim = s.heim
-            WHERE LOWER(TRIM(t."user")) = LOWER(TRIM(:u)) AND t.saison = :s
-            ORDER BY t.spieltag DESC, t.heim ASC
+                FROM tipps t
+                JOIN spiele s ON t.saison = s.saison AND t.spieltag = s.spieltag AND t.heim = s.heim
+                WHERE t."user" ILIKE :u AND t.saison = :s
+                ORDER BY t.spieltag DESC, t.heim ASC
         """
         user_tipps = conn.query(query, params={"u": str(check_user), "s": str(aktuelle_saison)}, ttl=0)
         
