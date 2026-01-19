@@ -1,31 +1,32 @@
 import streamlit as st
 from streamlit_javascript import st_javascript
 
-#================================================================
-# Diese Datei prüft beim Start die Bildschirmbreite des Nutzers.
-# - Breite < 800px -> Mobile Version (mobile_app.py)
-# - Breite >= 800px -> Desktop Version (main.py)
-#================================================================
+# Falls die Breite schon bekannt ist, laden wir direkt
+if "device_width" not in st.session_state:
+    st.session_state.device_width = None
 
-def starter_router():
-    # Page-config einmalig setzen
-    st.set_page_config(page_title="Bundesligadashboard", layout="wide")
-    #JavaScript wird im Browser ausgeführt, um die Fensterbreite zu ermitteln
-    width = st_javascript("window.innerWidth")
+def start_router():
+    # Page Config MUSS die erste Streamlit-Zeile sein
+    st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
 
-    #Falls die Breite noch ermittelt wird, wird ein Ladekreis angezeigt. 
-    if width is None:
-        #solange Javascript lädt, wird hier kurz gestoppt
-        return
+    # Breite nur abfragen, wenn wir sie noch nicht haben
+    if st.session_state.device_width is None:
+        width = st_javascript("window.innerWidth")
+        if width is not None and width > 0:
+            st.session_state.device_width = width
+            st.rerun()
+        else:
+            # Während er wartet, zeigen wir kurz was an
+            st.write("Verbinde mit Server...")
+            return
 
-    if width < 800:
-        # Import erst hier, damit nicht beide Apps gleichzeitig geladen werden
+    # Jetzt entscheiden wir basierend auf dem gespeicherten Wert
+    if st.session_state.device_width < 800:
         import mobile_app
         mobile_app.run_mobile_main()
     else:
         import main
         main.main()
-        
-if __name__ == "__main__":
-    starter_router()
 
+if __name__ == "__main__":
+    start_router()
