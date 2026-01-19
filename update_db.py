@@ -6,7 +6,7 @@ from sqlalchemy import create_engine, text
 
 
 from update_scrapper import run_scrapper, update_csv_from_db
-from Bundesligadashboard.check_table import show_table, save_table_to_txt
+from check_table import show_table, save_table_to_txt
 from validate_bundesliga_csv import validate_csv
 
 # --- KONFIGURATION ---
