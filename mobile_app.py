@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import pandas as pd
+import plotly.express as px
 from sqlalchemy import text
 
 def show_mobile_startseite():
@@ -319,25 +320,45 @@ def show_mobile_meisterschaften(df):
     st.markdown(table_html, unsafe_allow_html=True)
 
 def show_mobile_torschuetzen():
-    st.markdown("<h4 style='color: #8B0000;'>⚽ Ewige Torschützen</h4>", unsafe_allow_html=True)
-
+    st.markdown("<h1 style='color: darkred; font-size: 1.5rem;'>⚽ Ewige Torschützen</h1>", unsafe_allow_html=True)
+    
+    # Import der Datenfunktion (wie vorhin besprochen, lokal um Zirkelbezug zu vermeiden)
     from main import get_torschuetzen
-
     df_tore = get_torschuetzen()
+
     if not df_tore.empty:
+        # Gleiche Bereinigung wie in der Desktop-Ansicht
+        def clean_player_name(full_name):
+            stops = [" FC ", " 1.", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " Bayer ", " Eintracht ", " Borussia ", " VfB ", " Schalke "]
+            name = full_name
+            for stop in stops:
+                if stop in name:
+                    name = name.split(stop)[0]
+            return name.strip()
+
+        df_tore['spieler'] = df_tore['spieler'].apply(clean_player_name)
+
+        # Auch mobil zeigen wir das Diagramm für die Top 3
+        top_3 = df_tore.head(3)
+        rest_tore = df_tore.iloc[3:]
+
+        fig_mobile = px.bar(top_3, x='spieler', y='tore', text='tore', color='tore', color_continuous_scale='Reds')
+        fig_mobile.update_layout(xaxis_title="", yaxis_title="Tore", showlegend=False, height=300)
+        st.plotly_chart(fig_mobile, use_container_width=True)
+
+        # Tabelle (auf dem Handy nutzen wir use_container_width=True, damit es auf den kleinen Screen passt)
         st.dataframe(
-            df_tore[["platz", "spieler", "tore"]],
+            rest_tore,
             column_config={
-                "platz": "Rang",
-                "spieler": "Name",
-                "tore": "Tore"
+                "platz": st.column_config.NumberColumn("Pl.", width=40, format="%d"),
+                "spieler": st.column_config.TextColumn("Spieler"),
+                "tore": st.column_config.NumberColumn("Tore", width=50, format="%d")
             },
             hide_index=True,
             use_container_width=True
         )
     else:
-        st.info("Keine Torschützendaten gefunden.")
-
+        st.info("Keine Daten gefunden.")
 
 def show_mobile_vereinsanalyse(df):
     st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🔍 Vereinsanalyse</h2>", unsafe_allow_html=True)
@@ -542,7 +563,7 @@ def run_mobile_main():
         return
     
     #Navigation oben
-    menu = st.selectbox("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Ewige Torschützen", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
+    menu = st.selectbox("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Torschützen", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
 
     if menu == "Startseite":
         show_mobile_startseite()
@@ -552,7 +573,7 @@ def run_mobile_main():
         show_mobile_saisontabelle(df)
     elif menu == "Ewige Tabelle":
         show_mobile_ewige_tabelle(df)
-    elif menu == "Ewige Torschützen":
+    elif menu == "Torschützen":
         show_mobile_torschuetzen()
     elif menu == "Meisterschaften":
         show_mobile_meisterschaften(df)
