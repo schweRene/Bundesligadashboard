@@ -508,7 +508,7 @@ def show_mobile_highscore(df):
 
 def run_mobile_main():
     #Zentrieres Layout für die Handyansicht
-    st.set_page_config(page_title="Bundesliga Dashboard", layout="centered")
+    #st.set_page_config(page_title="Bundesliga Dashboard", layout="centered")
 
     from main import load_data_from_db
 

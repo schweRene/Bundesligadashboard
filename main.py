@@ -471,7 +471,7 @@ def main():
         run_mobile_main()
         st.stop() # Verhindert das Laden der Desktop-Konfiguration
     
-    st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
+    #st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
     
     init_db() 
     df = load_data_from_db()
