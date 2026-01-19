@@ -318,6 +318,27 @@ def show_mobile_meisterschaften(df):
     table_html += "</table>"
     st.markdown(table_html, unsafe_allow_html=True)
 
+def show_mobile_torschuetzen():
+    st.markdown("<h4 style='color: #8B0000;'>⚽ Ewige Torschützen</h4>", unsafe_allow_html=True)
+
+    from main import get_torschuetzen
+
+    df_tore = get_torschuetzen()
+    if not df_tore.empty:
+        st.dataframe(
+            df_tore[["platz", "spieler", "tore"]],
+            column_config={
+                "platz": "Rang",
+                "spieler": "Name",
+                "tore": "Tore"
+            },
+            hide_index=True,
+            use_container_width=True
+        )
+    else:
+        st.info("Keine Torschützendaten gefunden.")
+
+
 def show_mobile_vereinsanalyse(df):
     st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🔍 Vereinsanalyse</h2>", unsafe_allow_html=True)
 
@@ -517,7 +538,7 @@ def run_mobile_main():
         return
     
     #Navigation oben
-    menu = st.selectbox("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
+    menu = st.selectbox("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Ewige Torschützen", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
 
     if menu == "Startseite":
         show_mobile_startseite()
@@ -527,6 +548,8 @@ def run_mobile_main():
         show_mobile_saisontabelle(df)
     elif menu == "Ewige Tabelle":
         show_mobile_ewige_tabelle(df)
+    elif menu == "Ewige Torschützen":
+        show_mobile_torschuetzen()
     elif menu == "Meisterschaften":
         show_mobile_meisterschaften(df)
     elif menu == "Vereinsanalyse":
