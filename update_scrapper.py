@@ -77,6 +77,9 @@ def run_scrapper(spieltag):
             soup = BeautifulSoup(response.text, 'html.parser')
             found_count = 0
             
+            # Wir sammeln alle Spiele eines Spieltags erst in einer Liste
+            matches_to_update = []
+
             for row in soup.find_all(['div', 'a', 'tr'], class_=re.compile(r'spiele-row|det-match')):
                 text_data = row.get_text(" ", strip=True)
                 teams = []
@@ -89,59 +92,48 @@ def run_scrapper(spieltag):
                     heim, gast = teams[0], teams[1]
                     t_h, t_g = None, None
                     res_match = re.search(r'(\d+):(\d+)', text_data)
+                    
                     if res_match:
                         h_val, g_val = int(res_match.group(1)), int(res_match.group(2))
-                        hat_datum = bool(re.search(r'\d{2}\.\d{2}\.', text_data))
+                        # Wichtig: Wir prüfen, ob es ein valides Ergebnis ist
                         if h_val < 15 and "uhr" not in text_data.lower():
-                            if spieltag <= 17 or hat_datum:
-                                t_h, t_g = h_val, g_val
+                            t_h, t_g = h_val, g_val
 
-                    # --- 1. LOKAL SPEICHERN (Wie bisher) ---
-                    conn = sqlite3.connect(DB_NAME)
+                    matches_to_update.append((heim, gast, t_h, t_g))
+
+            # --- JETZT DER DATENBANK-TRANSFER ---
+            if matches_to_update:
+                # 1. Lokal (SQLite)
+                conn = sqlite3.connect(DB_NAME)
+                for heim, gast, t_h, t_g in matches_to_update:
                     conn.execute("""INSERT OR REPLACE INTO spiele (saison, spieltag, heim, gast, tore_heim, tore_gast)
                                     VALUES (?, ?, ?, ?, ?, ?)""", (SAISON, spieltag, heim, gast, t_h, t_g))
-                    conn.commit()
-                    conn.close()
+                conn.commit()
+                conn.close()
 
-                   # --- 2. CLOUD SPEICHERN (Korrigierte Version) ---
-                    try:
-                        with engine.connect() as cloud_conn:
-                            # Prüfen, ob das Spiel schon existiert
-                            check_sql = text("""
-                                SELECT id FROM spiele 
-                                WHERE saison = :s AND spieltag = :st AND heim = :h AND gast = :g
+                # 2. Cloud (Supabase) - Hier nutzen wir .begin() für Auto-Commit
+                try:
+                    with engine.begin() as cloud_conn: # .begin() macht AUTOMATISCH einen Commit am Ende!
+                        for heim, gast, t_h, t_g in matches_to_update:
+                            # Wir nutzen "UPSERT" Logik (Update if exists, else Insert)
+                            # Das ist sicherer als ID-Suche
+                            sql = text("""
+                                INSERT INTO spiele (saison, spieltag, heim, gast, tore_heim, tore_gast)
+                                VALUES (:s, :st, :h, :g, :th, :tg)
+                                ON CONFLICT (saison, spieltag, heim, gast) 
+                                DO UPDATE SET tore_heim = EXCLUDED.tore_heim, tore_gast = EXCLUDED.tore_gast;
                             """)
-                            existing = cloud_conn.execute(check_sql, {
-                                "s": SAISON, "st": spieltag, "h": heim, "g": gast
-                            }).fetchone()
+                            cloud_conn.execute(sql, {
+                                "s": SAISON, "st": spieltag, "h": heim, "g": gast, "th": t_h, "tg": t_g
+                            })
+                    print(f"✅ Cloud Sync ok", end=" ")
+                except Exception as e:
+                    print(f"\n❌ Cloud-Fehler: {str(e)[:100]}")
 
-                            if existing:
-                                # Update: Tore aktualisieren, ID bleibt gleich
-                                update_sql = text("""
-                                    UPDATE spiele 
-                                    SET tore_heim = :th, tore_gast = :tg 
-                                    WHERE id = :id
-                                """)
-                                cloud_conn.execute(update_sql, {"th": t_h, "tg": t_g, "id": existing[0]})
-                                print(f"✅ Cloud Update", end=" ")
-                            else:
-                                # Insert: Neues Spiel anlegen, ID kommt automatisch
-                                insert_sql = text("""
-                                    INSERT INTO spiele (saison, spieltag, heim, gast, tore_heim, tore_gast)
-                                    VALUES (:s, :st, :h, :g, :th, :tg)
-                                """)
-                                cloud_conn.execute(insert_sql, {
-                                    "s": SAISON, "st": spieltag, "h": heim, "g": gast, "th": t_h, "tg": t_g
-                                })
-                                print(f"✅ Cloud Neu", end=" ")
-                            
-                            cloud_conn.commit()
-                    except Exception as e:
-                        print(f"\n❌ Cloud-Fehler bei {heim}: {str(e)[:100]}")
-
-                    found_count += 1
-            return found_count
-        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-            print(f" (Timeout-Retry {attempt+1})...", end="")
+                return len(matches_to_update)
+            
+            return 0
+        except Exception as e:
+            print(f" (Retry {attempt+1})...", end="")
             time.sleep(2)
     return 0
