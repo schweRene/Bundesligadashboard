@@ -1,4 +1,7 @@
 import streamlit as st
+# Page Config MUSS die erste Streamlit-Zeile sein
+st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
+
 from streamlit_javascript import st_javascript
 
 # Falls die Breite schon bekannt ist, laden wir direkt
@@ -6,9 +9,6 @@ if "device_width" not in st.session_state:
     st.session_state.device_width = None
 
 def start_router():
-    # Page Config MUSS die erste Streamlit-Zeile sein
-    st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
-
     # Breite nur abfragen, wenn wir sie noch nicht haben
     if st.session_state.device_width is None:
         width = st_javascript("window.innerWidth")

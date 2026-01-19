@@ -507,9 +507,7 @@ def show_mobile_highscore(df):
         st.info("Die Hall of Fame wird geladen...")   
 
 def run_mobile_main():
-    #Zentrieres Layout für die Handyansicht
-    #st.set_page_config(page_title="Bundesliga Dashboard", layout="centered")
-
+    
     from main import load_data_from_db
 
     #Laden der Daten aus der Hauptdatei
