@@ -1,25 +1,23 @@
 import streamlit as st
 from streamlit_javascript import st_javascript
 
-# Page Config MUSS die erste Streamlit-Zeile sein
-st.set_page_config(page_title="Bundesliga Dashboard", layout="wide")
 
 def start_router():
     # Session State initialisieren
     if "device_width" not in st.session_state:
         st.session_state.device_width = None
 
+    curr_width = st_javascript("window.innerWidth")
+
+    if curr_width is not None and curr_width > 0:
+        if st.session_state.device_width != curr_width:
+            st.session_state.device_width = curr_width
+            st.rerun()
+
     # Breite nur abfragen, wenn wir sie noch nicht haben
     if st.session_state.device_width is None:
-        width = st_javascript("window.innerWidth")
-
-        if width is not None and width > 0:
-            st.session_state.device_width = width
-            st.rerun()
-        else:
-            import main
-            main.main()
-            return
+        import main
+        main.main()
 
     # Jetzt entscheiden wir basierend auf dem gespeicherten Wert
     if st.session_state.device_width < 768:
