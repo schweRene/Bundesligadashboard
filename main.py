@@ -10,6 +10,7 @@ import os
 from sqlalchemy import text
 from datetime import datetime
 
+st.set_page_config(layout="wide", page_title="Bundesliga Dashboard")
 
 # ==========================================
 # 1. DATENBANK & SETUP (Cloud Version)
