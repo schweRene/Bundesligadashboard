@@ -22,28 +22,27 @@ def log_pipeline_run(status, message):
 
 def get_current_update_range():
     """
-    Ermittelt automatisch, welche Spieltage ein Update benötigen.
-    Prüft den ersten Spieltag ohne Tore und nimmt zur Sicherheit den davor mit.
+    Findet den letzten Spieltag mit Toren und prüft von dort aus 
+    bis zu 3 Spieltage in die Zukunft.
     """
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        # Finde den kleinsten Spieltag, der noch keine Tore hat
+        # Wir suchen den MAXIMALEN Spieltag, der BEREITS Tore hat
         cursor.execute("""
-            SELECT MIN(spieltag) FROM spiele 
-            WHERE saison = ? AND (tore_heim IS NULL OR tore_gast IS NULL)
+            SELECT MAX(spieltag) FROM spiele 
+            WHERE saison = ? AND tore_heim IS NOT NULL
         """, (SAISON,))
-        first_empty = cursor.fetchone()[0]
+        last_played = cursor.fetchone()[0]
         conn.close()
 
-        if first_empty is None:
-            return 34, 34 # Saison scheint beendet
+        if last_played is None:
+            return 1, 3 # Saisonstart
         
-        # Wir starten beim Tag davor (falls Tore korrigiert wurden) 
-        # aber nicht unter 1
-        start_st = max(1, first_empty - 1)
-        # Wir prüfen bis zu 2 Spieltage in die Zukunft
-        end_st = min(34, first_empty + 1)
+        # Wir starten beim letzten bekannten Spieltag (für Korrekturen)
+        start_st = max(1, last_played)
+        # Wir gehen bis zu 3 Spieltage weiter, um den aktuellen ST sicher zu treffen
+        end_st = min(34, last_played + 3)
         
         return start_st, end_st
     except Exception:
