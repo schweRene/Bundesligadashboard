@@ -36,9 +36,7 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          # Füge alle Dateien hinzu, die sich geändert haben könnten
-          # Ich habe suender_64.csv hinzugefügt, damit diese auch gespeichert wird
-          git add bundesliga.db bundesliga_2026.csv suender_64.csv pipeline_log.txt
-          # Nur committen, wenn es wirklich Änderungen gibt
-          git commit -m "Auto-Update Spielstand $(date +'%Y-%m-%d %H:%M')" || echo "Keine Änderungen zum Committen"
-          git push
+          # Entferne suender_64.csv aus dieser Zeile, solange der Scraper nicht auf GitHub läuft
+          git add bundesliga.db bundesliga_2026.csv pipeline_log.txt
+          git commit -m "Auto-Update $(date +'%Y-%m-%d %H:%M')" || echo "Keine Änderungen"
+          git push origin main
