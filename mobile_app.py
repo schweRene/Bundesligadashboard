@@ -407,7 +407,7 @@ import pandas as pd
 import streamlit as st
 
 def show_mobile_tippspiel(df):
-    st.markdown("<h2 style='text-align: center; color: #8B0000;'>📝 Tippspiel</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #8B0000;'>🎮 Tippspiel</h2>", unsafe_allow_html=True)
     
     aktuelle_saison = str(df["saison"].max())
     offene_spieltage = sorted(df[(df["saison"] == aktuelle_saison) & (df["tore_heim"].isna())]["spieltag"].unique())
