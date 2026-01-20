@@ -585,15 +585,9 @@ def main():
             #Top 3 Torschützen
             if not df_tore.empty:
                 top_3_tore = df_tore.head(3)
-                fig_tore = px.bar(
-                    top_3_tore, 
-                    x='spieler', 
-                    y='tore', 
-                    text='tore', 
-                    color='tore', 
-                    color_continuous_scale='Reds'
-                )
-                fig_tore.update_layout(xaxis_title="", yaxis_title="Tore", showlegend=False, height=350)
+                fig_tore = px.bar(top_3_tore.iloc[::-1], x='tore', y='spieler', orientation='h', 
+                             text='tore', color='tore', color_continuous_scale='Reds')
+                fig_tore.update_layout(xaxis_title="Tore", yaxis_title="", showlegend=False, height=300)
                 st.plotly_chart(fig_tore, use_container_width=True)
 
                 st.subheader("Weitere Platzierungen ab den 4.Platz")
@@ -601,7 +595,7 @@ def main():
                 rest_tore = df_tore.iloc[3:]
 
                 # Höhe berechnen (35px pro Zeile + Header)
-                h = (len(df_tore) + 1) * 35 + 10
+                h = (len(df_tore) * 35) + 38
                 
                 st.dataframe(
                     rest_tore,
@@ -625,8 +619,9 @@ def main():
         if not df_rekord.empty:
             # Top 3 Visualisierung
             top3_rekord = df_rekord.head(3)
-            fig_rekord = px.bar(top3_rekord, x='spieler', y='spiele', text='spiele', color='spiele', color_continuous_scale='Greens')
-            fig_rekord.update_layout(xaxis_title="", yaxis_title="Spiele", showlegend=False, height=350)
+            fig_rekord = px.bar(top3_rekord.iloc[::-1], x='spiele', y='spieler', orientation='h', 
+                               text='spiele', color='spiele', color_continuous_scale='Greens')
+            fig_rekord.update_layout(xaxis_title="Spiele", yaxis_title="", showlegend=False, height=300)
             st.plotly_chart(fig_rekord, use_container_width=True)
 
             st.subheader("Weitere Platzierungen ab den 4.Platz")
@@ -635,9 +630,8 @@ def main():
             rest_rekord = df_rekord.iloc[3:]
 
             #Höhe berechnen (35px pro Zeile + Header)
-            h_rekord = (len(df_rekord) +1) * 35 + 10
-            st.dataframe(rest_rekord, column_config={...}, hide_index=True, height=h_rekord)
-
+            h_rekord = (len(df_rekord) * 35) + 38
+            
             st.dataframe(
                 rest_rekord,
                 column_config={

@@ -323,7 +323,7 @@ def show_mobile_torschuetzen():
         conn = st.connection("postgresql", type="sql")
         df = conn.query("SELECT * FROM torschuetzen ORDER BY platz ASC", ttl="1h")
         if not df.empty:
-            top_3 = df.head(3)
+            top_3 = df.head(3).iloc[::-1]
             fig = px.bar(top_3, x='tore', y='spieler', orientation='h', text='tore', color='tore', color_continuous_scale='Reds')
             fig.update_layout(xaxis_title="Tore", yaxis_title="", showlegend=False, height=250, margin=dict(l=0,r=0,t=0,b=0))
             st.plotly_chart(fig, use_container_width=True)
@@ -340,7 +340,7 @@ def show_mobile_rekordspieler():
         conn = st.connection("postgresql", type="sql")
         df = conn.query("SELECT * FROM rekordspieler ORDER BY platz ASC", ttl="1h")
         if not df.empty:
-            top_3 = df.head(3)
+            top_3 = df.head(3).iloc[::-1]
             fig = px.bar(top_3, x='spiele', y='spieler', orientation='h', text='spiele', color='spiele', color_continuous_scale='Greens')
             fig.update_layout(xaxis_title="Spiele", yaxis_title="", showlegend=False, height=250, margin=dict(l=0,r=0,t=0,b=0))
             st.plotly_chart(fig, use_container_width=True)
