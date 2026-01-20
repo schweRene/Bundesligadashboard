@@ -600,10 +600,10 @@ def main():
                 st.dataframe(
                     rest_tore,
                     column_config={
-                        "platz": st.column_config.NumberColumn("Platz", width=50, format="%d"),
-                        "spieler": st.column_config.TextColumn("Spieler", width=200),
-                        "spiele": st.column_config.NumberColumn("Einsätze", width=80, format="%d"),
-                        "tore": st.column_config.NumberColumn("Tore", width=80, format="%d")
+                        "platz": st.column_config.NumberColumn("Platz", width=60, format="%d"),
+                        "spieler": st.column_config.TextColumn("Spieler", width=300),
+                        "spiele": st.column_config.NumberColumn("Einsätze", width=100, format="%d"),
+                        "tore": st.column_config.NumberColumn("Tore", width=100, format="%d")
                     },
                     hide_index=True,
                     use_container_width=False, # Erzwingt die festen Breiten
@@ -635,9 +635,9 @@ def main():
             st.dataframe(
                 rest_rekord,
                 column_config={
-                    "platz": st.column_config.NumberColumn("Platz", width=50, format="%d"),
-                    "spieler": st.column_config.TextColumn("Spieler", width=200),
-                    "spiele": st.column_config.NumberColumn("Spiele", width=100, format="%d")
+                    "platz": st.column_config.NumberColumn("Platz", width=60, format="%d"),
+                    "spieler": st.column_config.TextColumn("Spieler", width=350),
+                    "spiele": st.column_config.NumberColumn("Spiele", width=120, format="%d")
                 },
                 hide_index=True,
                 use_container_width=False,
