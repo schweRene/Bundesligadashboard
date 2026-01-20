@@ -578,8 +578,7 @@ def main():
 
     elif page == "Torschützen":
         st.markdown("<h1 style='color: darkred;'>⚽ Ewige Torschützenliste</h1>", unsafe_allow_html=True)
-        st.markdown("----")
-
+        
         df_tore = get_torschuetzen()
         
         if not df_tore.empty:
@@ -597,10 +596,13 @@ def main():
                 fig_tore.update_layout(xaxis_title="", yaxis_title="Tore", showlegend=False, height=350)
                 st.plotly_chart(fig_tore, use_container_width=True)
 
-                st.subheader("Weitere Platzierungen")
-            
+                st.subheader("Weitere Platzierungen ab den 4.Platz")
+                #Tabellenansicht ab den 4.Platz
+                rest_tore = df_tore.iloc[3:]
+
                 # Höhe berechnen (35px pro Zeile + Header)
                 h = (len(df_tore) + 1) * 35 + 10
+                st.dataframe(rest_tore, column_config={...}, hide_index=True, height=h)
 
                 st.dataframe(
                     df_tore,
@@ -628,9 +630,14 @@ def main():
             fig_rekord.update_layout(xaxis_title="", yaxis_title="Spiele", showlegend=False, height=350)
             st.plotly_chart(fig_rekord, use_container_width=True)
 
-            st.subheader("Rekordspieler")
+            st.subheader("Weitere Platzierungen ab den 4.Platz")
+
+            #Tabellenansicht ab den 4. Platz
+            rest_rekord = df_rekord.iloc[3:]
+
             #Höhe berechnen (35px pro Zeile + Header)
             h_rekord = (len(df_rekord) +1) * 35 + 10
+            st.dataframe(rest_rekord, column_config={...}, hide_index=True, height=h_rekord)
 
             st.dataframe(
                 df_rekord,

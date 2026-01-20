@@ -338,6 +338,8 @@ def show_mobile_torschuetzen():
                                     margin=dict(l=0, r=0, t=0, b=0))
             st.plotly_chart(fig_mobile, use_container_width=True)
 
+            rest_tore = df.iloc[3:]
+
             # Tabelle (auf dem Handy nutzen wir use_container_width=True, damit es auf den kleinen Screen passt)
             st.dataframe(
                 df,
@@ -371,6 +373,7 @@ def show_mobile_rekordspieler():
                               margin=dict(l=0, r=0, t=0, b=0))
             st.plotly_chart(fig, use_container_width=True)
 
+            rest_rekord = df.iloc[3:]
             st.dataframe(
                 df,
                 column_config={
@@ -381,6 +384,9 @@ def show_mobile_rekordspieler():
                 hide_index=True,
                 use_container_width=True
             )
+        else:
+            st.info("Keine Daten gefunden.")
+
     except Exception as e:
         st.error("Daten konnten nicht geladen werden.")
 
