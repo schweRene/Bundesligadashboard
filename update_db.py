@@ -8,6 +8,8 @@ from sqlalchemy import create_engine, text
 from update_scrapper import run_scrapper, update_csv_from_db
 from check_table import show_table, save_table_to_txt
 from validate_bundesliga_csv import validate_csv
+from torschuetzenscrapper import update_torschuetzen_db
+from rekordspieler import player_scraping
 
 # --- KONFIGURATION ---
 DB_NAME = "bundesliga.db"
@@ -76,13 +78,26 @@ def run_pipeline():
     update_csv_from_db()    # CSV aktualisieren
     validate_csv()          # Logik-Check
     save_table_to_txt()     # Tabelle berechnen & exportieren
-   
-    log_pipeline_run("ENDE", f"Update Spieltag {start_st}-{max_st} erfolgreich.")
-    print(f"{'='*50}\nALLE DATEN AKTUALISIERT!\n{'='*50}")
 
-    from torschuetzenscrapper import update_torschuetzen_db
-    print("Aktualisiere Torschützenliste")
-    update_torschuetzen_db()
+    #3. Spielerstatistiken aktualisieren
+    print(f"\n{'='*50}")
+    print("📊 Starte Update der Spielerstatistiken")
+    print(f"{'='*50}")
 
+    # Torschützen aktualisieren
+    try:
+        update_torschuetzen_db()
+    except Exception as e:
+        print(f"❌ Fehler beim Erstellen des Updates für die Torschützen: {e}")
+
+    # Rekordspieler aktualisieren
+    try:
+        player_scraping()
+    except Exception as e:
+        print(f"❌ Fehler beim Erstellen des Updates der Rekordspieler: {e}")
+
+    print(f"{'='*50}\nALLE DATEN AKTUALISIERT!\n{'='*50}")   
+    log_pipeline_run("Success:  Updates erfolgreich durchgeführt.")
+    
 if __name__ == "__main__":
     run_pipeline()

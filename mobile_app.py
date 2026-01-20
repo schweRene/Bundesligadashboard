@@ -238,8 +238,6 @@ def show_mobile_ewige_tabelle(df):
 def show_mobile_meisterschaften(df):
     st.markdown(f"<h4 style='text-align: center; color: #8B0000;'>🏆 Meisterschaften</h4>", unsafe_allow_html=True)
 
-
-
     # 1. Titelträger pro Saison ermitteln
     titel_liste = []
     # Wichtig: Saisons sortieren, damit die Berechnung sauber durchläuft
@@ -320,45 +318,71 @@ def show_mobile_meisterschaften(df):
     st.markdown(table_html, unsafe_allow_html=True)
 
 def show_mobile_torschuetzen():
-    st.markdown("<h1 style='color: darkred; font-size: 1.5rem;'>⚽ Ewige Torschützen</h1>", unsafe_allow_html=True)
+    st.markdown("<h4 style='color: darkred; font-size: 1.5rem;'>⚽ Ewige Torschützen</h4>", unsafe_allow_html=True)
     
-    # Import der Datenfunktion (wie vorhin besprochen, lokal um Zirkelbezug zu vermeiden)
-    from main import get_torschuetzen
-    df_tore = get_torschuetzen()
+    try:
+        conn = st.connection("postgresql", type="sql")
+        df = conn.query("SELECT * FROM torschuetzen ORDER BY platz ASC", ttl="1h")
 
-    if not df_tore.empty:
-        # Gleiche Bereinigung wie in der Desktop-Ansicht
-        def clean_player_name(full_name):
-            stops = [" FC ", " 1.", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " Bayer ", " Eintracht ", " Borussia ", " VfB ", " Schalke "]
-            name = full_name
-            for stop in stops:
-                if stop in name:
-                    name = name.split(stop)[0]
-            return name.strip()
+        if not df.empty:  
+            # Auch mobil zeigen wir das Diagramm für die Top 3
+            top_3 = df.head(3)
+            fig_mobile = px.bar(
+                top_3, 
+                x='spieler', 
+                y='tore', 
+                text='tore', 
+                color='tore', 
+                color_continuous_scale='Reds')
+            fig_mobile.update_layout(xaxis_title="Tore", yaxis_title="", showlegend=False, height=300,
+                                    margin=dict(l=0, r=0, t=0, b=0))
+            st.plotly_chart(fig_mobile, use_container_width=True)
 
-        df_tore['spieler'] = df_tore['spieler'].apply(clean_player_name)
+            # Tabelle (auf dem Handy nutzen wir use_container_width=True, damit es auf den kleinen Screen passt)
+            st.dataframe(
+                df,
+                column_config={
+                    "platz": st.column_config.NumberColumn("Pl.", width=40, format="%d"),
+                    "spieler": st.column_config.TextColumn("Spieler"),
+                    "tore": st.column_config.NumberColumn("Tore", width=50, format="%d")
+                },
+                hide_index=True,
+                use_container_width=True
+            )
+        else:
+            st.info("Keine Daten gefunden.")
 
-        # Auch mobil zeigen wir das Diagramm für die Top 3
-        top_3 = df_tore.head(3)
-        rest_tore = df_tore.iloc[3:]
+    except Exception as e:
+        st.error("Daten konnten nicht geladen werden.")
 
-        fig_mobile = px.bar(top_3, x='spieler', y='tore', text='tore', color='tore', color_continuous_scale='Reds')
-        fig_mobile.update_layout(xaxis_title="", yaxis_title="Tore", showlegend=False, height=300)
-        st.plotly_chart(fig_mobile, use_container_width=True)
+def show_mobile_rekordspieler():
+    st.markdown("<h4 style='color: #8B0000;'>🏃 Rekordspieler</h4>", unsafe_allow_html=True)
 
-        # Tabelle (auf dem Handy nutzen wir use_container_width=True, damit es auf den kleinen Screen passt)
-        st.dataframe(
-            rest_tore,
-            column_config={
-                "platz": st.column_config.NumberColumn("Pl.", width=40, format="%d"),
-                "spieler": st.column_config.TextColumn("Spieler"),
-                "tore": st.column_config.NumberColumn("Tore", width=50, format="%d")
-            },
-            hide_index=True,
-            use_container_width=True
-        )
-    else:
-        st.info("Keine Daten gefunden.")
+    try:
+        conn = st.connection("postgresql", type="sql")
+        df = conn.query("SELECT * FROM rekordspieler ORDER BY platz ASC", ttl="1h")
+
+        if not df.empty:
+            #Kompaktes Balkendiagramm Top 3
+            top_3 = df.head(3)
+            fig = px.bar(top_3, x='spiele', y='spieler', orientation='h',
+                         text='spiele', color='spiele', color_continuous_scale='Greens')
+            fig.update_layout(axis_title="Spiele", yaxis_title="", showlegend=False, height=300,
+                              margin=dict(l=0, r=0, t=0, b=0))
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.dataframe(
+                df,
+                column_config={
+                    "platz": st.column_config.NumberColumn("Pos", width=40, format="%d"),
+                    "spieler": st.column_config.TextColumn("Name", width=150),
+                    "spiele": st.column_config.NumberColumn("Sp", width=60, format="%d")
+                },
+                hide_index=True,
+                use_container_width=True
+            )
+    except Exception as e:
+        st.error("Daten konnten nicht geladen werden.")
 
 def show_mobile_vereinsanalyse(df):
     st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🔍 Vereinsanalyse</h2>", unsafe_allow_html=True)
@@ -563,7 +587,7 @@ def run_mobile_main():
         return
     
     #Navigation oben
-    menu = st.selectbox("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Torschützen", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
+    menu = st.selectbox("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Torschützen", "Rekordspieler", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
 
     if menu == "Startseite":
         show_mobile_startseite()
@@ -575,6 +599,8 @@ def run_mobile_main():
         show_mobile_ewige_tabelle(df)
     elif menu == "Torschützen":
         show_mobile_torschuetzen()
+    elif menu == "Rekordspieler":
+        show_mobile_rekordspieler()
     elif menu == "Meisterschaften":
         show_mobile_meisterschaften(df)
     elif menu == "Vereinsanalyse":

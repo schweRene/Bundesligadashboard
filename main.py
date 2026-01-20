@@ -43,11 +43,20 @@ def get_torschuetzen():
     try:
         conn = get_conn()
         # sortieren nach Platz
-        df = conn.query("SELECT * FROM torschuetzen ORDER BY platz ASC", ttl="1h")
-        return df
+        return conn.query("SELECT * FROM torschuetzen ORDER BY platz ASC", ttl="1h")
     except Exception as e:
         # Falls die Tabelle noch nicht existiert oder ein Fehler auftritt
         st.error(f"Fehler beim Laden der Torschützenliste: [e]")
+        return pd.DataFrame()
+    
+def get_rekordspieler():
+    """Holt die Rekordspieler aus der PostgrSQL DB"""
+    try:
+        conn = get_conn()
+        #Liste sortieren nach dem Platz
+        return conn.query("SELECT * FROM rekordspieler ORDER BY platz ASC", ttl="1h")
+    except Exception as e:
+        st.error(f"Fehler beim Laden der Rekordspieler: {e}")
         return pd.DataFrame()
 
 def load_data_from_db():
@@ -527,7 +536,7 @@ def main():
 
     seasons = sorted(df["saison"].unique(), reverse=True)
     
-    page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Torschützen", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
+    page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Torschützen", "Rekordspieler", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
 
     if page == "Startseite": 
         show_startseite()
@@ -574,46 +583,68 @@ def main():
         df_tore = get_torschuetzen()
         
         if not df_tore.empty:
-            # --- DATENBEREINIGUNG ---
-            def clean_player_name(full_name):
-                # Wir suchen nach Vereinen oder "X Vereine" und schneiden dort ab
-                # Hinzugefügt: "1.", "2." etc. auch ohne führendes Leerzeichen prüfen
-                stops = [" FC ", " 1.", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " Bayer ", " Eintracht ", " Borussia ", " VfB ", " Schalke "]
-                name = full_name
-                for stop in stops:
-                    if stop in name:
-                        name = name.split(stop)[0]
-                return name.strip()
+            #Top 3 Torschützen
+            if not df_tore.empty:
+                top_3_tore = df_tore.head(3)
+                fig_tore = px.bar(
+                    top_3_tore, 
+                    x='spieler', 
+                    y='tore', 
+                    text='tore', 
+                    color='tore', 
+                    color_continuous_scale='Reds'
+                )
+                fig_tore.update_layout(xaxis_title="", yaxis_title="Tore", showlegend=False, height=350)
+                st.plotly_chart(fig_tore, use_container_width=True)
 
-            df_tore['spieler'] = df_tore['spieler'].apply(clean_player_name)
-
-            # Top 3 für das Diagramm
-            top_3 = df_tore.head(3)
-            rest_tore = df_tore.iloc[3:]
-
-            fig_tore = px.bar(top_3, x='spieler', y='tore', text='tore', color='tore', color_continuous_scale='Reds')
-            fig_tore.update_layout(xaxis_title="", yaxis_title="Tore", showlegend=False, height=350)
-            st.plotly_chart(fig_tore, use_container_width=True)
-
-            st.subheader("Weitere Platzierungen")
+                st.subheader("Weitere Platzierungen")
             
-            # Höhe berechnen (35px pro Zeile + Header)
-            h = (len(rest_tore) + 1) * 35 + 10
+                # Höhe berechnen (35px pro Zeile + Header)
+                h = (len(df_tore) + 1) * 35 + 10
+
+                st.dataframe(
+                    df_tore,
+                    column_config={
+                        "platz": st.column_config.NumberColumn("Platz", width=50, format="%d"),
+                        "spieler": st.column_config.TextColumn("Spieler", width=200),
+                        "spiele": st.column_config.NumberColumn("Einsätze", width=80, format="%d"),
+                        "tore": st.column_config.NumberColumn("Tore", width=80, format="%d")
+                    },
+                    hide_index=True,
+                    use_container_width=False, # Erzwingt die festen Breiten
+                    height=h
+                )
+        else:
+            st.warning("Keine Torschützendaten gefunden.")
+            
+    elif page == "Rekordspieler":
+        st.markdown("<h1 style='color: darkred;'>🏃 Ewige Rekordspieler</h1>", unsafe_allow_html=True)
+
+        df_rekord = get_rekordspieler()
+        if not df_rekord.empty():
+            # Top 3 Visualisierung
+            top3_rekord = df_rekord.head(3)
+            fig_rekord = px.bar(top3_rekord, x='spieler', y='spiele', text='spiele', color='spiele', color_continuous_scale='Greens')
+            fig_rekord.update_layout(xaxis_title="", yaxis_title="Spiele", showlegend=False, height=350)
+            st.plotly_chart(fig_rekord, use_container_width=True)
+
+            st.subheader("Rekordspieler")
+            #Höhe berechnen (35px pro Zeile + Header)
+            h_rekord = (len(df_rekord) +1) * 35 + 10
 
             st.dataframe(
-                rest_tore,
+                df_rekord,
                 column_config={
                     "platz": st.column_config.NumberColumn("Platz", width=50, format="%d"),
                     "spieler": st.column_config.TextColumn("Spieler", width=200),
-                    "spiele": st.column_config.NumberColumn("Einsätze", width=80, format="%d"),
-                    "tore": st.column_config.NumberColumn("Tore", width=80, format="%d")
+                    "spiele": st.column_config.NumberColumn("Spiele", width=100, format="%d")
                 },
                 hide_index=True,
-                use_container_width=False, # Erzwingt die festen Breiten
-                height=h
+                use_container_width=False,
+                height=h_rekord
             )
         else:
-            st.warning("Keine Torschützendaten gefunden.")
+            st.warning("Keine Daten für Rekordspieler gefunden.")
     elif page == "Meisterschaften": 
         show_meisterstatistik(df, seasons)
     elif page == "Vereinsanalyse": 

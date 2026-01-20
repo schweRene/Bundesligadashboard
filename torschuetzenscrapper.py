@@ -3,11 +3,25 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import io
+import re
 from sqlalchemy import create_engine, text
 
 #Konfiguration
 DB_URL = "postgresql://postgres.scspxyixfumfhfkodsit:zz2r9OSjV8L@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require"
 engine = create_engine(DB_URL)
+
+def clean_player_name(full_name):
+    #Daten bereinigen ohne Verein, nur der Name
+    # Wir suchen eine Zahl, die nicht Teil des Namens ist
+    name = str(full_name).strip()
+    name = re.split(r'\s\d', name)[0]
+
+    # 2. Schritt: Wir teilen den Rest in einzelne Wörter auf
+    words = name.split()
+
+    if len(words) >= 2:
+        return f"{words[0]} {words[1]}"
+    return name
 
 def update_torschuetzen_db():
     print("---Starte Torschützen-Update in die DB")
@@ -29,15 +43,16 @@ def update_torschuetzen_db():
             return False
 
         # 3. Tabelle einlesen mit StringIO
-        table_html = io.StringIO(str(table))
-        df = pd.read_html(table_html)[0]
+        df = pd.read_html(io.StringIO(str(table)))[0]
+        
                 
         # 4. Spalten präzise auswählen (#, Spieler, Spiele, Tore)
-        df = df.iloc[:20, :4] 
+        df = df.iloc[:, [0, 1, 2, 3]].copy() 
         df.columns = ["platz", "spieler", "spiele", "tore"]
 
         # 5. Datenreinigung
         # Wir filtern Zeilen, die im Feld 'platz' keine Ziffern haben
+        df['spieler'] = df['spieler'].apply(clean_player_name)
         df = df[df['platz'].astype(str).str.contains(r'^\d+$', na=False)].copy()
         
         # Typen konvertieren
