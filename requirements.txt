@@ -6,4 +6,5 @@ Requests
 sqlalchemy
 psycopg2-binary
 streamlit-javascript
-
+cloudscraper
+lxml
