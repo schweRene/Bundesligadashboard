@@ -602,7 +602,7 @@ def main():
                     column_config={
                         "platz": st.column_config.NumberColumn("Platz", width=60, format="%d"),
                         "spieler": st.column_config.TextColumn("Spieler", width=150),
-                        "spiele": st.column_config.NumberColumn("Einsätze", width=100, format="%d"),
+                        "spiele": st.column_config.NumberColumn("Einsätze", width=90, format="%d"),
                         "tore": st.column_config.NumberColumn("Tore", width=100, format="%d")
                     },
                     hide_index=True,
