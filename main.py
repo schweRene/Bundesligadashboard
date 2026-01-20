@@ -602,10 +602,9 @@ def main():
 
                 # Höhe berechnen (35px pro Zeile + Header)
                 h = (len(df_tore) + 1) * 35 + 10
-                st.dataframe(rest_tore, column_config={...}, hide_index=True, height=h)
-
+                
                 st.dataframe(
-                    df_tore,
+                    rest_tore,
                     column_config={
                         "platz": st.column_config.NumberColumn("Platz", width=50, format="%d"),
                         "spieler": st.column_config.TextColumn("Spieler", width=200),
@@ -640,7 +639,7 @@ def main():
             st.dataframe(rest_rekord, column_config={...}, hide_index=True, height=h_rekord)
 
             st.dataframe(
-                df_rekord,
+                rest_rekord,
                 column_config={
                     "platz": st.column_config.NumberColumn("Platz", width=50, format="%d"),
                     "spieler": st.column_config.TextColumn("Spieler", width=200),

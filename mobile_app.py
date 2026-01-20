@@ -318,77 +318,38 @@ def show_mobile_meisterschaften(df):
     st.markdown(table_html, unsafe_allow_html=True)
 
 def show_mobile_torschuetzen():
-    st.markdown("<h4 style='color: darkred; font-size: 1.5rem;'>⚽ Ewige Torschützen</h4>", unsafe_allow_html=True)
-    
+    st.markdown("<h4 style='color: #8B0000;'>⚽ Ewige Torschützen</h4>", unsafe_allow_html=True)
     try:
         conn = st.connection("postgresql", type="sql")
         df = conn.query("SELECT * FROM torschuetzen ORDER BY platz ASC", ttl="1h")
-
-        if not df.empty:  
-            # Auch mobil zeigen wir das Diagramm für die Top 3
+        if not df.empty:
             top_3 = df.head(3)
-            fig_mobile = px.bar(
-                top_3, 
-                x='spieler', 
-                y='tore', 
-                text='tore', 
-                color='tore', 
-                color_continuous_scale='Reds')
-            fig_mobile.update_layout(xaxis_title="Tore", yaxis_title="", showlegend=False, height=300,
-                                    margin=dict(l=0, r=0, t=0, b=0))
-            st.plotly_chart(fig_mobile, use_container_width=True)
+            fig = px.bar(top_3, x='tore', y='spieler', orientation='h', text='tore', color='tore', color_continuous_scale='Reds')
+            fig.update_layout(xaxis_title="Tore", yaxis_title="", showlegend=False, height=250, margin=dict(l=0,r=0,t=0,b=0))
+            st.plotly_chart(fig, use_container_width=True)
 
-            rest_tore = df.iloc[3:]
-
-            # Tabelle (auf dem Handy nutzen wir use_container_width=True, damit es auf den kleinen Screen passt)
-            st.dataframe(
-                df,
-                column_config={
-                    "platz": st.column_config.NumberColumn("Pl.", width=40, format="%d"),
-                    "spieler": st.column_config.TextColumn("Spieler"),
-                    "tore": st.column_config.NumberColumn("Tore", width=50, format="%d")
-                },
-                hide_index=True,
-                use_container_width=True
-            )
-        else:
-            st.info("Keine Daten gefunden.")
-
+            st.markdown("<strong>Weitere Plätze (ab Platz 4)</strong>", unsafe_allow_html=True)
+            rest_mobile = df.iloc[3:]
+            st.dataframe(rest_mobile, hide_index=True, use_container_width=True)
     except Exception as e:
-        st.error("Daten konnten nicht geladen werden.")
+        st.error(f"Fehler: {e}")
 
 def show_mobile_rekordspieler():
     st.markdown("<h4 style='color: #8B0000;'>🏃 Rekordspieler</h4>", unsafe_allow_html=True)
-
     try:
         conn = st.connection("postgresql", type="sql")
         df = conn.query("SELECT * FROM rekordspieler ORDER BY platz ASC", ttl="1h")
-
         if not df.empty:
-            #Kompaktes Balkendiagramm Top 3
             top_3 = df.head(3)
-            fig = px.bar(top_3, x='spiele', y='spieler', orientation='h',
-                         text='spiele', color='spiele', color_continuous_scale='Greens')
-            fig.update_layout(axis_title="Spiele", yaxis_title="", showlegend=False, height=300,
-                              margin=dict(l=0, r=0, t=0, b=0))
+            fig = px.bar(top_3, x='spiele', y='spieler', orientation='h', text='spiele', color='spiele', color_continuous_scale='Greens')
+            fig.update_layout(xaxis_title="Spiele", yaxis_title="", showlegend=False, height=250, margin=dict(l=0,r=0,t=0,b=0))
             st.plotly_chart(fig, use_container_width=True)
 
-            rest_rekord = df.iloc[3:]
-            st.dataframe(
-                df,
-                column_config={
-                    "platz": st.column_config.NumberColumn("Pos", width=40, format="%d"),
-                    "spieler": st.column_config.TextColumn("Name", width=150),
-                    "spiele": st.column_config.NumberColumn("Sp", width=60, format="%d")
-                },
-                hide_index=True,
-                use_container_width=True
-            )
-        else:
-            st.info("Keine Daten gefunden.")
-
+            st.markdown("<strong>Weitere Plätze (ab Platz 4)</strong>", unsafe_allow_html=True)
+            rest_mobile = df.iloc[3:]
+            st.dataframe(rest_mobile, hide_index=True, use_container_width=True)
     except Exception as e:
-        st.error("Daten konnten nicht geladen werden.")
+        st.error(f"Fehler: {e}")
 
 def show_mobile_vereinsanalyse(df):
     st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🔍 Vereinsanalyse</h2>", unsafe_allow_html=True)
