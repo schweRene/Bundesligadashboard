@@ -215,87 +215,87 @@
 24,SV Werder Bremen,1. FC Heidenheim,-:-
 24,TSG Hoffenheim,FC St Pauli,-:-
 24,VfB Stuttgart,VfL Wolfsburg,-:-
-25,1. FC Heidenheim,TSG Hoffenheim,-:-
-25,1. FC Köln,Borussia Dortmund,-:-
-25,1. FC Union Berlin,SV Werder Bremen,-:-
-25,FC Bayern München,Borussia Mönchengladbach,-:-
-25,FC St Pauli,Eintracht Frankfurt,-:-
-25,FSV Mainz 05,VfB Stuttgart,-:-
-25,RB Leipzig,1.FC Augsburg,-:-
-25,SC Freiburg,Bayer 04 Leverkusen,-:-
-25,VfL Wolfsburg,Hamburger SV,-:-
-26,Bayer 04 Leverkusen,FC Bayern München,-:-
-26,Borussia Dortmund,1.FC Augsburg,-:-
-26,Borussia Mönchengladbach,FC St Pauli,-:-
-26,Eintracht Frankfurt,1. FC Heidenheim,-:-
-26,Hamburger SV,1. FC Köln,-:-
-26,SC Freiburg,1. FC Union Berlin,-:-
-26,SV Werder Bremen,FSV Mainz 05,-:-
-26,TSG Hoffenheim,VfL Wolfsburg,-:-
-26,VfB Stuttgart,RB Leipzig,-:-
-27,1. FC Heidenheim,Bayer 04 Leverkusen,-:-
-27,1. FC Köln,Borussia Mönchengladbach,-:-
-27,1.FC Augsburg,VfB Stuttgart,-:-
-27,Borussia Dortmund,Hamburger SV,-:-
-27,FC Bayern München,1. FC Union Berlin,-:-
-27,FC St Pauli,SC Freiburg,-:-
-27,FSV Mainz 05,Eintracht Frankfurt,-:-
-27,RB Leipzig,TSG Hoffenheim,-:-
-27,VfL Wolfsburg,SV Werder Bremen,-:-
-28,1. FC Union Berlin,FC St Pauli,-:-
-28,Bayer 04 Leverkusen,VfL Wolfsburg,-:-
-28,Borussia Mönchengladbach,1. FC Heidenheim,-:-
-28,Eintracht Frankfurt,1. FC Köln,-:-
-28,Hamburger SV,1.FC Augsburg,-:-
-28,SC Freiburg,FC Bayern München,-:-
-28,SV Werder Bremen,RB Leipzig,-:-
-28,TSG Hoffenheim,FSV Mainz 05,-:-
-28,VfB Stuttgart,Borussia Dortmund,-:-
-29,1. FC Heidenheim,1. FC Union Berlin,-:-
-29,1. FC Köln,SV Werder Bremen,-:-
-29,1.FC Augsburg,TSG Hoffenheim,-:-
-29,Borussia Dortmund,Bayer 04 Leverkusen,-:-
-29,FC St Pauli,FC Bayern München,-:-
-29,FSV Mainz 05,SC Freiburg,-:-
-29,RB Leipzig,Borussia Mönchengladbach,-:-
-29,VfB Stuttgart,Hamburger SV,-:-
-29,VfL Wolfsburg,Eintracht Frankfurt,-:-
-30,1. FC Union Berlin,VfL Wolfsburg,-:-
-30,Bayer 04 Leverkusen,1.FC Augsburg,-:-
-30,Borussia Mönchengladbach,FSV Mainz 05,-:-
-30,Eintracht Frankfurt,RB Leipzig,-:-
-30,FC Bayern München,VfB Stuttgart,-:-
-30,FC St Pauli,1. FC Köln,-:-
-30,SC Freiburg,1. FC Heidenheim,-:-
-30,SV Werder Bremen,Hamburger SV,-:-
-30,TSG Hoffenheim,Borussia Dortmund,-:-
-31,1. FC Heidenheim,FC St Pauli,-:-
-31,1. FC Köln,Bayer 04 Leverkusen,-:-
-31,1.FC Augsburg,Eintracht Frankfurt,-:-
-31,Borussia Dortmund,SC Freiburg,-:-
-31,FSV Mainz 05,FC Bayern München,-:-
-31,Hamburger SV,TSG Hoffenheim,-:-
-31,RB Leipzig,1. FC Union Berlin,-:-
-31,VfB Stuttgart,SV Werder Bremen,-:-
-31,VfL Wolfsburg,Borussia Mönchengladbach,-:-
-32,1. FC Union Berlin,1. FC Köln,-:-
-32,Bayer 04 Leverkusen,RB Leipzig,-:-
-32,Borussia Mönchengladbach,Borussia Dortmund,-:-
-32,Eintracht Frankfurt,Hamburger SV,-:-
-32,FC Bayern München,1. FC Heidenheim,-:-
-32,FC St Pauli,FSV Mainz 05,-:-
-32,SC Freiburg,VfL Wolfsburg,-:-
-32,SV Werder Bremen,1.FC Augsburg,-:-
-32,TSG Hoffenheim,VfB Stuttgart,-:-
-33,1. FC Köln,1. FC Heidenheim,-:-
-33,1.FC Augsburg,Borussia Mönchengladbach,-:-
-33,Borussia Dortmund,Eintracht Frankfurt,-:-
-33,FSV Mainz 05,1. FC Union Berlin,-:-
-33,Hamburger SV,SC Freiburg,-:-
-33,RB Leipzig,FC St Pauli,-:-
-33,TSG Hoffenheim,SV Werder Bremen,-:-
-33,VfB Stuttgart,Bayer 04 Leverkusen,-:-
-33,VfL Wolfsburg,FC Bayern München,-:-
+25,1. FC Heidenheim,TSG Hoffenheim,1:0
+25,1. FC Köln,Borussia Dortmund,1:0
+25,1. FC Union Berlin,SV Werder Bremen,1:0
+25,FC Bayern München,Borussia Mönchengladbach,1:0
+25,FC St Pauli,Eintracht Frankfurt,1:0
+25,FSV Mainz 05,VfB Stuttgart,1:0
+25,RB Leipzig,1.FC Augsburg,1:0
+25,SC Freiburg,Bayer 04 Leverkusen,1:0
+25,VfL Wolfsburg,Hamburger SV,1:0
+26,Bayer 04 Leverkusen,FC Bayern München,1:0
+26,Borussia Dortmund,1.FC Augsburg,1:0
+26,Borussia Mönchengladbach,FC St Pauli,1:0
+26,Eintracht Frankfurt,1. FC Heidenheim,1:0
+26,Hamburger SV,1. FC Köln,1:0
+26,SC Freiburg,1. FC Union Berlin,1:0
+26,SV Werder Bremen,FSV Mainz 05,1:0
+26,TSG Hoffenheim,VfL Wolfsburg,1:0
+26,VfB Stuttgart,RB Leipzig,1:0
+27,1. FC Heidenheim,Bayer 04 Leverkusen,1:0
+27,1. FC Köln,Borussia Mönchengladbach,1:0
+27,1.FC Augsburg,VfB Stuttgart,1:0
+27,Borussia Dortmund,Hamburger SV,1:0
+27,FC Bayern München,1. FC Union Berlin,1:0
+27,FC St Pauli,SC Freiburg,1:0
+27,FSV Mainz 05,Eintracht Frankfurt,1:0
+27,RB Leipzig,TSG Hoffenheim,1:0
+27,VfL Wolfsburg,SV Werder Bremen,1:0
+28,1. FC Union Berlin,FC St Pauli,2:0
+28,Bayer 04 Leverkusen,VfL Wolfsburg,2:0
+28,Borussia Mönchengladbach,1. FC Heidenheim,2:0
+28,Eintracht Frankfurt,1. FC Köln,2:0
+28,Hamburger SV,1.FC Augsburg,2:0
+28,SC Freiburg,FC Bayern München,2:0
+28,SV Werder Bremen,RB Leipzig,2:0
+28,TSG Hoffenheim,FSV Mainz 05,2:0
+28,VfB Stuttgart,Borussia Dortmund,2:0
+29,1. FC Heidenheim,1. FC Union Berlin,2:0
+29,1. FC Köln,SV Werder Bremen,2:0
+29,1.FC Augsburg,TSG Hoffenheim,2:0
+29,Borussia Dortmund,Bayer 04 Leverkusen,2:0
+29,FC St Pauli,FC Bayern München,2:0
+29,FSV Mainz 05,SC Freiburg,2:0
+29,RB Leipzig,Borussia Mönchengladbach,2:0
+29,VfB Stuttgart,Hamburger SV,2:0
+29,VfL Wolfsburg,Eintracht Frankfurt,2:0
+30,1. FC Union Berlin,VfL Wolfsburg,2:0
+30,Bayer 04 Leverkusen,1.FC Augsburg,2:0
+30,Borussia Mönchengladbach,FSV Mainz 05,2:0
+30,Eintracht Frankfurt,RB Leipzig,2:0
+30,FC Bayern München,VfB Stuttgart,2:0
+30,FC St Pauli,1. FC Köln,2:0
+30,SC Freiburg,1. FC Heidenheim,2:0
+30,SV Werder Bremen,Hamburger SV,2:0
+30,TSG Hoffenheim,Borussia Dortmund,2:0
+31,1. FC Heidenheim,FC St Pauli,2:0
+31,1. FC Köln,Bayer 04 Leverkusen,2:0
+31,1.FC Augsburg,Eintracht Frankfurt,2:0
+31,Borussia Dortmund,SC Freiburg,2:0
+31,FSV Mainz 05,FC Bayern München,2:0
+31,Hamburger SV,TSG Hoffenheim,2:0
+31,RB Leipzig,1. FC Union Berlin,2:0
+31,VfB Stuttgart,SV Werder Bremen,2:0
+31,VfL Wolfsburg,Borussia Mönchengladbach,2:0
+32,1. FC Union Berlin,1. FC Köln,2:0
+32,Bayer 04 Leverkusen,RB Leipzig,2:0
+32,Borussia Mönchengladbach,Borussia Dortmund,2:0
+32,Eintracht Frankfurt,Hamburger SV,2:0
+32,FC Bayern München,1. FC Heidenheim,2:0
+32,FC St Pauli,FSV Mainz 05,2:0
+32,SC Freiburg,VfL Wolfsburg,2:0
+32,SV Werder Bremen,1.FC Augsburg,2:0
+32,TSG Hoffenheim,VfB Stuttgart,2:0
+33,1. FC Köln,1. FC Heidenheim,2:0
+33,1.FC Augsburg,Borussia Mönchengladbach,2:0
+33,Borussia Dortmund,Eintracht Frankfurt,2:0
+33,FSV Mainz 05,1. FC Union Berlin,2:0
+33,Hamburger SV,SC Freiburg,2:0
+33,RB Leipzig,FC St Pauli,2:0
+33,TSG Hoffenheim,SV Werder Bremen,2:0
+33,VfB Stuttgart,Bayer 04 Leverkusen,2:0
+33,VfL Wolfsburg,FC Bayern München,2:0
 34,1. FC Heidenheim,FSV Mainz 05,-:-
 34,1. FC Union Berlin,1.FC Augsburg,-:-
 34,Bayer 04 Leverkusen,Hamburger SV,-:-
