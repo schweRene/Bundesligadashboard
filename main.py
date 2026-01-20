@@ -616,12 +616,12 @@ def main():
                 )
         else:
             st.warning("Keine Torschützendaten gefunden.")
-            
+
     elif page == "Rekordspieler":
         st.markdown("<h1 style='color: darkred;'>🏃 Ewige Rekordspieler</h1>", unsafe_allow_html=True)
 
         df_rekord = get_rekordspieler()
-        if not df_rekord.empty():
+        if not df_rekord.empty:
             # Top 3 Visualisierung
             top3_rekord = df_rekord.head(3)
             fig_rekord = px.bar(top3_rekord, x='spieler', y='spiele', text='spiele', color='spiele', color_continuous_scale='Greens')
