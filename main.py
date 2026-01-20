@@ -595,7 +595,7 @@ def main():
                 rest_tore = df_tore.iloc[3:]
 
                 # Höhe berechnen (35px pro Zeile + Header)
-                h = (len(df_tore) * 35) + 38
+                h = (len(rest_tore) * 35) + 36
                 
                 st.dataframe(
                     rest_tore,
@@ -630,7 +630,7 @@ def main():
             rest_rekord = df_rekord.iloc[3:]
 
             #Höhe berechnen (35px pro Zeile + Header)
-            h_rekord = (len(df_rekord) * 35) + 38
+            h_rekord = (len(rest_rekord) * 35) + 36
             
             st.dataframe(
                 rest_rekord,
