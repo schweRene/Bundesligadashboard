@@ -601,7 +601,7 @@ def main():
                     rest_tore,
                     column_config={
                         "platz": st.column_config.NumberColumn("Platz", width=60, format="%d"),
-                        "spieler": st.column_config.TextColumn("Spieler", width=300),
+                        "spieler": st.column_config.TextColumn("Spieler", width=150),
                         "spiele": st.column_config.NumberColumn("Einsätze", width=100, format="%d"),
                         "tore": st.column_config.NumberColumn("Tore", width=100, format="%d")
                     },
@@ -636,8 +636,8 @@ def main():
                 rest_rekord,
                 column_config={
                     "platz": st.column_config.NumberColumn("Platz", width=60, format="%d"),
-                    "spieler": st.column_config.TextColumn("Spieler", width=350),
-                    "spiele": st.column_config.NumberColumn("Spiele", width=120, format="%d")
+                    "spieler": st.column_config.TextColumn("Spieler", width=150),
+                    "spiele": st.column_config.NumberColumn("Spiele", width=100, format="%d")
                 },
                 hide_index=True,
                 use_container_width=False,
