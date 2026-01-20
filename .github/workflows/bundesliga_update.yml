@@ -22,7 +22,9 @@ jobs:
 
       - name: Abhängigkeiten installieren
         run: |
-          pip install requests beautifulsoup4 sqlalchemy psycopg2-binary pandas
+          python -m pip install --upgrade pip
+          # Nutzt jetzt deine requirements.txt (inkl. streamlit, cloudscraper, etc.)
+          pip install -r requirements.txt
 
       - name: Update-Skript ausführen
         env:
@@ -35,12 +37,8 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           # Füge alle Dateien hinzu, die sich geändert haben könnten
-          git add bundesliga.db bundesliga_2026.csv pipeline_log.txt
+          # Ich habe suender_64.csv hinzugefügt, damit diese auch gespeichert wird
+          git add bundesliga.db bundesliga_2026.csv suender_64.csv pipeline_log.txt
           # Nur committen, wenn es wirklich Änderungen gibt
           git commit -m "Auto-Update Spielstand $(date +'%Y-%m-%d %H:%M')" || echo "Keine Änderungen zum Committen"
           git push
-
-      - name: Show Validation Logs
-        run: |
-          cat validation_errors.txt  # Ersetze das durch deinen echten Dateinamen
-          cat pipeline_log.txt
