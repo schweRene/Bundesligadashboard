@@ -97,7 +97,7 @@ def run_pipeline():
         print(f"❌ Fehler beim Erstellen des Updates der Rekordspieler: {e}")
 
     print(f"{'='*50}\nALLE DATEN AKTUALISIERT!\n{'='*50}")   
-    log_pipeline_run("Success:  Updates erfolgreich durchgeführt.")
+    log_pipeline_run("Success:,  Updates erfolgreich durchgeführt.")
     
 if __name__ == "__main__":
     run_pipeline()
