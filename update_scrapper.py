@@ -2,138 +2,136 @@ import sqlite3
 import requests
 from bs4 import BeautifulSoup
 import re
-import csv
-import time
+import io
 from sqlalchemy import create_engine, text
 import os
+from datetime import datetime, timedelta
 
+# --- KONFIGURATION ---
 DB_NAME = "bundesliga.db"
-CSV_NAME = "bundesliga_2026.csv"
 SAISON = "2025/26"
 BASE_URL = "https://www.fussballdaten.de/bundesliga/2026/"
-DB_URL = os.getenv(
-    "SUPABASE_DB_URL", 
-    "postgresql://postgres.scspxyixfumfhfkodsit:zz2r9OSjV8L@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require"
-)
-engine = create_engine(DB_URL)
+DB_URL_CLOUD = "postgresql://postgres.scspxyixfumfhfkodsit:zz2r9OSjV8L@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require"
+engine_cloud = create_engine(DB_URL_CLOUD)
 
-# Deine vollständige Mapping-Liste (Bitte im Code behalten)
+# Deine vollständige Mapping-Liste
 TEAM_MAP = {
     "Bremen": "SV Werder Bremen", "Dortmund": "Borussia Dortmund",
-    "K'lautern": "1.FC Kaiserslautern", "1. FC Kaiserslautern": "1.FC Kaiserslautern",
     "Frankfurt": "Eintracht Frankfurt", "Nürnberg": "1. FC Nürnberg",
     "Braunschweig": "Eintracht Braunschweig", "Karlsruhe": "Karlsruher SC",
     "TSV 1860": "TSV 1860 München", "Münster": "Preußen Münster",
-    "Hamburg": "Hamburger SV", "Köln": "1. FC Köln",
-    "Stuttgart": "VfB Stuttgart", "Saarbrücken": "1. FC Saarbrücken",
-    "Schalke": "FC Schalke 04", "Schalke 04": "FC Schalke 04",
-    "M'gladbach": "Borussia Mönchengladbach", "Bayern": "FC Bayern München",
-    "Düsseldorf": "Fortuna Düsseldorf", "Offenbach": "Kickers Offenbach",
-    "Wuppertal": "Wuppertaler SV", "Bielefeld": "Arminia Bielefeld",
-    "Tasmania": "Tasmania Berlin", "Mannheim": "Waldhof Mannheim",
-    "Leverkusen": "Bayer 04 Leverkusen", "St. Kickers": "Stuttgarter Kickers",
-    "Uerdingen": "KFC Uerdingen", "Wattenscheid": "SG Wattenscheid 09",
-    "TB Berlin": "Tennis Borussia Berlin", "Duisburg": "MSV Duisburg",
-    "RW Essen": "Rot Weiss Essen", "Dresden": "SG Dynamo Dresden",
-    "Freiburg": "SC Freiburg", "Rostock": "FC Hansa Rostock",
-    "St. Pauli": "FC St Pauli", "Wolfsburg": "VfL Wolfsburg",
-    "Cottbus": "Energie Cottbus", "Hoffenheim": "TSG Hoffenheim",
-    "Hannover": "Hannover 96", "Paderborn": "SC Paderborn 07",
-    "Ingolstadt": "FC Ingolstadt 04", "Darmstadt": "SV Darmstadt 98",
-    "Leipzig": "RB Leipzig", "Union Berlin": "1. FC Union Berlin",
-    "Heidenheim": "1. FC Heidenheim", "Holstein Kiel": "Holstein Kiel",
+    "Hamburg": "Hamburger SV", "Kaiserslautern": "1.FC Kaiserslautern",
+    "K'lautern": "1.FC Kaiserslautern", "1. FC Kaiserslautern": "1.FC Kaiserslautern",
+    "Meidericher SV": "MSV Duisburg", "Duisburg": "MSV Duisburg",
+    "Saarbrücken": "1. FC Saarbrücken", "Schalke": "FC Schalke 04",
+    "Hertha": "Hertha BSC", "Hannover": "Hannover 96",
+    "Neunkirchen": "Borussia Neunkirchen", "Tasmania": "Tasmania Berlin",
+    "Essen": "Rot-Weiss Essen", "Offenbach": "Kickers Offenbach",
+    "Leipzig": "RB Leipzig", "Oberhausen": "Rot-Weiß Oberhausen",
+    "Bielefeld": "Arminia Bielefeld", "Uerdingen": "Bayer 05 Uerdingen",
+    "Wattenscheid": "SG Wattenscheid 09", "St. Pauli": "FC St. Pauli",
+    "Homburg": "FC 08 Homburg", "Stuttg. Kickers": "Stuttgarter Kickers",
+    "Dresden": "Dynamo Dresden", "Rostock": "Hansastat Rostock",
+    "Düsseldorf": "Fortuna Düsseldorf", "Unterhaching": "SpVgg Unterhaching",
+    "Cottbus": "Energie Cottbus", "Fürth": "SpVgg Greuther Fürth",
+    "Paderborn": "SC Paderborn 07", "Ingolstadt": "FC Intolstadt 04",
+    "Darmstadt": "SV Darmstadt 98", "Heidenheim": "1. FC Heidenheim",
+    "Bayern": "FC Bayern München", "Leverkusen": "Bayer 04 Leverkusen",
+    "Gladbach": "Borussia Mönchengladbach", "Stuttgart": "VfB Stuttgart",
     "Augsburg": "1.FC Augsburg", "Mainz": "FSV Mainz 05",
-    "Neunkirchen": "Borussia Neunkirchen", "Homburg": "FC 08 Homburg",
-    "Fürth": "SpVgg Greuther Fürth", "Oberhausen": "Rot Weiss Oberhausen",
-    "Ulm": "SSV Ulm 1846", "Aachen": "Alemania Aachen", "Meiderich": "MSV Duisburg"
+    "Wolfsburg": "VfL Wolfsburg", "Hoffenheim": "TSG Hoffenheim",
+    "Freiburg": "SC Freiburg", "Union Berlin": "1. FC Union Berlin",
+    "Köln": "1. FC Köln", "Bochum": "VfL Bochum", "Kiel": "Holstein Kiel"
 }
 
-def get_clean_team_name(text):
-    if not text: return None
-    for key, full_name in TEAM_MAP.items():
-        if key.lower() in text.lower():
-            return full_name
-    return None
+def get_full_team_name(short_name):
+    return TEAM_MAP.get(short_name, short_name)
 
-def update_csv_from_db():
-    conn = sqlite3.connect(DB_NAME)
-    query = f"SELECT spieltag, heim, gast, tore_heim, tore_gast FROM spiele WHERE saison = '{SAISON}' ORDER BY spieltag ASC, heim ASC"
-    rows = conn.execute(query).fetchall()
-    conn.close()
-    with open(CSV_NAME, mode='w', encoding='utf-8-sig', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(['spieltag', 'home', 'away', 'result'])
-        for r in rows:
-            res = f"{r[3]}:{r[4]}" if r[3] is not None else "-:-"
-            writer.writerow([r[0], r[1], r[2], res])
-
-def run_scrapper(spieltag):
-    url = f"{BASE_URL}{spieltag}/"
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0"}
+def run_scrapper():
+    print(f"--- Starte Ergebnis-Update für {SAISON} ---")
     
-    for attempt in range(3):
+    # 1. Finde Spieltage, die noch keine Ergebnisse haben (NULL)
+    # WICHTIG: Wir suchen nur in der aktuellen Saison!
+    conn_local = sqlite3.connect(DB_NAME)
+    cursor = conn_local.cursor()
+    cursor.execute("""
+        SELECT DISTINCT spieltag FROM spiele 
+        WHERE (tore_heim IS NULL OR tore_gast IS NULL) 
+        AND saison = ? ORDER BY spieltag ASC
+    """, (SAISON,))
+    missing_days = [row[0] for row in cursor.fetchall()]
+    conn_local.close()
+
+    if not missing_days:
+        print("✅ Alle bisherigen Spiele haben Ergebnisse. Nichts zu tun.")
+        return
+
+    print(f"Unvollständige Spieltage gefunden: {missing_days}")
+    now = datetime.now()
+
+    for spieltag in missing_days:
+        url = f"{BASE_URL}{spieltag}/"
         try:
-            response = requests.get(url, headers=headers, timeout=20)
+            response = requests.get(url, timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
-            found_count = 0
-            
-            # Wir sammeln alle Spiele eines Spieltags erst in einer Liste
-            matches_to_update = []
+            matches_found = 0
 
-            for row in soup.find_all(['div', 'a', 'tr'], class_=re.compile(r'spiele-row|det-match')):
-                text_data = row.get_text(" ", strip=True)
-                teams = []
-                potential_parts = re.split(r'\d+:\d+|\s-\s|\|', text_data)
-                for part in potential_parts:
-                    name = get_clean_team_name(part)
-                    if name and name not in teams: teams.append(name)
+            # Wir suchen die Ergebnis-Container
+            for container in soup.select('a.ergebnis'):
+                content = container.find('div', class_='content')
+                if not content: continue
+
+                # Zeit-Check: Ist das Spiel schon vorbei?
+                time_span = content.find('span', class_='uhrzeit')
+                if time_span and 'data-time' in time_span.attrs:
+                    kickoff = datetime.fromtimestamp(int(time_span['data-time']))
+                    # Nur eintragen, wenn Anpfiff + 110 Minuten vergangen sind
+                    if now < (kickoff + timedelta(minutes=110)):
+                        continue
+
+                teams = content.find_all('div', class_='team')
+                ergebnis_div = content.find('div', class_='ergebnis')
                 
-                if len(teams) >= 2:
-                    heim, gast = teams[0], teams[1]
-                    t_h, t_g = None, None
-                    res_match = re.search(r'(\d+):(\d+)', text_data)
+                if len(teams) == 2 and ergebnis_div:
+                    h_short = teams[0].find('span').text.strip()
+                    g_short = teams[1].find('span').text.strip()
+                    h_full = get_full_team_name(h_short)
+                    g_full = get_full_team_name(g_short)
                     
-                    if res_match:
-                        h_val, g_val = int(res_match.group(1)), int(res_match.group(2))
-                        # Wichtig: Wir prüfen, ob es ein valides Ergebnis ist
-                        if h_val < 15 and "uhr" not in text_data.lower():
-                            t_h, t_g = h_val, g_val
+                    tore_text = ergebnis_div.text.strip()
+                    if ':' in tore_text:
+                        try:
+                            th, tg = map(int, tore_text.split(':'))
+                            
+                            # --- DATENBANK UPDATES (NUR UPDATE, KEIN INSERT/REPLACE) ---
+                            
+                            # A. LOKAL
+                            conn_l = sqlite3.connect(DB_NAME)
+                            conn_l.execute("""
+                                UPDATE spiele SET tore_heim = ?, tore_gast = ? 
+                                WHERE saison = ? AND spieltag = ? AND heim = ? AND gast = ?
+                            """, (th, tg, SAISON, spieltag, h_full, g_full))
+                            conn_l.commit()
+                            conn_l.close()
 
-                    matches_to_update.append((heim, gast, t_h, t_g))
+                            # B. CLOUD
+                            try:
+                                with engine_cloud.begin() as conn_c:
+                                    conn_c.execute(text("""
+                                        UPDATE spiele SET tore_heim = :th, tore_gast = :tg 
+                                        WHERE saison = :s AND spieltag = :st AND heim = :h AND gast = :g
+                                    """), {"th": th, "tg": tg, "s": SAISON, "st": spieltag, "h": h_full, "g": g_full})
+                            except Exception as cloud_err:
+                                print(f"Cloud-Fehler bei {h_full}: {cloud_err}")
+                            
+                            matches_found += 1
+                        except ValueError:
+                            continue # Falls dort "Abbruch" oder ähnliches steht
 
-            # --- JETZT DER DATENBANK-TRANSFER ---
-            if matches_to_update:
-                # 1. Lokal (SQLite)
-                conn = sqlite3.connect(DB_NAME)
-                for heim, gast, t_h, t_g in matches_to_update:
-                    conn.execute("""INSERT OR REPLACE INTO spiele (saison, spieltag, heim, gast, tore_heim, tore_gast)
-                                    VALUES (?, ?, ?, ?, ?, ?)""", (SAISON, spieltag, heim, gast, t_h, t_g))
-                conn.commit()
-                conn.close()
+            print(f"Spieltag {spieltag}: {matches_found} Ergebnisse aktualisiert.")
 
-                # 2. Cloud (Supabase) - Hier nutzen wir .begin() für Auto-Commit
-                try:
-                    with engine.begin() as cloud_conn: # .begin() macht AUTOMATISCH einen Commit am Ende!
-                        for heim, gast, t_h, t_g in matches_to_update:
-                            # Wir nutzen "UPSERT" Logik (Update if exists, else Insert)
-                            # Das ist sicherer als ID-Suche
-                            sql = text("""
-                                INSERT INTO spiele (saison, spieltag, heim, gast, tore_heim, tore_gast)
-                                VALUES (:s, :st, :h, :g, :th, :tg)
-                                ON CONFLICT (saison, spieltag, heim, gast) 
-                                DO UPDATE SET tore_heim = EXCLUDED.tore_heim, tore_gast = EXCLUDED.tore_gast;
-                            """)
-                            cloud_conn.execute(sql, {
-                                "s": SAISON, "st": spieltag, "h": heim, "g": gast, "th": t_h, "tg": t_g
-                            })
-                    print(f"✅ Cloud Sync ok", end=" ")
-                except Exception as e:
-                    print(f"\n❌ Cloud-Fehler: {str(e)[:100]}")
-
-                return len(matches_to_update)
-            
-            return 0
         except Exception as e:
-            print(f" (Retry {attempt+1})...", end="")
-            time.sleep(2)
-    return 0
+            print(f"Fehler beim Scrapen von Spieltag {spieltag}: {e}")
+
+if __name__ == "__main__":
+    run_scrapper()
