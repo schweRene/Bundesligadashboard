@@ -59,6 +59,53 @@ def get_rekordspieler():
         st.error(f"Fehler beim Laden der Rekordspieler: {e}")
         return pd.DataFrame()
 
+def get_suender_aktuell():
+    """Holt die Top 20 der aktuellsten Saison automatisch aus der DB"""
+    try:
+        conn = get_conn()
+        # 1. Wir ermitteln erst, was die aktuellste Saison in der Tabelle ist
+        saison_info = conn.query("SELECT MAX(saison) as aktuelle_saison FROM suenderkartei", ttl="1h")
+        akt_saison = saison_info.iloc[0]['aktuelle_saison'] if not saison_info.empty else "2025/26"
+
+        # 2. Wir laden die Daten für genau diese Saison
+        query = text("""
+            SELECT platz, spieler, einsaetze, gelb, gelb_rot, rot, punkte 
+            FROM suenderkartei 
+            WHERE saison = :s
+            ORDER BY punkte DESC, rot DESC, gelb_rot DESC 
+            LIMIT 20
+        """)
+        df = conn.query(query, params={"s": akt_saison}, ttl="1h")
+        return df, akt_saison
+    except Exception as e:
+        st.error(f"Fehler beim Laden der aktuellen Sünder: {e}")
+        return pd.DataFrame(), "Unbekannt"
+    
+def get_suender_ewig():
+    # Summiert alle Saison auf - völlig unabhängig von Jahreszahlen
+    try:
+        conn = get_conn()
+        query = """
+            SELECT
+                spieler, 
+                SUM(einsaetze) as spiele, 
+                SUM(gelb) as gelb,
+                SUM(gelb_rot) as gelb_rot,
+                SUM(rot) as rot,
+                SUM(punkte) as punkte
+            FROM suenderkartei
+            GROUP BY spieler
+            ORDER BY punkte DESC
+            LIMIT 100
+        """
+        df = conn.query(query, ttl="1h")
+        if not df.empty:
+            df.insert(0, "platz", range(1, len(df) + 1))
+        return df
+    except Exception as e:
+        st.error(f"Fehler beim Laden der ewigen Sünder: {e}")
+        return pd.DataFrame()
+
 def load_data_from_db():
     try:
         conn = get_conn()
@@ -645,6 +692,50 @@ def main():
             )
         else:
             st.warning("Keine Daten für Rekordspieler gefunden.")
+    elif page == "Sünderkartei":
+        # Die Funktion gibt jetzt Daten UND den Saison-Namen zurück
+        df_akt, saison_name = get_suender_aktuell()
+        st.markdown(f"<h1 style='color: darkred;'>⚖️ Sünderkartei {saison_name}</h1>", unsafe_allow_html=True)
+
+        tab1, tab2 = st.tabs([f"Saison {saison_name}", "Ewige Sünderliste"])
+
+        with tab1:
+            if not df_akt.empty:
+                st.dataframe(
+                    df_akt,
+                    column_config={
+                        "platz": "Rang",
+                        "spieler": "Spieler",
+                        "einsaetze": "Spiele",
+                        "gelb": "🟨",
+                        "gelb_rot": "🟨🟥",
+                        "rot": "🟥",
+                        "punkte": "Punkte"
+                    },
+                    hide_index=True,
+                    use_container_width=True
+                )
+            else:
+                st.info(f"Keine Daten für die Saison {saison_name} gefunden.")
+        with tab2:
+            st.subheader("Die ewigen Rekordsünder")
+            df_ewig = get_suender_ewig()
+            if not df_ewig.empty:
+                st.dataframe(
+                    df_ewig,
+                    column_config={
+                        "platz": "Rang",
+                        "spieler": "Spieler",
+                        "spiele": "Einsätze",
+                        "gelb": "🟨",
+                        "gelb_rot": "🟨🟥",
+                        "rot": "🟥",
+                        "punkte": "Gesamtpunkte"
+                    },
+                    hide_index=True,
+                    use_container_width=True
+                )
+
     elif page == "Meisterschaften": 
         show_meisterstatistik(df, seasons)
     elif page == "Vereinsanalyse": 
