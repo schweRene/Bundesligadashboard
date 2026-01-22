@@ -583,7 +583,7 @@ def main():
 
     seasons = sorted(df["saison"].unique(), reverse=True)
     
-    page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Torschützen", "Rekordspieler", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
+    page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Torschützen", "Rekordspieler", "Sünderkartei", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
 
     if page == "Startseite": 
         show_startseite()
