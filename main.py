@@ -727,7 +727,7 @@ def main():
                 top10 = df_ewig.head(10)
                 fig = px.bar(top10, x='punkte', y='spieler', orientation='h', 
                              text='punkte', color='punkte', color_continuous_scale='Reds')
-                fig.update_layout(yaxis={'categoryheader':'total ascending'}, height=400, showlegend=False)
+                fig.update_layout(yaxis={'categoryorder':'total ascending'}, height=400, showlegend=False)
                 st.plotly_chart(fig, use_container_width=True)
 
                 #Tabelle Platz 11 bis 100
@@ -738,7 +738,7 @@ def main():
                     rest_ewig,
                     column_config={
                         "platz": st.column_config.NumberColumn("Rang", width=40),
-                        "spieler": st.column_config.NumberColumn("Spieler", width=200),
+                        "spieler": st.column_config.TextColumn("Spieler", width=200),
                         "spiele": st.column_config.NumberColumn("Einsätze", width=50),
                         "gelb": st.column_config.NumberColumn("🟨", width=40),
                         "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=40),
