@@ -59,7 +59,7 @@ def get_rekordspieler():
         st.error(f"Fehler beim Laden der Rekordspieler: {e}")
         return pd.DataFrame()
 
-def get_suender_aktuell():
+def get_suender():
     """Holt die Top 20 der aktuellsten Saison automatisch aus der DB"""
     try:
         conn = get_conn()
@@ -694,7 +694,7 @@ def main():
             st.warning("Keine Daten für Rekordspieler gefunden.")
     elif page == "Sünderkartei":
         # Die Funktion gibt jetzt Daten UND den Saison-Namen zurück
-        df_akt, saison_name = get_suender_aktuell()
+        df_akt, saison_name = get_suender()
         st.markdown(f"<h1 style='color: darkred;'>⚖️ Sünderkartei {saison_name}</h1>", unsafe_allow_html=True)
 
         tab1, tab2 = st.tabs([f"Saison {saison_name}", "Ewige Sünderliste"])
@@ -707,12 +707,12 @@ def main():
                     df_akt,
                     column_config={
                         "platz": st.column_config.NumberColumn("Platz", width=40, format="%d"),
-                        "spieler": st.column_config.TextColumn("Spieler", width=200),
-                        "einsaetze": st.column_config.NumberColumn("Sp", width=40, format="%d"),
+                        "spieler": st.column_config.TextColumn("Spieler", width=180),
+                        "einsaetze": st.column_config.NumberColumn("Spiele", width=40, format="%d"),
                         "gelb": st.column_config.NumberColumn("🟨", width=40, format="%d"),
-                        "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=40, format="%d"),
+                        "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=60, format="%d"),
                         "rot": st.column_config.NumberColumn("🟥", width=40, format="%d"),
-                        "punkte": st.column_config.NumberColumn("Punkte", width=70, format="%d")
+                        "punkte": st.column_config.NumberColumn("Punkte", width=60, format="%d")
                     },
                     hide_index=True,
                     use_container_width=False,
@@ -739,12 +739,12 @@ def main():
                     rest_ewig,
                     column_config={
                         "platz": st.column_config.NumberColumn("Platz", width=70, format="%d"),
-                        "spieler": st.column_config.TextColumn("Spieler", width=200),
-                        "einsaetze": st.column_config.NumberColumn("Sp", width=40, format="%d"),
+                        "spieler": st.column_config.TextColumn("Spieler", width=180),
+                        "einsaetze": st.column_config.NumberColumn("Spiele", width=40, format="%d"),
                         "gelb": st.column_config.NumberColumn("🟨", width=40, format="%d"),
-                        "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=40, format="%d"),
+                        "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=60, format="%d"),
                         "rot": st.column_config.NumberColumn("🟥", width=40, format="%d"),
-                        "punkte": st.column_config.NumberColumn("Punkte", width=70, format="%d")
+                        "punkte": st.column_config.NumberColumn("Punkte", width=60, format="%d")
                     },
                     hide_index=True,
                     use_container_width=False,
