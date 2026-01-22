@@ -354,7 +354,7 @@ def show_mobile_rekordspieler():
 def show_mobile_suender():
     conn = st.connection("postgresql", type="sql")     
 
-    #Saison automatisch ermitteln
+    # Saison automatisch ermitteln
     s_info = conn.query("SELECT MAX(saison) as akt FROM suenderkartei", ttl="1h")  
     akt_saison = s_info.iloc[0]['akt'] if not s_info.empty else "2025/26"
 
@@ -363,6 +363,7 @@ def show_mobile_suender():
     tab1, tab2 = st.tabs([f"Saison {akt_saison}", "Ewige Sünderliste"])
 
     with tab1:
+        # Wir laden die Daten
         df_akt = conn.query("""
             SELECT platz, spieler, einsaetze, gelb, gelb_rot, rot, punkte 
             FROM suenderkartei 
@@ -379,7 +380,10 @@ def show_mobile_suender():
                     "spieler": st.column_config.TextColumn("Spieler", width=150),
                     "gelb": st.column_config.NumberColumn("🟨", width=35, format="%d"),
                     "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=35, format="%d"),
-                    "rot": st.column_config.NumberColumn("🟥", width=35, format="%d")
+                    "rot": st.column_config.NumberColumn("🟥", width=35, format="%d"),
+                    # EXPLICIT HIDING: Diese Spalten werden nicht angezeigt
+                    "einsaetze": None,
+                    "punkte": None
                 },
                 hide_index=True,
                 use_container_width=True
@@ -413,10 +417,10 @@ def show_mobile_suender():
             )
             st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-            #Zweite Überschrift
             st.markdown("<h4 style='text-align: center;'>Platzierungen 11 - 100</h4>", unsafe_allow_html=True)
 
             rest_ewig = df_ewig.iloc[10:]
+            
             st.dataframe(
                 rest_ewig,
                 column_config={
@@ -424,7 +428,10 @@ def show_mobile_suender():
                     "spieler": st.column_config.TextColumn("Spieler", width=155),
                     "gelb": st.column_config.NumberColumn("🟨", width=35, format="%d"),
                     "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=35, format="%d"),
-                    "rot": st.column_config.NumberColumn("🟥", width=35, format="%d")
+                    "rot": st.column_config.NumberColumn("🟥", width=35, format="%d"),
+                    # EXPLICIT HIDING: Alles andere ausblenden
+                    "spiele": None,
+                    "punkte": None
                 },
                 hide_index=True,
                 use_container_width=True
