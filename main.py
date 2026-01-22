@@ -706,7 +706,7 @@ def main():
                 st.dataframe(
                     df_akt,
                     column_config={
-                        "platz": st.column_config.NumberColumn("RG", width=40, format="%d"),
+                        "platz": st.column_config.NumberColumn("Platz", width=40, format="%d"),
                         "spieler": st.column_config.TextColumn("Spieler", width=200),
                         "einsaetze": st.column_config.NumberColumn("Sp", width=40, format="%d"),
                         "gelb": st.column_config.NumberColumn("🟨", width=40, format="%d"),
@@ -715,7 +715,8 @@ def main():
                         "punkte": st.column_config.NumberColumn("Punkte", width=70, format="%d")
                     },
                     hide_index=True,
-                    use_container_width=True
+                    use_container_width=False,
+                    height=h_akt
                 )
             else:
                 st.info(f"Keine Daten für die Saison {saison_name} gefunden.")
@@ -737,13 +738,13 @@ def main():
                 st.dataframe(
                     rest_ewig,
                     column_config={
-                        "platz": st.column_config.NumberColumn("RG", width=40, format="%d"),
+                        "platz": st.column_config.NumberColumn("Platz", width=70, format="%d"),
                         "spieler": st.column_config.TextColumn("Spieler", width=200),
                         "einsaetze": st.column_config.NumberColumn("Sp", width=40, format="%d"),
                         "gelb": st.column_config.NumberColumn("🟨", width=40, format="%d"),
                         "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=40, format="%d"),
                         "rot": st.column_config.NumberColumn("🟥", width=40, format="%d"),
-                        "punkte": st.column_config.NumberColumn("Gesamtpunkte", width=100, format="%d")
+                        "punkte": st.column_config.NumberColumn("Punkte", width=70, format="%d")
                     },
                     hide_index=True,
                     use_container_width=False,
