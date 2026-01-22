@@ -708,7 +708,7 @@ def main():
                     column_config={
                         "platz": st.column_config.NumberColumn("Platz", width=40, format="%d"),
                         "spieler": st.column_config.TextColumn("Spieler", width=180),
-                        "einsaetze": st.column_config.NumberColumn("Spiele", width=40, format="%d"),
+                        "einsaetze": st.column_config.NumberColumn("Spiele", width=50, format="%d"),
                         "gelb": st.column_config.NumberColumn("🟨", width=60, format="%d"),
                         "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=60, format="%d"),
                         "rot": st.column_config.NumberColumn("🟥", width=40, format="%d"),
@@ -740,7 +740,7 @@ def main():
                     column_config={
                         "platz": st.column_config.NumberColumn("Platz", width=70, format="%d"),
                         "spieler": st.column_config.TextColumn("Spieler", width=180),
-                        "einsaetze": st.column_config.NumberColumn("Spiele", width=40, format="%d"),
+                        "einsaetze": st.column_config.NumberColumn("Spiele", width=50, format="%d"),
                         "gelb": st.column_config.NumberColumn("🟨", width=60, format="%d"),
                         "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=60, format="%d"),
                         "rot": st.column_config.NumberColumn("🟥", width=40, format="%d"),
