@@ -68,7 +68,7 @@ def get_suender_aktuell():
         akt_saison = saison_info.iloc[0]['aktuelle_saison'] if not saison_info.empty else "2025/26"
 
         # 2. Wir laden die Daten für genau diese Saison
-        query = text("""
+        query = ("""
             SELECT platz, spieler, einsaetze, gelb, gelb_rot, rot, punkte 
             FROM suenderkartei 
             WHERE saison = :s
