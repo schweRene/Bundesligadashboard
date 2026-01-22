@@ -701,18 +701,18 @@ def main():
 
         with tab1:
             if not df_akt.empty:
-                #Höhe der Tabelle dynamisch berechnen (Zeilen + 35px) + Header
+                #Höhe der Tabelle dynamisch berechnen (Zeilen * 35px) + Header
                 h_akt = (len(df_akt) * 35) + 38
                 st.dataframe(
                     df_akt,
                     column_config={
-                        "platz": "Rang",
-                        "spieler": "Spieler",
-                        "einsaetze": "Spiele",
-                        "gelb": "🟨",
-                        "gelb_rot": "🟨🟥",
-                        "rot": "🟥",
-                        "punkte": "Punkte"
+                        "platz": st.column_config.NumberColumn("RG", width=40, format="%d"),
+                        "spieler": st.column_config.TextColumn("Spieler", width=200),
+                        "einsaetze": st.column_config.NumberColumn("Sp", width=40, format="%d"),
+                        "gelb": st.column_config.NumberColumn("🟨", width=40, format="%d"),
+                        "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=40, format="%d"),
+                        "rot": st.column_config.NumberColumn("🟥", width=40, format="%d"),
+                        "punkte": st.column_config.NumberColumn("Punkte", width=70, format="%d")
                     },
                     hide_index=True,
                     use_container_width=True
@@ -737,13 +737,13 @@ def main():
                 st.dataframe(
                     rest_ewig,
                     column_config={
-                        "platz": st.column_config.NumberColumn("Rang", width=40),
+                        "platz": st.column_config.NumberColumn("RG", width=40, format="%d"),
                         "spieler": st.column_config.TextColumn("Spieler", width=200),
-                        "spiele": st.column_config.NumberColumn("Einsätze", width=50),
-                        "gelb": st.column_config.NumberColumn("🟨", width=40),
-                        "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=40),
-                        "rot": st.column_config.NumberColumn("🟥", width=40),
-                        "punkte": st.column_config.NumberColumn("Gesamtpunkte", width=150)
+                        "einsaetze": st.column_config.NumberColumn("Sp", width=40, format="%d"),
+                        "gelb": st.column_config.NumberColumn("🟨", width=40, format="%d"),
+                        "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=40, format="%d"),
+                        "rot": st.column_config.NumberColumn("🟥", width=40, format="%d"),
+                        "punkte": st.column_config.NumberColumn("Gesamtpunkte", width=100, format="%d")
                     },
                     hide_index=True,
                     use_container_width=False,
