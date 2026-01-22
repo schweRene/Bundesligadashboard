@@ -407,10 +407,10 @@ def show_mobile_suender():
                          text='punkte', color='punkte', color_continuous_scale='Reds')
             
             fig.update_layout(
-                yaxis={'categoryorder':'total ascending'},
+                yaxis={'categoryorder':'total ascending'}, 
                 height=400,
                 showlegend=False,
-                margin=dict(l=10, r=10, t=10, h=10),
+                margin=dict(l=10, r=10, t=10, b=10),
                 xaxis_title=None, yaxis_title=None
             )
             st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
