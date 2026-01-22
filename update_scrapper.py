@@ -41,7 +41,8 @@ TEAM_MAP = {
     "Augsburg": "1.FC Augsburg", "Mainz": "FSV Mainz 05",
     "Wolfsburg": "VfL Wolfsburg", "Hoffenheim": "TSG Hoffenheim",
     "Freiburg": "SC Freiburg", "Union Berlin": "1. FC Union Berlin",
-    "Köln": "1. FC Köln", "Bochum": "VfL Bochum", "Kiel": "Holstein Kiel"
+    "Köln": "1. FC Köln", "Bochum": "VfL Bochum", "Kiel": "Holstein Kiel",
+    "M'gladbach": "Borussia Mönchengladbach", "Meiderich": "Meidericher SV"
 }
 
 def get_full_team_name(short_name):

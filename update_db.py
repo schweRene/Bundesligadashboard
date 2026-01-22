@@ -26,6 +26,9 @@ def main():
     # 4. Sünderkartei aktualisieren
     run_script("suender.py")
 
+    # 5. Zuschauerzahlen aktualisieren
+    run_script("zuschauer.py")
+
     print("\n✨ Alle Updates abgeschlossen!")
 
 if __name__ == "__main__":
