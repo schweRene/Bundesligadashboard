@@ -72,7 +72,7 @@ def get_suender_aktuell():
             SELECT platz, spieler, einsaetze, gelb, gelb_rot, rot, punkte 
             FROM suenderkartei 
             WHERE saison = :s
-            ORDER BY punkte DESC, rot DESC, gelb_rot DESC 
+            ORDER BY platz ASC 
             LIMIT 20
         """)
         df = conn.query(query, params={"s": akt_saison}, ttl="1h")
@@ -701,6 +701,8 @@ def main():
 
         with tab1:
             if not df_akt.empty:
+                #Höhe der Tabelle dynamisch berechnen (Zeilen + 35px) + Header
+                h_akt = (len(df_akt) * 35) + 38
                 st.dataframe(
                     df_akt,
                     column_config={
@@ -717,23 +719,35 @@ def main():
                 )
             else:
                 st.info(f"Keine Daten für die Saison {saison_name} gefunden.")
-        with tab2:
-            st.subheader("Die ewigen Rekordsünder")
-            df_ewig = get_suender_ewig()
+        with tab2:            
+            df_ewig = get_suender_ewig()            
             if not df_ewig.empty:
+                # Diagramm für die Top 10 Sünder
+                st.subheader("Top 10 Sünder")
+                top10 = df_ewig.head(10)
+                fig = px.bar(top10, x='punkte', y='spieler', orientation='h', 
+                             text='punkte', color='punkte', color_continuous_scale='Reds')
+                fig.update_layout(yaxis={'categoryheader':'total ascending'}, height=400, showlegend=False)
+                st.plotly_chart(fig, use_container_width=True)
+
+                #Tabelle Platz 11 bis 100
+                st.subheader("Platzierungen 11 - 100")
+                rest_ewig = df_ewig.iloc[10:]
+                h_ewig = (len(rest_ewig) * 35) + 38
                 st.dataframe(
-                    df_ewig,
+                    rest_ewig,
                     column_config={
-                        "platz": "Rang",
-                        "spieler": "Spieler",
-                        "spiele": "Einsätze",
-                        "gelb": "🟨",
-                        "gelb_rot": "🟨🟥",
-                        "rot": "🟥",
-                        "punkte": "Gesamtpunkte"
+                        "platz": st.column_config.NumberColumn("Rang", width=40),
+                        "spieler": st.column_config.NumberColumn("Spieler", width=200),
+                        "spiele": st.column_config.NumberColumn("Einsätze", width=50),
+                        "gelb": st.column_config.NumberColumn("🟨", width=40),
+                        "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=40),
+                        "rot": st.column_config.NumberColumn("🟥", width=40),
+                        "punkte": st.column_config.NumberColumn("Gesamtpunkte", width=150)
                     },
                     hide_index=True,
-                    use_container_width=True
+                    use_container_width=False,
+                    height=h_ewig
                 )
 
     elif page == "Meisterschaften": 
