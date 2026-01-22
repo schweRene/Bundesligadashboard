@@ -63,7 +63,7 @@ def show_mobile_spieltage(df):
     )
 
     # 2. Überschrift
-    st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>⚽ {selected_st}. Spieltag</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='text-align: center; color: #8B0000;'>⚽ {selected_st}. Spieltag</h4>", unsafe_allow_html=True)
 
     # 3. Spiele für den gewählten Spieltag filtern
     mask = (df["saison"] == selected_saison) & (df["spieltag"] == selected_st)
@@ -94,7 +94,7 @@ def show_mobile_spieltage(df):
                 st.markdown(f"<div style='text-align: right;'><b>{row['gast']}</b></div>", unsafe_allow_html=True)
 
 def show_mobile_saisontabelle(df):
-    st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>📊 Saisontabelle</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='text-align: center; color: #8B0000;'>📊 Saisontabelle</h4>", unsafe_allow_html=True)
     
     # 1. Saison-Auswahl
     saisons = sorted(df["saison"].unique(), reverse=True)
@@ -164,7 +164,7 @@ def show_mobile_saisontabelle(df):
     st.markdown(table_html, unsafe_allow_html=True)  
 
 def show_mobile_ewige_tabelle(df):
-    st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🏆 Ewige Tabelle</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='text-align: center; color: #8B0000;'>🏆 Ewige Tabelle</h4>", unsafe_allow_html=True)
 
     # --- LOGIK AUS main.py ÜBERNOMMEN: Namen vereinheitlichen ---
     df_clean = df.dropna(subset=["tore_heim", "tore_gast"]).copy()
@@ -351,8 +351,91 @@ def show_mobile_rekordspieler():
     except Exception as e:
         st.error(f"Fehler: {e}")
 
+def show_mobile_suender():
+    conn = st.connection("postgresql", type="sql")     
+
+    #Saison automatisch ermitteln
+    s_info = conn.query("SELECT MAC(saison) as akt FROM suenderkartei", ttl="1h")  
+    akt_saison = s_info.iloc[0]['akt'] if not s_info.empty else "2025/26"
+
+    st.markdown(f"<h4 style='text-align: center; color: darkred;'>⚖️ Sünderkartei {akt_saison}</h4>", unsafe_allow_html=True)
+
+    tab1, tab2 = st.tabs([f"Saison {akt_saison}", "Ewige Sünderliste"])
+
+    with tab1:
+        df_akt = conn.query("""
+            SELECT platz, spieler, einsaetze, gelb, gelb_rot, rot, punkte 
+            FROM suenderkartei 
+            WHERE saison = :s 
+            ORDER BY platz ASC 
+            LIMIT 20
+        """, params={"s": akt_saison}, ttl="1h")
+
+        if not df_akt.empty:
+            st.dataframe(
+                df_akt,
+                column_config={
+                    "platz": st.column_config.NumberColumn("Platz", width=40, format="%d"),
+                    "spieler": st.column_config.TextColumn("Spieler", width=150),
+                    "einsaetze": st.column_config.NumberColumn("Spiele", width=40, format="%d"),
+                    "gelb": st.column_config.NumberColumn("🟨", width=35, format="%d"),
+                    "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=35, format="%d"),
+                    "rot": st.column_config.NumberColumn("🟥", width=35, format="%d"),
+                    "punkte": st.column_config.NumberColumn("Punkte", width=50, format="%d")
+                },
+                hide_index=True,
+                use_container_width=True
+            )
+    
+    with tab2:
+        df_ewig = conn.query("""
+            SELECT spieler, SUM(einsaetze) as spiele, SUM(gelb) as gelb, 
+                   SUM(gelb_rot) as gelb_rot, SUM(rot) as rot, SUM(punkte) as punkte
+            FROM suenderkartei 
+            GROUP BY spieler 
+            ORDER BY punkte DESC 
+            LIMIT 100
+        """, ttl="1h")
+
+        if not df_ewig.empty:
+            df_ewig.insert(0, "platz", range(1, len(df_ewig) + 1))
+
+            st.markdown("<h4 style='text-align: center;'>Top 10 Ewige Sünder</h4>", unsafe_allow_html=True)
+
+            top10 = df_ewig.head(10).copy().sort_values('punkte', ascending=True)
+            fig = px.bar(top10, x='punkte', y='spieler', orientation='h',
+                         text='punkte', color='punkte', color_continuous_scale='Reds')
+            
+            fig.update_layout(
+                yaxis={'categoryorder':'total ascending'},
+                height=400,
+                showlegend=False,
+                margin=dict(l=10, r=10, t=10, h=10),
+                xaxis_title=None, yaxis_title=None
+            )
+            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+
+            #Zweite Überschrift
+            st.markdown("<h4 style='text-align: center;'>Platzierungen 11 - 100</h4>", unsafe_allow_html=True)
+
+            rest_ewig = df_ewig.iloc[10:]
+            st.dataframe(
+                rest_ewig,
+                column_config={
+                    "platz": st.column_config.NumberColumn("Platz", width=40, format="%d"),
+                    "spieler": st.column_config.TextColumn("Spieler", width=150),
+                    "spiele": st.column_config.NumberColumn("Spiele", width=45, format="%d"),
+                    "gelb": st.column_config.NumberColumn("🟨", width=35, format="%d"),
+                    "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=35, format="%d"),
+                    "rot": st.column_config.NumberColumn("🟥", width=35, format="%d"),
+                    "punkte": st.column_config.NumberColumn("Punkte", width=50, format="%d")
+                },
+                hide_index=True,
+                use_container_width=True
+            )
+
 def show_mobile_vereinsanalyse(df):
-    st.markdown(f"<h2 style='text-align: center; color: #8B0000;'>🔍 Vereinsanalyse</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='text-align: center; color: #8B0000;'>🔍 Vereinsanalyse</h4>", unsafe_allow_html=True)
 
     # VEREINS-AUSWAHL: Wir starten mit einer leeren Auswahl (""), 
     # damit du beim Tippen nichts löschen musst.
@@ -407,7 +490,7 @@ import pandas as pd
 import streamlit as st
 
 def show_mobile_tippspiel(df):
-    st.markdown("<h2 style='text-align: center; color: #8B0000;'>🎮 Tippspiel</h2>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align: center; color: #8B0000;'>🎮 Tippspiel</h4>", unsafe_allow_html=True)
     
     aktuelle_saison = str(df["saison"].max())
     offene_spieltage = sorted(df[(df["saison"] == aktuelle_saison) & (df["tore_heim"].isna())]["spieltag"].unique())
@@ -473,7 +556,7 @@ def show_mobile_tippspiel(df):
         st.info("Keine offenen Spiele zum Tippen verfügbar.")
 
     # --- AUSWERTUNG (Bleibt konsistent) ---
-    st.markdown("<br><h3 style='text-align: center; color: #8B0000;'>📊 Deine Auswertung</h3>", unsafe_allow_html=True)
+    st.markdown("<br><h4 style='text-align: center; color: #8B0000;'>📊 Deine Auswertung</h4>", unsafe_allow_html=True)
     check_user = st.text_input("Name eingeben für Punkte-Check:", key="mob_check_user")
     
     if check_user:
@@ -505,7 +588,7 @@ def show_mobile_tippspiel(df):
             st.info("Keine Tipps gefunden.")
 
 def show_mobile_highscore(df):
-    st.markdown("<h2 style='text-align: center; color: #8B0000;'>🏆 Hall of Fame</h2>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align: center; color: #8B0000;'>🏆 Hall of Fame</h4>", unsafe_allow_html=True)
     from main import get_conn
     conn = get_conn()
 
@@ -554,7 +637,7 @@ def run_mobile_main():
         return
     
     #Navigation oben
-    menu = st.selectbox("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Torschützen", "Rekordspieler", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
+    menu = st.selectbox("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Torschützen", "Rekordspieler", "Sünderkartei", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
 
     if menu == "Startseite":
         show_mobile_startseite()
@@ -568,6 +651,8 @@ def run_mobile_main():
         show_mobile_torschuetzen()
     elif menu == "Rekordspieler":
         show_mobile_rekordspieler()
+    elif menu == "Sünderkartei":
+        show_mobile_suender()
     elif menu == "Meisterschaften":
         show_mobile_meisterschaften(df)
     elif menu == "Vereinsanalyse":
