@@ -1,0 +1,144 @@
+import pandas as pd
+import cloudscraper
+import io
+import re
+import time
+
+def clean_name(text):
+    if not isinstance(text, str): return text
+    # Trennt Namen von Position (z.B. "RehhagelZentrales Mittelfeld" -> "Rehhagel")
+    match = re.search(r'([a-z])([A-Z])', text)
+    if match:
+        return text[:match.start()+1].strip()
+    return text.strip()
+
+def scrape_alle_suender(start_jahr=1963, end_jahr=2024):
+    scraper = cloudscraper.create_scraper()
+    alle_saisons_daten = []
+
+    for jahr in range(start_jahr, end_jahr + 1):
+        # Erstellt den Namen wie "1963/64"
+        saison_name = f"{jahr}/{str(jahr+1)[2:]}"
+        url = f"https://www.transfermarkt.de/bundesliga/suenderkartei/wettbewerb/L1/saison_id/{jahr}/plus/1"
+        
+        print(f"Lade Saison {saison_name}...")
+        
+        try:
+            response = scraper.get(url)
+            if response.status_code == 200:
+                html_data = io.StringIO(response.text)
+                dfs = pd.read_html(html_data)
+                df = dfs[1]
+
+                # 1. Datenreinigung
+                df = df[df.iloc[:, 0].notna()].copy()
+                
+                # 2. Deine exakte Spaltenwahl (Index 10 für Punkte in der Plus-Ansicht)
+                df = df.iloc[:, [0, 1, 4, 6, 7, 8, 10]]
+                df.columns = ['platz', 'spieler', 'einsaetze', 'gelb', 'gelb_rot', 'rot', 'punkte']
+                
+                # 3. Saison-Spalte als Identifikator hinzufügen
+                df.insert(0, 'saison', saison_name)
+                
+                # 4. Namen säubern
+                df['spieler'] = df['spieler'].apply(clean_name)
+
+                # 5. Zahlen formatieren (Float zu Int)
+                for col in ['platz', 'einsaetze', 'gelb', 'gelb_rot', 'rot', 'punkte']:
+                    df[col] = df[col].astype(str).str.replace('-', '0').str.split('.').str[0]
+                    df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).astype(int)
+
+                alle_saisons_daten.append(df)
+                print(f"   -> Erfolg: {len(df)} Spieler gefunden.")
+                
+                # Wichtig: Kurze Pause für den Server (Anti-Blocking)
+                time.sleep(1.5) 
+            else:
+                print(f"   -> ⚠️ Fehler {response.status_code} bei Saison {jahr}")
+                
+        except Exception as e:
+            print(f"   -> ❌ Fehler bei Jahr {jahr}: {e}")
+
+    # Am Ende alle einzelnen DataFrames zu einem großen zusammenfügen
+    if alle_saisons_daten:
+        final_df = pd.concat(alle_saisons_daten, ignore_index=True)
+        final_df.to_csv("bundesliga_suender_historie.csv", index=False, encoding="utf-8-sig")
+        print(f"\n✅ FERTIG! Datei 'bundesliga_suender_historie.csv' mit {len(final_df)} Zeilen erstellt.")
+
+if __name__ == "__main__":
+    scrape_alle_suender()
+
+
+
+
+aus der update_scrapper.py
+def run_scrapper(spieltag):
+    url = f"{BASE_URL}{spieltag}/"
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0"}
+    
+    for attempt in range(3):
+        try:
+            response = requests.get(url, headers=headers, timeout=20)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            #found_count = 0
+            
+            # Wir sammeln alle Spiele eines Spieltags erst in einer Liste
+            matches_to_update = []
+
+            for row in soup.find_all(['div', 'a', 'tr'], class_=re.compile(r'spiele-row|det-match')):
+                text_data = row.get_text(" ", strip=True)
+                teams = []
+                potential_parts = re.split(r'\d+:\d+|\s-\s|\|', text_data)
+                for part in potential_parts:
+                    name = get_clean_team_name(part)
+                    if name and name not in teams: teams.append(name)
+                
+                if len(teams) >= 2:
+                    heim, gast = teams[0], teams[1]
+                    t_h, t_g = None, None
+                    res_match = re.search(r'(\d+):(\d+)', text_data)
+                    
+                    if res_match:
+                        h_val, g_val = int(res_match.group(1)), int(res_match.group(2))
+                        # Wichtig: Wir prüfen, ob es ein valides Ergebnis ist
+                        if h_val < 15 and "uhr" not in text_data.lower():
+                            t_h, t_g = h_val, g_val
+
+                    matches_to_update.append((heim, gast, t_h, t_g))
+
+            # --- JETZT DER DATENBANK-TRANSFER ---
+            if matches_to_update:
+                # 1. Lokal (SQLite)
+                conn = sqlite3.connect(DB_NAME)
+                for heim, gast, t_h, t_g in matches_to_update:
+                    conn.execute("""INSERT OR REPLACE INTO spiele (saison, spieltag, heim, gast, tore_heim, tore_gast)
+                                    VALUES (?, ?, ?, ?, ?, ?)""", (SAISON, spieltag, heim, gast, t_h, t_g))
+                conn.commit()
+                conn.close()
+
+                # 2. Cloud (Supabase) - Hier nutzen wir .begin() für Auto-Commit
+                try:
+                    with engine.begin() as cloud_conn: # .begin() macht AUTOMATISCH einen Commit am Ende!
+                        for heim, gast, t_h, t_g in matches_to_update:
+                            # Wir nutzen "UPSERT" Logik (Update if exists, else Insert)
+                            # Das ist sicherer als ID-Suche
+                            sql = text("""
+                                INSERT INTO spiele (saison, spieltag, heim, gast, tore_heim, tore_gast)
+                                VALUES (:s, :st, :h, :g, :th, :tg)
+                                ON CONFLICT (saison, spieltag, heim, gast) 
+                                DO UPDATE SET tore_heim = EXCLUDED.tore_heim, tore_gast = EXCLUDED.tore_gast;
+                            """)
+                            cloud_conn.execute(sql, {
+                                "s": SAISON, "st": spieltag, "h": heim, "g": gast, "th": t_h, "tg": t_g
+                            })
+                    print(f"✅ Cloud Sync ok", end=" ")
+                except Exception as e:
+                    print(f"\n❌ Cloud-Fehler: {str(e)[:100]}")
+
+                return len(matches_to_update)
+            
+            return 0
+        except Exception as e:
+            print(f" (Retry {attempt+1})...", end="")
+            time.sleep(2)
+    return 0

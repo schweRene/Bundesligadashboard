@@ -4,13 +4,18 @@ from bs4 import BeautifulSoup
 import re
 import csv
 import time
-
+from sqlalchemy import create_engine, text
+import os
 
 DB_NAME = "bundesliga.db"
 CSV_NAME = "bundesliga_2026.csv"
 SAISON = "2025/26"
 BASE_URL = "https://www.fussballdaten.de/bundesliga/2026/"
-
+DB_URL = os.getenv(
+    "SUPABASE_DB_URL", 
+    "postgresql://postgres.scspxyixfumfhfkodsit:zz2r9OSjV8L@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require"
+)
+engine = create_engine(DB_URL)
 
 # Deine vollständige Mapping-Liste (Bitte im Code behalten)
 TEAM_MAP = {
@@ -64,19 +69,22 @@ def update_csv_from_db():
 
 def run_scrapper(spieltag):
     url = f"{BASE_URL}{spieltag}/"
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124 Safari/537.36"}
     
-    # Retry-Logik (versucht es bis zu 3 Mal bei Timeouts)
     for attempt in range(3):
         try:
-            response = requests.get(url, headers=headers, timeout=20) # Timeout auf 20s erhöht
+            response = requests.get(url, headers=headers, timeout=20)
             soup = BeautifulSoup(response.text, 'html.parser')
-            found_count = 0
             
+            matches_to_update = []
+
             for row in soup.find_all(['div', 'a', 'tr'], class_=re.compile(r'spiele-row|det-match')):
-                text = row.get_text(" ", strip=True)
+                # Wir holen den Text mit Trennern, um besser filtern zu können
+                text_data = row.get_text(" ", strip=True)
+                
+                # --- SCHRITT 1: Teams finden ---
                 teams = []
-                potential_parts = re.split(r'\d+:\d+|\s-\s|\|', text)
+                potential_parts = re.split(r'\d+:\d+|\s-\s|\|', text_data)
                 for part in potential_parts:
                     name = get_clean_team_name(part)
                     if name and name not in teams: teams.append(name)
@@ -84,23 +92,56 @@ def run_scrapper(spieltag):
                 if len(teams) >= 2:
                     heim, gast = teams[0], teams[1]
                     t_h, t_g = None, None
-                    res_match = re.search(r'(\d+):(\d+)', text)
+                    
+                    # --- SCHRITT 2: Ergebnis finden ---
+                    res_match = re.search(r'(\d+):(\d+)', text_data)
+                    
                     if res_match:
                         h_val, g_val = int(res_match.group(1)), int(res_match.group(2))
-                        hat_datum = bool(re.search(r'\d{2}\.\d{2}\.', text))
-                        # Strenge Prüfung gegen Geister-Tore
-                        if h_val < 15 and "uhr" not in text.lower():
-                            if spieltag <= 17 or hat_datum:
-                                t_h, t_g = h_val, g_val
+                        
+                        # --- SCHRITT 3: Die "Zukunfts-Sperre" ---
+                        # Wir prüfen auf Begriffe, die NUR bei geplanten Spielen vorkommen
+                        is_future = any(x in text_data.lower() for x in ["uhr", "live", "spiel verschoben", "termin"])
+                        
+                        # Zusätzlich: Ein Bundesliga-Ergebnis über 12 Toren ist extrem unwahrscheinlich.
+                        # Wenn h_val und g_val kleine Zahlen sind UND kein "uhr" im Text vorkommt,
+                        # gehen wir davon aus, dass das Spiel beendet ist.
+                        if not is_future and h_val < 15 and g_val < 15:
+                            t_h, t_g = h_val, g_val
+                        else:
+                            # Falls es ein Zukunftsspiel ist, erzwingen wir NULL (None)
+                            t_h, t_g = None, None
 
-                    conn = sqlite3.connect(DB_NAME)
+                    matches_to_update.append((heim, gast, t_h, t_g))
+
+            # --- RESTLICHER CODE (DB-Update) BLEIBT GLEICH ---
+            if matches_to_update:
+                conn = sqlite3.connect(DB_NAME)
+                for heim, gast, t_h, t_g in matches_to_update:
                     conn.execute("""INSERT OR REPLACE INTO spiele (saison, spieltag, heim, gast, tore_heim, tore_gast)
                                     VALUES (?, ?, ?, ?, ?, ?)""", (SAISON, spieltag, heim, gast, t_h, t_g))
-                    conn.commit()
-                    conn.close()
-                    found_count += 1
-            return found_count
-        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-            print(f" (Timeout-Retry {attempt+1})...", end="")
-            time.sleep(2) # Kurz warten vor dem nächsten Versuch
-    return 0
+                conn.commit()
+                conn.close()
+
+                try:
+                    with engine.begin() as cloud_conn:
+                        for heim, gast, t_h, t_g in matches_to_update:
+                            sql = text("""
+                                INSERT INTO spiele (saison, spieltag, heim, gast, tore_heim, tore_gast)
+                                VALUES (:s, :st, :h, :g, :th, :tg)
+                                ON CONFLICT (saison, spieltag, heim, gast) 
+                                DO UPDATE SET tore_heim = EXCLUDED.tore_heim, tore_gast = EXCLUDED.tore_gast;
+                            """)
+                            cloud_conn.execute(sql, {
+                                "s": SAISON, "st": spieltag, "h": heim, "g": gast, "th": t_h, "tg": t_g
+                            })
+                    print(f"✅ Cloud Sync ok", end=" ")
+                except Exception as e:
+                    print(f"\n❌ Cloud-Fehler: {str(e)[:100]}")
+
+                return len(matches_to_update)
+            
+            return 0
+        except Exception as e:
+            print(f" (Retry {attempt+1})...", end="")
+            time.sleep(2)
