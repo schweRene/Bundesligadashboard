@@ -421,7 +421,7 @@ def show_mobile_suender():
                 rest_ewig,
                 column_config={
                     "platz": st.column_config.NumberColumn("Platz", width=40, format="%d"),
-                    "spieler": st.column_config.TextColumn("Spieler", width=150),
+                    "spieler": st.column_config.TextColumn("Spieler", width=155),
                     "gelb": st.column_config.NumberColumn("🟨", width=35, format="%d"),
                     "gelb_rot": st.column_config.NumberColumn("🟨🟥", width=35, format="%d"),
                     "rot": st.column_config.NumberColumn("🟥", width=35, format="%d")
