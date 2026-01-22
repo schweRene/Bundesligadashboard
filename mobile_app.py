@@ -355,7 +355,7 @@ def show_mobile_suender():
     conn = st.connection("postgresql", type="sql")     
 
     #Saison automatisch ermitteln
-    s_info = conn.query("SELECT MAC(saison) as akt FROM suenderkartei", ttl="1h")  
+    s_info = conn.query("SELECT MAX(saison) as akt FROM suenderkartei", ttl="1h")  
     akt_saison = s_info.iloc[0]['akt'] if not s_info.empty else "2025/26"
 
     st.markdown(f"<h4 style='text-align: center; color: darkred;'>⚖️ Sünderkartei {akt_saison}</h4>", unsafe_allow_html=True)
