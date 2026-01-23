@@ -387,8 +387,7 @@ def show_torschuetzen():
             st.warning("Keine Torschützen gefunden.")
 
 def show_zuschauer_statistik():
-    st.title("🏟️ Zuschauer-Statistik")
-    st.markdown("Hier siehst du die durchschnittlichen und gesamten Zuschauerzahlen")
+    st.title("🏟️ Zuschauerstatistik")
 
     df_zuschauer = get_zuschauer_data()
 
@@ -413,17 +412,20 @@ def show_zuschauer_statistik():
 
     #Tabelle anzeigen
     st.subheader(f"Details der Saison {selected_season}")
+    #Dynamische Höhe berechnen
+    dynamic_height = (len(df_filtered) * 35) + 38
     st.dataframe(
         df_filtered,
         column_config={
-            "saison": "Saison",
-            "platz": st.column_config.NumberColumn("Platz", format="%d"),
-            "verein": "Verein",
-            "schnitt": st.column_config.NumberColumn("Schnitt", format="%d"),
-            "gesamt": st.column_config.NumberColumn("Gesamt", format="%d"),
+            "saison": st.column_config.TextColumn("Saison", width="small"),
+            "platz": st.column_config.NumberColumn("Platz", format="%d", width=50),
+            "verein": st.column_config.TextColumn("Verein", width=200),
+            "schnitt": st.column_config.NumberColumn("Schnitt", format="%d", width=100),
+            "gesamt": st.column_config.NumberColumn("Gesamt", format="%d", width=120)
         },
         hide_index=True,
-        use_container_width=True
+        use_container_width=False,
+        height = dynamic_height
     )
 
     #Ein kleiner Chart zur Visualisierung
@@ -437,6 +439,75 @@ def show_zuschauer_statistik():
         color_continuous_scale="Viridis"
     )
     st.plotly_chart(fig, use_container_width=True)
+
+def show_zuschauer_historisch():
+    st.title("📈 Historische Zuschauerentwicklung")
+    
+    df_hist = get_zuschauer_data()
+
+    if df_hist.empty:
+        st.warning("Keine Daten für die Analyse gefunden.")
+        return
+
+    #Auswahl: Gesamt Liga oder spzifischer Verein
+    mode = st.radio("Analyse-Modus wählen:", ["Gesamte Bundesliga", "Einzelner Verein"], horizontal=True)
+
+    if mode == "Gesamte Bundesliga":
+        #Durchschnitt pro Saison berechnen
+        df_line = df_hist.groupby('saison')['schnitt'].mean().reset_index()
+        #Sortieren nach Saison
+        df_line = df_line.sort_values('saison')
+
+        st.subheader("Entwicklung des Liga-Durchschnitts")
+        fig = px.line(df_line, x="saison", y="schnitt",
+                      title="Durchschnittlicher Zuschauerschnitt pro Saison (Alle Vereine)",
+                      labels={"saison": "Saison", "schnitt": "Zuschauer Ø"},
+                      markers=True)
+        
+    else:
+        #Vereins-Auswahl
+        vereine = sorted(df_hist['verein'].unique())
+        selected_verein = st.selectbox("Verein auswählen", vereine)
+
+        df_verein = df_hist[df_hist['verein'] == selected_verein].sort_values('saison')
+
+        st.subheader(f"Entwicklung für {selected_verein}")
+
+        #Metriken für den Verein
+        max_val = df_verein['schnitt'].max()
+        max_saison = df_verein[df_verein['schnitt'] == max_val]['saison'].values[0]
+
+        c1, c2 = st.columns(2)
+        c1.metric("Rekordschnitt", f"{int(max_val):,}".replace(",", "."), f"Saison {max_saison}")
+        c2.metric("Saisons in der DB", len(df_verein))
+
+        fig = px.area(df_verein, x="saison", y="schnitt", 
+                      title=f"Zuschauerschnitt: {selected_verein}",
+                      labels={"saison": "Saison", "schnitt": "Zuschauer Ø"},
+                      line_shape="spline", 
+                      render_mode="svg")
+
+    # Layout optimieren
+    fig.update_layout(xaxis_tickangle=-45)
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Rekordtabelle (Top 10 Saisons aller Zeiten)
+    st.subheader("Top 10: Höchste Zuschauerzahlen (Historisch)")
+    top_10 = df_hist.sort_values('schnitt', ascending=False).head(10)
+    
+    st.dataframe(
+        top_10,
+        column_config={
+            "saison": "Saison",
+            "verein": "Verein",
+            "schnitt": st.column_config.NumberColumn("Schnitt", format="%d", width=100),
+            "gesamt": st.column_config.NumberColumn("Gesamt", format="%d", width=120),
+            "platz": None # Platz in der damaligen Saison blenden wir hier aus
+        },
+        hide_index=True,
+        use_container_width=True,
+        height=388
+    )
 
 def show_tippspiel(df):
     
@@ -643,7 +714,7 @@ def main():
     page = st.sidebar.radio("Navigation", 
                             ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", 
                              "Torschützen", "Rekordspieler", "Sünderkartei", "Meisterschaften", 
-                             "Vereinsanalyse", "Zuschauerstatistik", "Tippspiel", "Highscore"])
+                             "Vereinsanalyse", "Zuschauer", "Zuschauer historisch", "Tippspiel", "Highscore"])
 
     if page == "Startseite": 
         show_startseite()
@@ -815,8 +886,10 @@ def main():
         show_meisterstatistik(df, seasons)
     elif page == "Vereinsanalyse": 
         show_vereinsanalyse(df, seasons)
-    elif page == "Zuschauerstatistik":
+    elif page == "Zuschauer":
         show_zuschauer_statistik()
+    elif page == "Zuschauer historisch":
+        show_zuschauer_historisch()
     elif page == "Tippspiel": 
         st.markdown("<h1 style='color: darkred;'>🎮 Tippspiel</h1>", unsafe_allow_html=True)
         show_tippspiel(df)
