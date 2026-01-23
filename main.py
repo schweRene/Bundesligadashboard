@@ -106,6 +106,11 @@ def get_suender_ewig():
         st.error(f"Fehler beim Laden der ewigen Sünder: {e}")
         return pd.DataFrame()
 
+def get_zuschauer_data():
+    conn = get_conn()
+    query = "SELECT saison, platz, verein, schnitt, gesamt FROM zuschauer ORDER BY saison DESC, platz ASC"
+    return conn.query(query, ttl=600)
+
 def load_data_from_db():
     try:
         conn = get_conn()
@@ -381,6 +386,58 @@ def show_torschuetzen():
         else:
             st.warning("Keine Torschützen gefunden.")
 
+def show_zuschauer_statistik():
+    st.title("🏟️ Zuschauer-Statistik")
+    st.markdown("Hier siehst du die durchschnittlichen und gesamten Zuschauerzahlen")
+
+    df_zuschauer = get_zuschauer_data()
+
+    if df_zuschauer.empty:
+        st.warning("Noch keine Zuschauerdaten in der Datenbank vorhanden")
+        return
+    
+    seasons = df_zuschauer['saison'].unique()
+    selected_season = st.selectbox("Saison auswählen", seasons)
+
+    df_filtered = df_zuschauer[df_zuschauer['saison'] == selected_season].copy()
+
+    #Kennzahlen oben anzeigen
+    col1, col2, col3 = st.columns(3)
+    total_attendance = df_filtered['gesamt'].sum()
+    avg_attendance = df_filtered['schnitt'].mean()
+    top_club = df_filtered.iloc[0]['verein']
+
+    col1.metric("Gesamtzuschauer", f"{total_attendance:,}".replace(",", "."))
+    col2.metric("Schnitt", f"{int(avg_attendance):,}".replace(",","."))
+    col3.metric("Top-Club", top_club)
+
+    #Tabelle anzeigen
+    st.subheader(f"Details der Saison {selected_season}")
+    st.dataframe(
+        df_filtered,
+        column_config={
+            "saison": "Saison",
+            "platz": st.column_config.NumberColumn("Platz", format="%d"),
+            "verein": "Verein",
+            "schnitt": st.column_config.NumberColumn("Schnitt", format="%d"),
+            "gesamt": st.column_config.NumberColumn("Gesamt", format="%d"),
+        },
+        hide_index=True,
+        use_container_width=True
+    )
+
+    #Ein kleiner Chart zur Visualisierung
+    st.subheader("Vergleich: Durchschnittliche Zuschauer")
+    fig = px.bar(
+        df_filtered, 
+        x="verein",
+        y="schnitt",
+        color="schnitt",
+        labels={"verein": "Verein", "schnitt": "Zuschauerschnitt"},
+        color_continuous_scale="Viridis"
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
 def show_tippspiel(df):
     
     # Dynamische Saison
@@ -583,7 +640,10 @@ def main():
 
     seasons = sorted(df["saison"].unique(), reverse=True)
     
-    page = st.sidebar.radio("Navigation", ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", "Torschützen", "Rekordspieler", "Sünderkartei", "Meisterschaften", "Vereinsanalyse", "Tippspiel", "Highscore"])
+    page = st.sidebar.radio("Navigation", 
+                            ["Startseite", "Spieltage", "Saisontabelle", "Ewige Tabelle", 
+                             "Torschützen", "Rekordspieler", "Sünderkartei", "Meisterschaften", 
+                             "Vereinsanalyse", "Zuschauerstatistik", "Tippspiel", "Highscore"])
 
     if page == "Startseite": 
         show_startseite()
@@ -755,6 +815,8 @@ def main():
         show_meisterstatistik(df, seasons)
     elif page == "Vereinsanalyse": 
         show_vereinsanalyse(df, seasons)
+    elif page == "Zuschauerstatistik":
+        show_zuschauer_statistik()
     elif page == "Tippspiel": 
         st.markdown("<h1 style='color: darkred;'>🎮 Tippspiel</h1>", unsafe_allow_html=True)
         show_tippspiel(df)
