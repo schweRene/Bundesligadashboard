@@ -420,8 +420,8 @@ def show_zuschauer_statistik():
             "saison": st.column_config.TextColumn("Saison", width="small"),
             "platz": st.column_config.NumberColumn("Platz", format="%d", width=50),
             "verein": st.column_config.TextColumn("Verein", width=200),
-            "schnitt": st.column_config.NumberColumn("Schnitt", format="%d", width=100),
-            "gesamt": st.column_config.NumberColumn("Gesamt", format="%d", width=120)
+            "schnitt": st.column_config.NumberColumn("Schnitt", format="%.3s", width=80), 
+            "gesamt": st.column_config.NumberColumn("Gesamt", format="%.4s", width=90)
         },
         hide_index=True,
         use_container_width=False,
@@ -498,10 +498,10 @@ def show_zuschauer_historisch():
     st.dataframe(
         top_10,
         column_config={
-            "saison": "Saison",
-            "verein": "Verein",
-            "schnitt": st.column_config.NumberColumn("Schnitt", format="%d", width=100),
-            "gesamt": st.column_config.NumberColumn("Gesamt", format="%d", width=120),
+            "saison": st.column_config.TextColumn("Saison", width="small"),
+            "verein": st.column_config.TextColumn("Verein", width=200),
+            "schnitt": st.column_config.NumberColumn("Schnitt", format="%.3s", width=80), 
+            "gesamt": st.column_config.NumberColumn("Gesamt", format="%.4s", width=90),
             "platz": None # Platz in der damaligen Saison blenden wir hier aus
         },
         hide_index=True,
