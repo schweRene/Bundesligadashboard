@@ -51,6 +51,7 @@ def get_full_team_name(short_name):
 def run_scrapper():
     print(f"--- Starte Ergebnis-Update für {SAISON} ---")
     
+    # 1. Welche Spieltage fehlen in der lokalen DB?
     conn_local = sqlite3.connect(DB_NAME)
     cursor = conn_local.cursor()
     cursor.execute("""
@@ -62,7 +63,7 @@ def run_scrapper():
     conn_local.close()
 
     if not missing_days:
-        print("✅ Alle bisherigen Spiele haben Ergebnisse. Nichts zu tun.")
+        print("✅ Alle bisherigen Spiele haben Ergebnisse.")
         return
 
     now = datetime.now()
@@ -74,16 +75,15 @@ def run_scrapper():
             soup = BeautifulSoup(response.text, 'html.parser')
             matches_found = 0
 
+            # Suche alle Ergebnis-Container
             for container in soup.select('a.ergebnis'):
                 content = container.find('div', class_='content')
                 if not content: continue
 
-                # ZEIT-CHECK VERBESSERT
+                # Zeit-Check: Bei alten Spieltagen (nicht heute) immer durchlassen
                 time_span = content.find('span', class_='uhrzeit')
                 if time_span and 'data-time' in time_span.attrs:
                     kickoff = datetime.fromtimestamp(int(time_span['data-time']))
-                    # Wenn das Spiel heute ist, geben wir ihm 130 Min Puffer.
-                    # Wenn es älter ist (z.B. gestern), lassen wir es IMMER durch.
                     if kickoff.date() == now.date() and now < (kickoff + timedelta(minutes=130)):
                         continue
 
@@ -91,39 +91,49 @@ def run_scrapper():
                 ergebnis_div = content.find('div', class_='ergebnis')
                 
                 if len(teams) == 2 and ergebnis_div:
-                    h_short = teams[0].find('span').text.strip()
-                    g_short = teams[1].find('span').text.strip()
-                    h_full = get_full_team_name(h_short)
-                    g_full = get_full_team_name(g_short)
+                    # Namen extrahieren
+                    h_name = teams[0].get_text(strip=True)
+                    g_name = teams[1].get_text(strip=True)
                     
-                    # ROBUSTES PARSING MIT REGEX (Zieht nur Zahlen raus)
-                    tore_raw = ergebnis_div.text.strip()
+                    # Mapping anwenden
+                    h_full = get_full_team_name(h_name)
+                    g_full = get_full_team_name(g_name)
+                    
+                    # Ergebnis extrahieren (Regex für "2:1 beendet" etc.)
+                    tore_raw = ergebnis_div.get_text(strip=True)
                     match = re.search(r'(\d+):(\d+)', tore_raw)
                     
                     if match:
                         th, tg = int(match.group(1)), int(match.group(2))
                         
-                        # A. LOKAL
+                        # A. LOKALE DB UPDATE
                         conn_l = sqlite3.connect(DB_NAME)
-                        conn_l.execute("""
+                        cur_l = conn_l.cursor()
+                        cur_l.execute("""
                             UPDATE spiele SET tore_heim = ?, tore_gast = ? 
-                            WHERE saison = ? AND spieltag = ? AND heim = ? AND gast = ?
-                        """, (th, tg, SAISON, spieltag, h_full, g_full))
-                        conn_l.commit()
-                        conn_l.close()
-
-                        # B. CLOUD
-                        try:
-                            with engine_cloud.begin() as conn_c:
-                                conn_c.execute(text("""
-                                    UPDATE spiele SET tore_heim = :th, tore_gast = :tg 
-                                    WHERE saison = :s AND spieltag = :st AND heim = :h AND gast = :g
-                                Dad"""), {"th": th, "tg": tg, "s": SAISON, "st": spieltag, "h": h_full, "g": g_full})
-                        except Exception as cloud_err:
-                            print(f"Cloud-Fehler bei {h_full}: {cloud_err}")
+                            WHERE saison = ? AND spieltag = ? AND (heim LIKE ? OR heim = ?) AND (gast LIKE ? OR gast = ?)
+                        """, (th, tg, SAISON, spieltag, f"%{h_name}%", h_full, f"%{g_name}%", g_full))
                         
-                        matches_found += 1
-                        print(f"Update: {h_full} {th}:{tg} {g_full}")
+                        if cur_l.rowcount > 0:
+                            conn_l.commit()
+                            # B. CLOUD DB UPDATE
+                            if engine_cloud:
+                                try:
+                                    with engine_cloud.begin() as conn_c:
+                                        conn_c.execute(text("""
+                                            UPDATE spiele SET tore_heim = :th, tore_gast = :tg 
+                                            WHERE saison = :s AND spieltag = :st AND (heim LIKE :h_search OR heim = :h) AND (gast LIKE :g_search OR gast = :g)
+                                        """), {
+                                            "th": th, "tg": tg, "s": SAISON, "st": spieltag, 
+                                            "h_search": f"%{h_name}%", "h": h_full, 
+                                            "g_search": f"%{g_name}%", "g": g_full
+                                        })
+                                except Exception as ce:
+                                    print(f"Cloud-Error: {ce}")
+                            
+                            matches_found += 1
+                            print(f"Spieltag {spieltag}: {h_full} {th}:{tg} {g_full} eingetragen.")
+                        conn_l.close()
 
             print(f"Spieltag {spieltag}: {matches_found} Ergebnisse aktualisiert.")
         except Exception as e:
