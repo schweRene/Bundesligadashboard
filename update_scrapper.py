@@ -1,8 +1,7 @@
 import sqlite3
-import requests
+import cloudscraper
 from bs4 import BeautifulSoup
 import re
-import io
 from sqlalchemy import create_engine, text
 import os
 from datetime import datetime, timedelta
@@ -14,7 +13,7 @@ BASE_URL = "https://www.fussballdaten.de/bundesliga/2026/"
 DB_URL_CLOUD = "postgresql://postgres.scspxyixfumfhfkodsit:zz2r9OSjV8L@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require"
 engine_cloud = create_engine(DB_URL_CLOUD)
 
-# Deine vollständige Mapping-Liste
+# Deine vollständige Mapping-Liste (unverändert)
 TEAM_MAP = {
     "Bremen": "SV Werder Bremen", "Dortmund": "Borussia Dortmund",
     "Frankfurt": "Eintracht Frankfurt", "Nürnberg": "1. FC Nürnberg",
@@ -46,10 +45,16 @@ TEAM_MAP = {
 }
 
 def get_full_team_name(short_name):
-    return TEAM_MAP.get(short_name, short_name)
+    """Sucht den Namen in der TEAM_MAP basierend auf enthaltenen Schlüsselwörtern."""
+    for key, full_name in TEAM_MAP.items():
+        if key.lower() in short_name.lower():
+            return full_name
+    return short_name
 
 def run_scrapper():
     print(f"--- Starte Ergebnis-Update für {SAISON} ---")
+    # Nutze cloudscraper wie in deinem erfolgreichen Test
+    scraper = cloudscraper.create_scraper()
     
     # 1. Welche Spieltage fehlen in der lokalen DB?
     conn_local = sqlite3.connect(DB_NAME)
@@ -66,76 +71,73 @@ def run_scrapper():
         print("✅ Alle bisherigen Spiele haben Ergebnisse.")
         return
 
-    now = datetime.now()
-
     for spieltag in missing_days:
         url = f"{BASE_URL}{spieltag}/"
         try:
-            response = requests.get(url, timeout=10)
+            # cloudscraper statt requests
+            response = scraper.get(url, timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
             matches_found = 0
+            
+            # Die robuste Suche aus deinem Testskript
+            all_links = soup.find_all('a')
+            seen_matches = set()
 
-            # Suche alle Ergebnis-Container
-            for container in soup.select('a.ergebnis'):
-                content = container.find('div', class_='content')
-                if not content: continue
-
-                # Zeit-Check: Bei alten Spieltagen (nicht heute) immer durchlassen
-                time_span = content.find('span', class_='uhrzeit')
-                if time_span and 'data-time' in time_span.attrs:
-                    kickoff = datetime.fromtimestamp(int(time_span['data-time']))
-                    if kickoff.date() == now.date() and now < (kickoff + timedelta(minutes=130)):
-                        continue
-
-                teams = content.find_all('div', class_='team')
-                ergebnis_div = content.find('div', class_='ergebnis')
+            for link in all_links:
+                text_content = link.get_text(" ", strip=True)
                 
-                if len(teams) == 2 and ergebnis_div:
-                    # Namen extrahieren
-                    h_name = teams[0].get_text(strip=True)
-                    g_name = teams[1].get_text(strip=True)
+                # Ergebnis-Muster finden
+                if re.search(r'\d+:\d+', text_content):
+                    raw_line = link.parent.get_text(" ", strip=True)
                     
-                    # Mapping anwenden
-                    h_full = get_full_team_name(h_name)
-                    g_full = get_full_team_name(g_name)
-                    
-                    # Ergebnis extrahieren (Regex für "2:1 beendet" etc.)
-                    tore_raw = ergebnis_div.get_text(strip=True)
-                    match = re.search(r'(\d+):(\d+)', tore_raw)
+                    # Regex zum Trennen von Heim, Ergebnis und Gast
+                    match = re.search(r'(.+?)\s+(\d+:\d+)\s+(\d+:\d+)?\s*(.+)', raw_line)
                     
                     if match:
-                        th, tg = int(match.group(1)), int(match.group(2))
+                        h_raw = match.group(1)
+                        res_raw = match.group(2)
+                        g_raw = match.group(4)
                         
-                        # A. LOKALE DB UPDATE
-                        conn_l = sqlite3.connect(DB_NAME)
-                        cur_l = conn_l.cursor()
-                        cur_l.execute("""
-                            UPDATE spiele SET tore_heim = ?, tore_gast = ? 
-                            WHERE saison = ? AND spieltag = ? AND (heim LIKE ? OR heim = ?) AND (gast LIKE ? OR gast = ?)
-                        """, (th, tg, SAISON, spieltag, f"%{h_name}%", h_full, f"%{g_name}%", g_full))
+                        h_full = get_full_team_name(h_raw)
+                        g_full = get_full_team_name(g_raw)
                         
-                        if cur_l.rowcount > 0:
-                            conn_l.commit()
-                            # B. CLOUD DB UPDATE
-                            if engine_cloud:
-                                try:
-                                    with engine_cloud.begin() as conn_c:
-                                        conn_c.execute(text("""
-                                            UPDATE spiele SET tore_heim = :th, tore_gast = :tg 
-                                            WHERE saison = :s AND spieltag = :st AND (heim LIKE :h_search OR heim = :h) AND (gast LIKE :g_search OR gast = :g)
-                                        """), {
-                                            "th": th, "tg": tg, "s": SAISON, "st": spieltag, 
-                                            "h_search": f"%{h_name}%", "h": h_full, 
-                                            "g_search": f"%{g_name}%", "g": g_full
-                                        })
-                                except Exception as ce:
-                                    print(f"Cloud-Error: {ce}")
-                            
-                            matches_found += 1
-                            print(f"Spieltag {spieltag}: {h_full} {th}:{tg} {g_full} eingetragen.")
-                        conn_l.close()
+                        match_id = f"{h_full}-{g_full}-{spieltag}"
+                        if match_id not in seen_matches:
+                            try:
+                                th, tg = map(int, res_raw.split(':'))
+                                
+                                # A. LOKALE DB UPDATE
+                                conn_l = sqlite3.connect(DB_NAME)
+                                cur_l = conn_l.cursor()
+                                cur_l.execute("""
+                                    UPDATE spiele SET tore_heim = ?, tore_gast = ? 
+                                    WHERE saison = ? AND spieltag = ? AND heim = ? AND gast = ?
+                                """, (th, tg, SAISON, spieltag, h_full, g_full))
+                                
+                                if cur_l.rowcount > 0:
+                                    conn_l.commit()
+                                    # B. CLOUD DB UPDATE
+                                    if engine_cloud:
+                                        try:
+                                            with engine_cloud.begin() as conn_c:
+                                                conn_c.execute(text("""
+                                                    UPDATE spiele SET tore_heim = :th, tore_gast = :tg 
+                                                    WHERE saison = :s AND spieltag = :st AND heim = :h AND gast = :g
+                                                """), {"th": th, "tg": tg, "s": SAISON, "st": spieltag, "h": h_full, "g": g_full})
+                                        except Exception as cloud_err:
+                                            print(f"Cloud-Fehler: {cloud_err}")
+                                    
+                                    matches_found += 1
+                                    print(f"Spieltag {spieltag}: {h_full} {th}:{tg} {g_full} eingetragen.")
+                                
+                                conn_l.close()
+                                seen_matches.add(match_id)
+                                
+                            except ValueError:
+                                continue
 
             print(f"Spieltag {spieltag}: {matches_found} Ergebnisse aktualisiert.")
+
         except Exception as e:
             print(f"Fehler bei Spieltag {spieltag}: {e}")
 
