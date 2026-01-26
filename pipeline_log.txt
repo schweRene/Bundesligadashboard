@@ -77,3 +77,58 @@
 [2026-01-19 08:12:11] ENDE: Update Spieltag 17-20 erfolgreich.
 [2026-01-20 23:31:21] START: Intelligentes Update gestartet.
 [2026-01-20 23:32:39] Success: Updates erfolgreich durchgeführt.
+2026-01-26 12:41:00 [INFO] 
+==================================================
+START PIPELINE RUN: 2026-01-26 12:41:00.328006
+==================================================
+2026-01-26 12:41:00 [INFO] >>> STARTE SKRIPT: update_scrapper.py
+2026-01-26 12:41:16 [INFO] Output update_scrapper.py:
+--- Starte Ergebnis-Update für 2025/26 ---
+Unvollständige Spieltage gefunden: [16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34]
+Spieltag 16: 0 Ergebnisse aktualisiert.
+Spieltag 17: 0 Ergebnisse aktualisiert.
+Spieltag 19: 0 Ergebnisse aktualisiert.
+Spieltag 20: 0 Ergebnisse aktualisiert.
+Spieltag 21: 0 Ergebnisse aktualisiert.
+Spieltag 22: 0 Ergebnisse aktualisiert.
+Spieltag 23: 0 Ergebnisse aktualisiert.
+Spieltag 24: 0 Ergebnisse aktualisiert.
+Spieltag 25: 0 Ergebnisse aktualisiert.
+Spieltag 26: 0 Ergebnisse aktualisiert.
+Spieltag 27: 0 Ergebnisse aktualisiert.
+Spieltag 28: 0 Ergebnisse aktualisiert.
+Spieltag 29: 0 Ergebnisse aktualisiert.
+Spieltag 30: 0 Ergebnisse aktualisiert.
+Spieltag 31: 0 Ergebnisse aktualisiert.
+Spieltag 32: 0 Ergebnisse aktualisiert.
+Spieltag 33: 0 Ergebnisse aktualisiert.
+Spieltag 34: 0 Ergebnisse aktualisiert.
+2026-01-26 12:41:16 [INFO] ✅ update_scrapper.py erfolgreich beendet.
+2026-01-26 12:41:16 [INFO] >>> STARTE SKRIPT: torschuetzenscrapper.py
+2026-01-26 12:41:24 [INFO] Output torschuetzenscrapper.py:
+--- Starte Torschützen-Update ---
+Schreibe 20 Einträge in BEIDE Datenbanken...
+✅ Cloud-Update (Supabase) erfolgreich.
+✅ Lokales Update (bundesliga.db) erfolgreich.
+2026-01-26 12:41:24 [INFO] ✅ torschuetzenscrapper.py erfolgreich beendet.
+2026-01-26 12:41:24 [INFO] >>> STARTE SKRIPT: rekordspieler.py
+2026-01-26 12:41:29 [INFO] Output rekordspieler.py:
+--- Korrektur Rekordspieler ---
+✅ Rekordspieler korrigiert (20 Einträge).
+2026-01-26 12:41:29 [INFO] ✅ rekordspieler.py erfolgreich beendet.
+2026-01-26 12:41:29 [INFO] >>> STARTE SKRIPT: suender.py
+2026-01-26 12:41:36 [INFO] Output suender.py:
+Lade aktuelle Saison 2025/26...
+   -> Erfolg: 25 Spieler gefunden.
+✅ Lokale DB (bundesliga.db) aktualisiert.
+✅ Cloud DB (Supabase) aktualisiert.
+2026-01-26 12:41:36 [INFO] ✅ suender.py erfolgreich beendet.
+2026-01-26 12:41:36 [INFO] >>> STARTE SKRIPT: zuschauer.py
+2026-01-26 12:41:41 [INFO] Output zuschauer.py:
+Scrape aktuelle Zuschauerzahlen (2025/26)...
+✅ Lokale DB aktualisiert.
+✅ Cloud DB aktualisiert.
+2026-01-26 12:41:41 [INFO] ✅ zuschauer.py erfolgreich beendet.
+2026-01-26 12:41:41 [INFO] 
+PIPELINE BEENDET AM: 2026-01-26 12:41:41.056847
+--------------------------------------------------
