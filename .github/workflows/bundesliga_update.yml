@@ -11,6 +11,10 @@ jobs:
   build-and-update:
     runs-on: ubuntu-latest
 
+    permission:
+      issues: write
+      contents: write
+
     steps:
       - name: Code auschecken
         uses: actions/checkout@v3
@@ -28,50 +32,25 @@ jobs:
 
       - name: Update-Skript ausführen
         env:
-          # Hier wird dein Secret aus den GitHub Settings geladen
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: python update_db.py
 
+      - name: Erstelle Issue bei Fehlern
+        # Dieses Step läuft nur, wenn die Datei issue_body.md Fehler enthält
+        if: always()
+        uses: peter-evans/create-issue-from-file@v4
+        with:
+          title: "Pipeline Bericht: Spieltag Update"
+          content-filepath: ./issue_body.md
+          labels: |
+            automated-report
+            bug
+
       - name: Änderungen speichern
+        if: always()
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          # Entferne suender_64.csv aus dieser Zeile, solange der Scraper nicht auf GitHub läuft
-          git add bundesliga.db bundesliga_2026.csv pipeline_log.txt
-          git commit -m "Auto-Update $(date +'%Y-%m-%d %H:%M')" || echo "Keine Änderungen"
-          git push origin main
-
-      - name: Vorbereiten der Log-Mail
-        if: always() # Läuft auch wenn vorherige Schritte Fehler hatten
-        id: logs
-        run: |
-          # Die letzten 50 Zeilen des Logs in eine Variable lesen
-          echo "PIPELINE_DATA<<EOF" >> $GITHUB_ENV
-          tail -n 50 pipeline_log.txt >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          
-          # Fehler-Log lesen
-          echo "ERROR_DATA<<EOF" >> $GITHUB_ENV
-          cat validation_errors.txt >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-      - name: E-Mail senden
-        if: always()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "Bundesliga Update Report - Durchlauf ${{ github.run_number }}"
-          to: DEINE_EMAIL@BEISPIEL.DE
-          from: Bundesliga Bot
-          body: |
-            Der Pipeline-Durchlauf ist abgeschlossen.
-            
-            PIPELINE LOG:
-            ${{ env.PIPELINE_DATA }}
-            
-            FEHLER LOG:
-            ${{ env.ERROR_DATA }}
-          attachments: pipeline_log.txt,validation_errors.txt
+          git add pipeline_log.txt validation_errors.txt
+          git commit -m "Logs aktualisiert" || echo "Keine Änderungen"
+          git push

@@ -51,8 +51,6 @@ def get_full_team_name(short_name):
 def run_scrapper():
     print(f"--- Starte Ergebnis-Update für {SAISON} ---")
     
-    # 1. Finde Spieltage, die noch keine Ergebnisse haben (NULL)
-    # WICHTIG: Wir suchen nur in der aktuellen Saison!
     conn_local = sqlite3.connect(DB_NAME)
     cursor = conn_local.cursor()
     cursor.execute("""
@@ -67,7 +65,6 @@ def run_scrapper():
         print("✅ Alle bisherigen Spiele haben Ergebnisse. Nichts zu tun.")
         return
 
-    print(f"Unvollständige Spieltage gefunden: {missing_days}")
     now = datetime.now()
 
     for spieltag in missing_days:
@@ -77,17 +74,17 @@ def run_scrapper():
             soup = BeautifulSoup(response.text, 'html.parser')
             matches_found = 0
 
-            # Wir suchen die Ergebnis-Container
             for container in soup.select('a.ergebnis'):
                 content = container.find('div', class_='content')
                 if not content: continue
 
-                # Zeit-Check: Ist das Spiel schon vorbei?
+                # ZEIT-CHECK VERBESSERT
                 time_span = content.find('span', class_='uhrzeit')
                 if time_span and 'data-time' in time_span.attrs:
                     kickoff = datetime.fromtimestamp(int(time_span['data-time']))
-                    # Nur eintragen, wenn Anpfiff + 110 Minuten vergangen sind
-                    if now < (kickoff + timedelta(minutes=110)):
+                    # Wenn das Spiel heute ist, geben wir ihm 130 Min Puffer.
+                    # Wenn es älter ist (z.B. gestern), lassen wir es IMMER durch.
+                    if kickoff.date() == now.date() and now < (kickoff + timedelta(minutes=130)):
                         continue
 
                 teams = content.find_all('div', class_='team')
@@ -99,40 +96,38 @@ def run_scrapper():
                     h_full = get_full_team_name(h_short)
                     g_full = get_full_team_name(g_short)
                     
-                    tore_text = ergebnis_div.text.strip()
-                    if ':' in tore_text:
-                        try:
-                            th, tg = map(int, tore_text.split(':'))
-                            
-                            # --- DATENBANK UPDATES (NUR UPDATE, KEIN INSERT/REPLACE) ---
-                            
-                            # A. LOKAL
-                            conn_l = sqlite3.connect(DB_NAME)
-                            conn_l.execute("""
-                                UPDATE spiele SET tore_heim = ?, tore_gast = ? 
-                                WHERE saison = ? AND spieltag = ? AND heim = ? AND gast = ?
-                            """, (th, tg, SAISON, spieltag, h_full, g_full))
-                            conn_l.commit()
-                            conn_l.close()
+                    # ROBUSTES PARSING MIT REGEX (Zieht nur Zahlen raus)
+                    tore_raw = ergebnis_div.text.strip()
+                    match = re.search(r'(\d+):(\d+)', tore_raw)
+                    
+                    if match:
+                        th, tg = int(match.group(1)), int(match.group(2))
+                        
+                        # A. LOKAL
+                        conn_l = sqlite3.connect(DB_NAME)
+                        conn_l.execute("""
+                            UPDATE spiele SET tore_heim = ?, tore_gast = ? 
+                            WHERE saison = ? AND spieltag = ? AND heim = ? AND gast = ?
+                        """, (th, tg, SAISON, spieltag, h_full, g_full))
+                        conn_l.commit()
+                        conn_l.close()
 
-                            # B. CLOUD
-                            try:
-                                with engine_cloud.begin() as conn_c:
-                                    conn_c.execute(text("""
-                                        UPDATE spiele SET tore_heim = :th, tore_gast = :tg 
-                                        WHERE saison = :s AND spieltag = :st AND heim = :h AND gast = :g
-                                    """), {"th": th, "tg": tg, "s": SAISON, "st": spieltag, "h": h_full, "g": g_full})
-                            except Exception as cloud_err:
-                                print(f"Cloud-Fehler bei {h_full}: {cloud_err}")
-                            
-                            matches_found += 1
-                        except ValueError:
-                            continue # Falls dort "Abbruch" oder ähnliches steht
+                        # B. CLOUD
+                        try:
+                            with engine_cloud.begin() as conn_c:
+                                conn_c.execute(text("""
+                                    UPDATE spiele SET tore_heim = :th, tore_gast = :tg 
+                                    WHERE saison = :s AND spieltag = :st AND heim = :h AND gast = :g
+                                Dad"""), {"th": th, "tg": tg, "s": SAISON, "st": spieltag, "h": h_full, "g": g_full})
+                        except Exception as cloud_err:
+                            print(f"Cloud-Fehler bei {h_full}: {cloud_err}")
+                        
+                        matches_found += 1
+                        print(f"Update: {h_full} {th}:{tg} {g_full}")
 
             print(f"Spieltag {spieltag}: {matches_found} Ergebnisse aktualisiert.")
-
         except Exception as e:
-            print(f"Fehler beim Scrapen von Spieltag {spieltag}: {e}")
+            print(f"Fehler bei Spieltag {spieltag}: {e}")
 
 if __name__ == "__main__":
     run_scrapper()
