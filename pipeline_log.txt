@@ -13366,3 +13366,193 @@ Schreibe 20 Einträge in BEIDE Datenbanken...
 ✅ Cloud DB aktualisiert.
 2026-04-02 22:53:19 [INFO] ✅ zuschauer.py erfolgreich beendet.
 2026-04-02 22:53:19 [INFO] 🏁 PIPELINE BEENDET: 2026-04-02 22:53:19.804586
+2026-04-03 22:54:00 [INFO] 
+========================================
+2026-04-03 22:54:00 [INFO] 🚀 START PIPELINE: 2026-04-03 22:54:00.236622
+2026-04-03 22:54:00 [INFO] Starte Skript: update_scrapper.py
+2026-04-03 22:55:06 [INFO] Output update_scrapper.py: --- Starte Ergebnis-Update für 2025/26 ---
+Spieltag 16: Eintracht Frankfurt 3:3 Borussia Dortmund eingetragen.
+Spieltag 16: SC Freiburg 2:1 Hamburger SV eingetragen.
+Spieltag 16: 1. FC Union Berlin 2:2 FSV Mainz 05 eingetragen.
+Spieltag 16: 1. FC Heidenheim 2:2 1. FC Köln eingetragen.
+Spieltag 16: Bayer 04 Leverkusen 1:4 VfB Stuttgart eingetragen.
+Spieltag 16: Borussia Mönchengladbach 4:0 1.FC Augsburg eingetragen.
+Spieltag 16: FC Bayern München 8:1 VfL Wolfsburg eingetragen.
+Spieltag 16: SV Werder Bremen 0:2 TSG Hoffenheim eingetragen.
+Spieltag 16: 8 Ergebnisse aktualisiert.
+Spieltag 17: VfB Stuttgart 3:2 Eintracht Frankfurt eingetragen.
+Spieltag 17: Borussia Dortmund 3:0 SV Werder Bremen eingetragen.
+Spieltag 17: FSV Mainz 05 2:1 1. FC Heidenheim eingetragen.
+Spieltag 17: RB Leipzig 2:0 SC Freiburg eingetragen.
+Spieltag 17: TSG Hoffenheim 5:1 Borussia Mönchengladbach eingetragen.
+Spieltag 17: 1. FC Köln 1:3 FC Bayern München eingetragen.
+Spieltag 17: 1.FC Augsburg 1:1 1. FC Union Berlin eingetragen.
+Spieltag 17: Hamburger SV 0:1 Bayer 04 Leverkusen eingetragen.
+Spieltag 17: 8 Ergebnisse aktualisiert.
+Spieltag 19: FC Bayern München 1:2 1.FC Augsburg eingetragen.
+Spieltag 19: Bayer 04 Leverkusen 1:0 SV Werder Bremen eingetragen.
+Spieltag 19: Eintracht Frankfurt 1:3 TSG Hoffenheim eingetragen.
+Spieltag 19: FSV Mainz 05 3:1 VfL Wolfsburg eingetragen.
+Spieltag 19: 1. FC Heidenheim 0:3 RB Leipzig eingetragen.
+Spieltag 19: 1. FC Union Berlin 0:3 Borussia Dortmund eingetragen.
+Spieltag 19: Borussia Mönchengladbach 0:3 VfB Stuttgart eingetragen.
+Spieltag 19: SC Freiburg 2:1 1. FC Köln eingetragen.
+Spieltag 19: 8 Ergebnisse aktualisiert.
+Spieltag 20: 1. FC Köln 1:0 VfL Wolfsburg eingetragen.
+Spieltag 20: Eintracht Frankfurt 1:3 Bayer 04 Leverkusen eingetragen.
+Spieltag 20: RB Leipzig 1:2 FSV Mainz 05 eingetragen.
+Spieltag 20: SV Werder Bremen 1:1 Borussia Mönchengladbach eingetragen.
+Spieltag 20: TSG Hoffenheim 3:1 1. FC Union Berlin eingetragen.
+Spieltag 20: Hamburger SV 2:2 FC Bayern München eingetragen.
+Spieltag 20: VfB Stuttgart 1:0 SC Freiburg eingetragen.
+Spieltag 20: Borussia Dortmund 3:2 1. FC Heidenheim eingetragen.
+Spieltag 20: 8 Ergebnisse aktualisiert.
+Spieltag 21: 1. FC Union Berlin 1:1 Eintracht Frankfurt eingetragen.
+Spieltag 21: SC Freiburg 1:0 SV Werder Bremen eingetragen.
+Spieltag 21: FSV Mainz 05 2:0 1.FC Augsburg eingetragen.
+Spieltag 21: VfL Wolfsburg 1:2 Borussia Dortmund eingetragen.
+Spieltag 21: 1. FC Heidenheim 0:2 Hamburger SV eingetragen.
+Spieltag 21: Borussia Mönchengladbach 1:1 Bayer 04 Leverkusen eingetragen.
+Spieltag 21: 1. FC Köln 1:2 RB Leipzig eingetragen.
+Spieltag 21: FC Bayern München 5:1 TSG Hoffenheim eingetragen.
+Spieltag 21: 8 Ergebnisse aktualisiert.
+Spieltag 22: Borussia Dortmund 4:0 FSV Mainz 05 eingetragen.
+Spieltag 22: Eintracht Frankfurt 3:0 Borussia Mönchengladbach eingetragen.
+Spieltag 22: SV Werder Bremen 0:3 FC Bayern München eingetragen.
+Spieltag 22: TSG Hoffenheim 3:0 SC Freiburg eingetragen.
+Spieltag 22: Hamburger SV 3:2 1. FC Union Berlin eingetragen.
+Spieltag 22: VfB Stuttgart 3:1 1. FC Köln eingetragen.
+Spieltag 22: 1.FC Augsburg 1:0 1. FC Heidenheim eingetragen.
+Spieltag 22: RB Leipzig 2:2 VfL Wolfsburg eingetragen.
+Spieltag 22: 8 Ergebnisse aktualisiert.
+Spieltag 23: FSV Mainz 05 1:1 Hamburger SV eingetragen.
+Spieltag 23: FC Bayern München 3:2 Eintracht Frankfurt eingetragen.
+Spieltag 23: VfL Wolfsburg 2:3 1.FC Augsburg eingetragen.
+Spieltag 23: 1. FC Union Berlin 1:0 Bayer 04 Leverkusen eingetragen.
+Spieltag 23: 1. FC Köln 2:2 TSG Hoffenheim eingetragen.
+Spieltag 23: RB Leipzig 2:2 Borussia Dortmund eingetragen.
+Spieltag 23: SC Freiburg 2:1 Borussia Mönchengladbach eingetragen.
+Spieltag 23: 1. FC Heidenheim 3:3 VfB Stuttgart eingetragen.
+Spieltag 23: 8 Ergebnisse aktualisiert.
+Spieltag 24: 1.FC Augsburg 2:0 1. FC Köln eingetragen.
+Spieltag 24: Bayer 04 Leverkusen 1:1 FSV Mainz 05 eingetragen.
+Spieltag 24: SV Werder Bremen 2:0 1. FC Heidenheim eingetragen.
+Spieltag 24: Borussia Mönchengladbach 1:0 1. FC Union Berlin eingetragen.
+Spieltag 24: Borussia Dortmund 2:3 FC Bayern München eingetragen.
+Spieltag 24: VfB Stuttgart 4:0 VfL Wolfsburg eingetragen.
+Spieltag 24: Eintracht Frankfurt 2:0 SC Freiburg eingetragen.
+Spieltag 24: Hamburger SV 1:2 RB Leipzig eingetragen.
+Spieltag 24: 8 Ergebnisse aktualisiert.
+Spieltag 25: FC Bayern München 4:1 Borussia Mönchengladbach eingetragen.
+Spieltag 25: SC Freiburg 3:3 Bayer 04 Leverkusen eingetragen.
+Spieltag 25: FSV Mainz 05 2:2 VfB Stuttgart eingetragen.
+Spieltag 25: RB Leipzig 2:1 1.FC Augsburg eingetragen.
+Spieltag 25: VfL Wolfsburg 1:2 Hamburger SV eingetragen.
+Spieltag 25: 1. FC Heidenheim 2:4 TSG Hoffenheim eingetragen.
+Spieltag 25: 1. FC Köln 1:2 Borussia Dortmund eingetragen.
+Spieltag 25: 1. FC Union Berlin 1:4 SV Werder Bremen eingetragen.
+Spieltag 25: 8 Ergebnisse aktualisiert.
+Spieltag 26: Bayer 04 Leverkusen 1:1 FC Bayern München eingetragen.
+Spieltag 26: Eintracht Frankfurt 1:0 1. FC Heidenheim eingetragen.
+Spieltag 26: Borussia Dortmund 2:0 1.FC Augsburg eingetragen.
+Spieltag 26: TSG Hoffenheim 1:1 VfL Wolfsburg eingetragen.
+Spieltag 26: Hamburger SV 1:1 1. FC Köln eingetragen.
+Spieltag 26: SV Werder Bremen 0:2 FSV Mainz 05 eingetragen.
+Spieltag 26: SC Freiburg 0:1 1. FC Union Berlin eingetragen.
+Spieltag 26: VfB Stuttgart 1:0 RB Leipzig eingetragen.
+Spieltag 26: 8 Ergebnisse aktualisiert.
+Spieltag 27: RB Leipzig 5:0 TSG Hoffenheim eingetragen.
+Spieltag 27: FC Bayern München 4:0 1. FC Union Berlin eingetragen.
+Spieltag 27: VfL Wolfsburg 0:1 SV Werder Bremen eingetragen.
+Spieltag 27: 1. FC Heidenheim 3:3 Bayer 04 Leverkusen eingetragen.
+Spieltag 27: 1. FC Köln 3:3 Borussia Mönchengladbach eingetragen.
+Spieltag 27: Borussia Dortmund 3:2 Hamburger SV eingetragen.
+Spieltag 27: FSV Mainz 05 2:1 Eintracht Frankfurt eingetragen.
+Spieltag 27: 1.FC Augsburg 2:5 VfB Stuttgart eingetragen.
+Spieltag 27: 8 Ergebnisse aktualisiert.
+Spieltag 28: Bayer 04 Leverkusen 15:30 VfL Wolfsburg eingetragen.
+Spieltag 28: SC Freiburg 15:30 FC Bayern München eingetragen.
+Spieltag 28: SV Werder Bremen 15:30 RB Leipzig eingetragen.
+Spieltag 28: Borussia Mönchengladbach 15:30 1. FC Heidenheim eingetragen.
+Spieltag 28: TSG Hoffenheim 15:30 FSV Mainz 05 eingetragen.
+Spieltag 28: Hamburger SV 15:30 1.FC Augsburg eingetragen.
+Spieltag 28: VfB Stuttgart 18:30 Borussia Dortmund eingetragen.
+Spieltag 28: Eintracht Frankfurt 17:30 1. FC Köln eingetragen.
+Spieltag 28: 8 Ergebnisse aktualisiert.
+Spieltag 29: 1.FC Augsburg 20:30 TSG Hoffenheim eingetragen.
+Spieltag 29: Borussia Dortmund 15:30 Bayer 04 Leverkusen eingetragen.
+Spieltag 29: RB Leipzig 15:30 Borussia Mönchengladbach eingetragen.
+Spieltag 29: VfL Wolfsburg 15:30 Eintracht Frankfurt eingetragen.
+Spieltag 29: 1. FC Heidenheim 15:30 1. FC Union Berlin eingetragen.
+Spieltag 29: 1. FC Köln 15:30 SV Werder Bremen eingetragen.
+Spieltag 29: VfB Stuttgart 17:30 Hamburger SV eingetragen.
+Spieltag 29: FSV Mainz 05 19:30 SC Freiburg eingetragen.
+Spieltag 29: 8 Ergebnisse aktualisiert.
+Spieltag 30: Bayer 04 Leverkusen 15:30 1.FC Augsburg eingetragen.
+Spieltag 30: SV Werder Bremen 15:30 Hamburger SV eingetragen.
+Spieltag 30: 1. FC Union Berlin 15:30 VfL Wolfsburg eingetragen.
+Spieltag 30: TSG Hoffenheim 15:30 Borussia Dortmund eingetragen.
+Spieltag 30: Eintracht Frankfurt 18:30 RB Leipzig eingetragen.
+Spieltag 30: SC Freiburg 15:30 1. FC Heidenheim eingetragen.
+Spieltag 30: FC Bayern München 17:30 VfB Stuttgart eingetragen.
+Spieltag 30: Borussia Mönchengladbach 19:30 FSV Mainz 05 eingetragen.
+Spieltag 30: 8 Ergebnisse aktualisiert.
+Spieltag 31: RB Leipzig 20:30 1. FC Union Berlin eingetragen.
+Spieltag 31: FSV Mainz 05 15:30 FC Bayern München eingetragen.
+Spieltag 31: VfL Wolfsburg 15:30 Borussia Mönchengladbach eingetragen.
+Spieltag 31: 1.FC Augsburg 15:30 Eintracht Frankfurt eingetragen.
+Spieltag 31: 1. FC Köln 15:30 Bayer 04 Leverkusen eingetragen.
+Spieltag 31: Hamburger SV 18:30 TSG Hoffenheim eingetragen.
+Spieltag 31: VfB Stuttgart 15:30 SV Werder Bremen eingetragen.
+Spieltag 31: Borussia Dortmund 17:30 SC Freiburg eingetragen.
+Spieltag 31: 8 Ergebnisse aktualisiert.
+Spieltag 32: FC Bayern München 15:30 1. FC Heidenheim eingetragen.
+Spieltag 32: Eintracht Frankfurt 15:30 Hamburger SV eingetragen.
+Spieltag 32: SV Werder Bremen 15:30 1.FC Augsburg eingetragen.
+Spieltag 32: 1. FC Union Berlin 15:30 1. FC Köln eingetragen.
+Spieltag 32: TSG Hoffenheim 15:30 VfB Stuttgart eingetragen.
+Spieltag 32: Bayer 04 Leverkusen 18:30 RB Leipzig eingetragen.
+Spieltag 32: Borussia Mönchengladbach 17:30 Borussia Dortmund eingetragen.
+Spieltag 32: SC Freiburg 19:30 VfL Wolfsburg eingetragen.
+Spieltag 32: 8 Ergebnisse aktualisiert.
+Spieltag 33: Borussia Dortmund 20:30 Eintracht Frankfurt eingetragen.
+Spieltag 33: VfB Stuttgart 15:30 Bayer 04 Leverkusen eingetragen.
+Spieltag 33: 1.FC Augsburg 15:30 Borussia Mönchengladbach eingetragen.
+Spieltag 33: TSG Hoffenheim 15:30 SV Werder Bremen eingetragen.
+Spieltag 33: VfL Wolfsburg 18:30 FC Bayern München eingetragen.
+Spieltag 33: Hamburger SV 15:30 SC Freiburg eingetragen.
+Spieltag 33: 1. FC Köln 17:30 1. FC Heidenheim eingetragen.
+Spieltag 33: FSV Mainz 05 19:30 1. FC Union Berlin eingetragen.
+Spieltag 33: 8 Ergebnisse aktualisiert.
+Spieltag 34: FC Bayern München 15:30 1. FC Köln eingetragen.
+Spieltag 34: Bayer 04 Leverkusen 15:30 Hamburger SV eingetragen.
+Spieltag 34: Eintracht Frankfurt 15:30 VfB Stuttgart eingetragen.
+Spieltag 34: SC Freiburg 15:30 RB Leipzig eingetragen.
+Spieltag 34: SV Werder Bremen 15:30 Borussia Dortmund eingetragen.
+Spieltag 34: Borussia Mönchengladbach 15:30 TSG Hoffenheim eingetragen.
+Spieltag 34: 1. FC Union Berlin 15:30 1.FC Augsburg eingetragen.
+Spieltag 34: 1. FC Heidenheim 15:30 FSV Mainz 05 eingetragen.
+Spieltag 34: 8 Ergebnisse aktualisiert.
+2026-04-03 22:55:06 [INFO] ✅ update_scrapper.py erfolgreich beendet.
+2026-04-03 22:55:06 [INFO] Starte Skript: torschuetzenscrapper.py
+2026-04-03 22:55:13 [INFO] Output torschuetzenscrapper.py: --- Starte Torschützen-Update ---
+Schreibe 20 Einträge in BEIDE Datenbanken...
+✅ Cloud-Update (Supabase) erfolgreich.
+✅ Lokales Update (bundesliga.db) erfolgreich.
+2026-04-03 22:55:13 [INFO] ✅ torschuetzenscrapper.py erfolgreich beendet.
+2026-04-03 22:55:13 [INFO] Starte Skript: rekordspieler.py
+2026-04-03 22:55:19 [INFO] Output rekordspieler.py: --- Korrektur Rekordspieler ---
+✅ Rekordspieler korrigiert (20 Einträge).
+2026-04-03 22:55:19 [INFO] ✅ rekordspieler.py erfolgreich beendet.
+2026-04-03 22:55:19 [INFO] Starte Skript: suender.py
+2026-04-03 22:55:23 [INFO] Output suender.py: Lade aktuelle Saison 2025/26...
+   -> Erfolg: 25 Spieler gefunden.
+✅ Lokale DB (bundesliga.db) aktualisiert.
+✅ Cloud DB (Supabase) aktualisiert.
+2026-04-03 22:55:23 [INFO] ✅ suender.py erfolgreich beendet.
+2026-04-03 22:55:23 [INFO] Starte Skript: zuschauer.py
+2026-04-03 22:55:28 [INFO] Output zuschauer.py: Scrape aktuelle Zuschauerzahlen (2025/26)...
+✅ Lokale DB aktualisiert.
+✅ Cloud DB aktualisiert.
+2026-04-03 22:55:28 [INFO] ✅ zuschauer.py erfolgreich beendet.
+2026-04-03 22:55:28 [INFO] 🏁 PIPELINE BEENDET: 2026-04-03 22:55:28.130265
